@@ -3,14 +3,9 @@ using MongoDB.Driver;
 
 namespace Data.MongoDB;
 
-public class MongoDbContext
+public class MongoDbContext(IMongoClient client, string databaseName)
 {
-    private readonly IMongoDatabase _database;
-
-    public MongoDbContext(IMongoClient client, string databaseName)
-    {
-        _database = client.GetDatabase(databaseName);
-    }
+    private readonly IMongoDatabase _database = client.GetDatabase(databaseName);
 
     // One typed collection per document type
     public IMongoCollection<ObservationDetail> ObservationDetails =>
