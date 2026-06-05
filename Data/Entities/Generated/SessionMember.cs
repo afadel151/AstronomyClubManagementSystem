@@ -1,0 +1,33 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
+
+namespace Data.Entities;
+
+[PrimaryKey("SessionId", "UserId")]
+[Table("SESSION_MEMBERS")]
+[Index("UserId", Name = "IX_SM_UserId")]
+public partial class SessionMember
+{
+    [Key]
+    public int SessionId { get; set; }
+
+    [Key]
+    public string UserId { get; set; } = null!;
+
+    [StringLength(30)]
+    public string SessionRole { get; set; } = null!;
+
+    public DateTimeOffset? ArrivalTimeUtc { get; set; }
+
+    public DateTimeOffset? DepartureTimeUtc { get; set; }
+
+    [StringLength(500)]
+    public string? Notes { get; set; }
+
+    [ForeignKey("SessionId")]
+    [InverseProperty("SessionMembers")]
+    public virtual ObservationSession Session { get; set; } = null!;
+}
