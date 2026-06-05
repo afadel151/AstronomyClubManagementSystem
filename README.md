@@ -6,7 +6,7 @@ Built with a **hybrid architecture** combining relational and document databases
 
 ---
 
-## 🚀 Tech Stack
+##  Stack
 
 * **Backend:** .NET 10 (ASP.NET Core Web API)
 * **Frontend:** Blazor Server
@@ -20,7 +20,7 @@ Built with a **hybrid architecture** combining relational and document databases
 
 ---
 
-## 🧱 Architecture Overview
+## Architecture 
 
 ```
 AstronomyClubManagementSystem/
@@ -36,7 +36,7 @@ AstronomyClubManagementSystem/
 
 ---
 
-## 🐳 Infrastructure (Docker)
+## Infrastructure (Docker)
 
 The system runs a full backend stack using Docker:
 
@@ -44,13 +44,13 @@ The system runs a full backend stack using Docker:
 * MongoDB
 * MinIO
 
-### ▶ Start Services
+### Start Services
 
 ```bash
 docker compose up -d
 ```
 
-### 🔍 Check SQL Server
+### Check SQL Server
 
 ```bash
 docker exec astro_sqlserver ./opt/mssql-tools18/bin/sqlcmd \
@@ -60,7 +60,7 @@ docker exec astro_sqlserver ./opt/mssql-tools18/bin/sqlcmd \
 
 ---
 
-## 🗄️ Database Setup (Using EF Core Migrations)
+## Database Setup (Using EF Core Migrations)
 
 Instead of running manual SQL scripts, the database is created and managed using **Entity Framework Core migrations**.
 
@@ -91,7 +91,7 @@ This will:
 
 ---
 
-## 🧬 EF Core (Database First for Domain Models)
+## EF Core (Database First for Domain Models)
 
 ### Install CLI
 
@@ -117,7 +117,7 @@ Microsoft.EntityFrameworkCore.SqlServer \
 
 ---
 
-## 🔐 Authentication
+## Authentication
 
 * ASP.NET Identity (Users, Roles)
 * JWT-based authentication
@@ -125,7 +125,7 @@ Microsoft.EntityFrameworkCore.SqlServer \
 
 ---
 
-## 🍃 MongoDB Integration
+## MongoDB Integration
 
 Used for flexible, unstructured data:
 
@@ -143,7 +143,7 @@ Used for flexible, unstructured data:
 
 ---
 
-## ☁️ MinIO Object Storage
+## MinIO Object Storage
 
 Used for storing:
 
@@ -159,7 +159,7 @@ Used for storing:
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
 ### `appsettings.json`
 
@@ -174,7 +174,7 @@ Used for storing:
 
 ---
 
-## ✨ Key Features
+## Key Features
 
 * 🔭 Observation session management
 * 🛰️ Astronomical event tracking
@@ -187,7 +187,7 @@ Used for storing:
 
 ---
 
-## 🔄 Development Workflow
+## Development Workflow
 
 1. Start Docker services
 2. Create database (`AstroDbClub`)
@@ -197,7 +197,7 @@ Used for storing:
 
 ---
 
-## 🔮 Future Improvements
+## Future Improvements
 
 * Real-time updates (SignalR)
 * AI-based observation recommendations
@@ -206,20 +206,20 @@ Used for storing:
 
 ---
 
-## 📄 License
+## License
 
 This project is for educational and development purposes.
 
 ---
 
-## 👨‍💻 Author
+## Author
 
 **Akram Fadel**
 Full-stack developer | Software engineering student
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome. Open issues or submit pull requests.
 
