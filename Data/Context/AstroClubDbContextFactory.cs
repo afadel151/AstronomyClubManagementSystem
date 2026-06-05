@@ -17,7 +17,7 @@ public class AstroClubDbContextFactory
             "Server=localhost,1433;" +
             "Database=AstroClubDb;" +
             "User Id=sa;" +
-            "Password=AstroClub@2025;" +
+            "Password=AstroClub2025;" +
             "TrustServerCertificate=True");
 
         return new AstroClubDbContext(optionsBuilder.Options);
