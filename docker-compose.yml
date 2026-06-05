@@ -5,13 +5,13 @@ services:
     container_name: astro_sqlserver
     environment:
       ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: "AstroClub2025"   # change in production
-      MSSQL_PID: "Developer"                  # free licence for dev
+      MSSQL_SA_PASSWORD: "AstroClub2025"   
+      MSSQL_PID: "Developer"                  
     ports:
       - "1433:1433"
     volumes:
-      - sqlserver_data:/var/opt/mssql          # persistent data volume
-      - ./scripts/sql:/docker-entrypoint-initdb # mount init scripts
+      - sqlserver_data:/var/opt/mssql          
+      - ./scripts/sql:/docker-entrypoint-initdb 
     healthcheck:
       test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "AstroClub2025" -C -Q "SELECT 1" || exit 1
       interval: 10s
@@ -38,8 +38,8 @@ services:
       MINIO_ROOT_USER: astro_admin
       MINIO_ROOT_PASSWORD: AstroMinio2025
     ports:
-      - "9000:9000"    # S3 API — your app talks here
-      - "9001:9001"    # Web console — admin UI
+      - "9000:9000"    
+      - "9001:9001"   
     volumes:
       - minio_data:/data
     command: server /data --console-address ":9001"
