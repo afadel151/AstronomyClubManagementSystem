@@ -16,8 +16,8 @@ namespace Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    RoleCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    RoleCode = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     PermissionLevel = table.Column<int>(type: "int", nullable: false),
                     CanApproveObservations = table.Column<bool>(type: "bit", nullable: false),
                     CanManageEquipment = table.Column<bool>(type: "bit", nullable: false),
@@ -39,23 +39,22 @@ namespace Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    MemberCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    FullName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    DisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    JoinDate = table.Column<DateOnly>(type: "date", nullable: false),
+                    MemberCode = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    FullName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    DisplayName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    JoinDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     BirthYear = table.Column<short>(type: "smallint", nullable: true),
                     MemberStatus = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AavsoObserverCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    AavsoObserverCode = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     Bio = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ProfileImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Nationality = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    City = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Nationality = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    City = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     LastLoginAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     LastLoginIp = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreatedByUserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    CreatedBy = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -75,14 +74,15 @@ namespace Data.Migrations
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AspNetUsers_AspNetUsers_CreatedByUserId",
-                        column: x => x.CreatedByUserId,
+                        name: "FK_AspNetUsers_AspNetUsers_CreatedBy",
+                        column: x => x.CreatedBy,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "DATAPRODUCT_TYPES",
+                name: "DataproductTypes",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -96,7 +96,7 @@ namespace Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "EQUIPMENT_CATEGORY",
+                name: "EquipmentCategories",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -106,11 +106,11 @@ namespace Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EQUIPMENT_CATEGORY", x => x.Id);
+                    table.PrimaryKey("PK_EquipmentCategories", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "EVENT_TYPES",
+                name: "EventTypes",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -120,11 +120,11 @@ namespace Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EVENT_TYPES", x => x.Id);
+                    table.PrimaryKey("PK_EventTypes", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "FORECAST_CATEGORIES",
+                name: "ForecastCategories",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -134,31 +134,11 @@ namespace Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_FORECAST_CATEGORIES", x => x.Id);
+                    table.PrimaryKey("PK_ForecastCategories", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "MEMBER_CONTACT_PREF",
-                columns: table => new
-                {
-                    PrefId = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Channel = table.Column<string>(type: "varchar(20)", unicode: false, maxLength: 20, nullable: false),
-                    ChannelAddress = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
-                    EventTypes = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    QuietHoursStart = table.Column<byte>(type: "tinyint", nullable: true),
-                    QuietHoursEnd = table.Column<byte>(type: "tinyint", nullable: true),
-                    Timezone = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_MEMBER_CONTACT_PREF", x => x.PrefId);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "MEMBER_ROLE_AUDIT",
+                name: "MemberRoleAudits",
                 columns: table => new
                 {
                     AuditId = table.Column<int>(type: "int", nullable: false)
@@ -173,11 +153,11 @@ namespace Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MEMBER_ROLE_AUDIT", x => x.AuditId);
+                    table.PrimaryKey("PK_MemberRoleAudits", x => x.AuditId);
                 });
 
             migrationBuilder.CreateTable(
-                name: "NOTIFICATION_LOG",
+                name: "NotificationLogs",
                 columns: table => new
                 {
                     NotificationId = table.Column<int>(type: "int", nullable: false)
@@ -200,11 +180,11 @@ namespace Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_NOTIFICATION_LOG", x => x.NotificationId);
+                    table.PrimaryKey("PK_NotificationLogs", x => x.NotificationId);
                 });
 
             migrationBuilder.CreateTable(
-                name: "OBSERVATION_SESSION_TYPES",
+                name: "ObservationSessionTypes",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -218,7 +198,7 @@ namespace Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "OBSERVATION_SITES",
+                name: "ObservationSites",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -242,11 +222,11 @@ namespace Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_OBSERVATION_SITES", x => x.Id);
+                    table.PrimaryKey("PK_ObservationSites", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "OBSERVATION_TYPES",
+                name: "ObservationTypes",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -260,7 +240,7 @@ namespace Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PROJECT_TYPE",
+                name: "ProjectTypes",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -270,11 +250,11 @@ namespace Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PROJECT_TYPE", x => x.Id);
+                    table.PrimaryKey("PK_ProjectTypes", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "TARGETS",
+                name: "Targets",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -321,11 +301,11 @@ namespace Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TARGETS", x => x.Id);
+                    table.PrimaryKey("PK_Targets", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "TASK_TYPE",
+                name: "TaskTypes",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -335,7 +315,7 @@ namespace Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TASK_TYPE", x => x.Id);
+                    table.PrimaryKey("PK_TaskTypes", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -445,7 +425,60 @@ namespace Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "EQUIPMENTS",
+                name: "MemberContactPrefs",
+                columns: table => new
+                {
+                    PrefId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Channel = table.Column<string>(type: "varchar(20)", unicode: false, maxLength: 20, nullable: false),
+                    ChannelAddress = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
+                    EventTypes = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    QuietHoursStart = table.Column<byte>(type: "tinyint", nullable: true),
+                    QuietHoursEnd = table.Column<byte>(type: "tinyint", nullable: true),
+                    Timezone = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MemberContactPrefs", x => x.PrefId);
+                    table.ForeignKey(
+                        name: "FK_MemberContactPrefs_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "RefreshTokens",
+                columns: table => new
+                {
+                    TokenId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
+                    Token = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    ExpiresAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    CreatedByIp = table.Column<string>(type: "nvarchar(45)", maxLength: 45, nullable: true),
+                    RevokedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    RevokedByIp = table.Column<string>(type: "nvarchar(45)", maxLength: 45, nullable: true),
+                    ReplacedByToken = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RefreshTokens", x => x.TokenId);
+                    table.ForeignKey(
+                        name: "FK_RefreshTokens_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Equipments",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -465,22 +498,29 @@ namespace Data.Migrations
                     LoanDueDate = table.Column<DateOnly>(type: "date", nullable: true),
                     Notes = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
                     FitsTelescop = table.Column<string>(type: "varchar(68)", unicode: false, maxLength: 68, nullable: true),
+                    Specifications = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ParentEquipmentId = table.Column<int>(type: "int", nullable: true),
                     FitsInstrume = table.Column<string>(type: "varchar(68)", unicode: false, maxLength: 68, nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false, defaultValueSql: "(sysdatetimeoffset())"),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false, defaultValueSql: "(sysdatetimeoffset())")
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EQUIPMENTS", x => x.Id);
+                    table.PrimaryKey("PK_Equipments", x => x.Id);
                     table.ForeignKey(
                         name: "FK_EQ_Category",
                         column: x => x.CategoryId,
-                        principalTable: "EQUIPMENT_CATEGORY",
+                        principalTable: "EquipmentCategories",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Equipments_Equipments_ParentEquipmentId",
+                        column: x => x.ParentEquipmentId,
+                        principalTable: "Equipments",
                         principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "FORECASTS",
+                name: "Forecasts",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -501,14 +541,14 @@ namespace Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_FORECASTS", x => x.Id);
+                    table.PrimaryKey("PK_Forecasts", x => x.Id);
                     table.ForeignKey(
                         name: "FK_FCST_Category",
                         column: x => x.CategoryId,
-                        principalTable: "FORECAST_CATEGORIES",
+                        principalTable: "ForecastCategories",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_FORECASTS_AspNetUsers_CreatedBy",
+                        name: "FK_Forecasts_AspNetUsers_CreatedBy",
                         column: x => x.CreatedBy,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
@@ -516,7 +556,7 @@ namespace Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "OBSERVATION_SESSIONS",
+                name: "ObservationSessions",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -553,21 +593,21 @@ namespace Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_OBSERVATION_SESSIONS", x => x.Id);
+                    table.PrimaryKey("PK_ObservationSessions", x => x.Id);
                     table.ForeignKey(
                         name: "FK_SES_SessionType",
                         column: x => x.SessionTypeId,
-                        principalTable: "OBSERVATION_SESSION_TYPES",
+                        principalTable: "ObservationSessionTypes",
                         principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_SES_Site",
                         column: x => x.SiteId,
-                        principalTable: "OBSERVATION_SITES",
+                        principalTable: "ObservationSites",
                         principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "EVENTS",
+                name: "Events",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -598,21 +638,21 @@ namespace Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EVENTS", x => x.Id);
+                    table.PrimaryKey("PK_Events", x => x.Id);
                     table.ForeignKey(
                         name: "FK_EV_EventType",
                         column: x => x.EventTypeId,
-                        principalTable: "EVENT_TYPES",
+                        principalTable: "EventTypes",
                         principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_EV_Target",
                         column: x => x.TargetId,
-                        principalTable: "TARGETS",
+                        principalTable: "Targets",
                         principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "PROJECTS",
+                name: "Projects",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -639,19 +679,19 @@ namespace Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PROJECTS", x => x.Id);
+                    table.PrimaryKey("PK_Projects", x => x.Id);
                     table.ForeignKey(
                         name: "FK_PRJ_Target",
                         column: x => x.TargetId,
-                        principalTable: "TARGETS",
+                        principalTable: "Targets",
                         principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_PRJ_Type",
                         column: x => x.ProjectTypeId,
-                        principalTable: "PROJECT_TYPE",
+                        principalTable: "ProjectTypes",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_PROJECTS_AspNetUsers_CreatedBy",
+                        name: "FK_Projects_AspNetUsers_CreatedBy",
                         column: x => x.CreatedBy,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
@@ -659,7 +699,30 @@ namespace Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "EQUIPMENT_MAINTENANCE",
+                name: "EquipmentCompatibilities",
+                columns: table => new
+                {
+                    EquipmentId = table.Column<int>(type: "int", nullable: false),
+                    CompatibleWithId = table.Column<int>(type: "int", nullable: false),
+                    CompatibilityNote = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EquipmentCompatibilities", x => new { x.EquipmentId, x.CompatibleWithId });
+                    table.ForeignKey(
+                        name: "FK_EquipmentCompatibilities_Equipments_CompatibleWithId",
+                        column: x => x.CompatibleWithId,
+                        principalTable: "Equipments",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_EquipmentCompatibilities_Equipments_EquipmentId",
+                        column: x => x.EquipmentId,
+                        principalTable: "Equipments",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "EquipmentMaintenances",
                 columns: table => new
                 {
                     MaintenanceId = table.Column<int>(type: "int", nullable: false)
@@ -677,16 +740,16 @@ namespace Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EQUIPMENT_MAINTENANCE", x => x.MaintenanceId);
+                    table.PrimaryKey("PK_EquipmentMaintenances", x => x.MaintenanceId);
                     table.ForeignKey(
                         name: "FK_EM_Equipment",
                         column: x => x.EquipmentId,
-                        principalTable: "EQUIPMENTS",
+                        principalTable: "Equipments",
                         principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "OBSERVATIONS",
+                name: "Observations",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -743,56 +806,56 @@ namespace Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_OBSERVATIONS", x => x.Id);
+                    table.PrimaryKey("PK_Observations", x => x.Id);
                     table.ForeignKey(
                         name: "FK_OBS_Camera",
                         column: x => x.CameraId,
-                        principalTable: "EQUIPMENTS",
+                        principalTable: "Equipments",
                         principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_OBS_DPType",
                         column: x => x.DataproductTypeId,
-                        principalTable: "DATAPRODUCT_TYPES",
+                        principalTable: "DataproductTypes",
                         principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_OBS_Filter",
                         column: x => x.FilterId,
-                        principalTable: "EQUIPMENTS",
+                        principalTable: "Equipments",
                         principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_OBS_Guider",
                         column: x => x.GuiderId,
-                        principalTable: "EQUIPMENTS",
+                        principalTable: "Equipments",
                         principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_OBS_Mount",
                         column: x => x.MountId,
-                        principalTable: "EQUIPMENTS",
+                        principalTable: "Equipments",
                         principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_OBS_ObsType",
                         column: x => x.ObservationTypeId,
-                        principalTable: "OBSERVATION_TYPES",
+                        principalTable: "ObservationTypes",
                         principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_OBS_Session",
                         column: x => x.SessionId,
-                        principalTable: "OBSERVATION_SESSIONS",
+                        principalTable: "ObservationSessions",
                         principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_OBS_Target",
                         column: x => x.TargetId,
-                        principalTable: "TARGETS",
+                        principalTable: "Targets",
                         principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_OBS_Telescope",
                         column: x => x.TelescopeId,
-                        principalTable: "EQUIPMENTS",
+                        principalTable: "Equipments",
                         principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "SESSION_MEMBERS",
+                name: "SessionMembers",
                 columns: table => new
                 {
                     SessionId = table.Column<int>(type: "int", nullable: false),
@@ -804,16 +867,16 @@ namespace Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SESSION_MEMBERS", x => new { x.SessionId, x.UserId });
+                    table.PrimaryKey("PK_SessionMembers", x => new { x.SessionId, x.UserId });
                     table.ForeignKey(
                         name: "FK_SM_Session",
                         column: x => x.SessionId,
-                        principalTable: "OBSERVATION_SESSIONS",
+                        principalTable: "ObservationSessions",
                         principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "EVENT_VISIBILITY",
+                name: "EventVisibilities",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -834,21 +897,21 @@ namespace Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EVENT_VISIBILITY", x => x.Id);
+                    table.PrimaryKey("PK_EventVisibilities", x => x.Id);
                     table.ForeignKey(
                         name: "FK_EV2_Event",
                         column: x => x.EventId,
-                        principalTable: "EVENTS",
+                        principalTable: "Events",
                         principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_EV2_Site",
                         column: x => x.SiteId,
-                        principalTable: "OBSERVATION_SITES",
+                        principalTable: "ObservationSites",
                         principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "FORECAST_PROJECT",
+                name: "ForecastProjects",
                 columns: table => new
                 {
                     ForecastId = table.Column<int>(type: "int", nullable: false),
@@ -857,21 +920,21 @@ namespace Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_FORECAST_PROJECT", x => new { x.ForecastId, x.ProjectId });
+                    table.PrimaryKey("PK_ForecastProjects", x => new { x.ForecastId, x.ProjectId });
                     table.ForeignKey(
                         name: "FK_FP_Forecast",
                         column: x => x.ForecastId,
-                        principalTable: "FORECASTS",
+                        principalTable: "Forecasts",
                         principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_FP_Project",
                         column: x => x.ProjectId,
-                        principalTable: "PROJECTS",
+                        principalTable: "Projects",
                         principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "MILESTONES",
+                name: "Milestones",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -886,16 +949,16 @@ namespace Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MILESTONES", x => x.Id);
+                    table.PrimaryKey("PK_Milestones", x => x.Id);
                     table.ForeignKey(
                         name: "FK_MS_Project",
                         column: x => x.ProjectId,
-                        principalTable: "PROJECTS",
+                        principalTable: "Projects",
                         principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "PROJECT_MEMBERS",
+                name: "ProjectMembers",
                 columns: table => new
                 {
                     ProjectId = table.Column<int>(type: "int", nullable: false),
@@ -907,16 +970,16 @@ namespace Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PROJECT_MEMBERS", x => new { x.ProjectId, x.UserId });
+                    table.PrimaryKey("PK_ProjectMembers", x => new { x.ProjectId, x.UserId });
                     table.ForeignKey(
                         name: "FK_PM_Project",
                         column: x => x.ProjectId,
-                        principalTable: "PROJECTS",
+                        principalTable: "Projects",
                         principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "EVENT_OBSERVATION",
+                name: "EventObservations",
                 columns: table => new
                 {
                     EventId = table.Column<int>(type: "int", nullable: false),
@@ -927,19 +990,19 @@ namespace Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EVENT_OBSERVATION", x => new { x.EventId, x.ObservationId });
+                    table.PrimaryKey("PK_EventObservations", x => new { x.EventId, x.ObservationId });
                     table.ForeignKey(
                         name: "FK_EO_Event",
                         column: x => x.EventId,
-                        principalTable: "EVENTS",
+                        principalTable: "Events",
                         principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_EO_Observation",
                         column: x => x.ObservationId,
-                        principalTable: "OBSERVATIONS",
+                        principalTable: "Observations",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_EVENT_OBSERVATION_AspNetUsers_CreatedBy",
+                        name: "FK_EventObservations_AspNetUsers_CreatedBy",
                         column: x => x.CreatedBy,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
@@ -947,7 +1010,7 @@ namespace Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "IMAGE_RECORDS",
+                name: "ImageRecords",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -974,21 +1037,21 @@ namespace Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_IMAGE_RECORDS", x => x.Id);
+                    table.PrimaryKey("PK_ImageRecords", x => x.Id);
                     table.ForeignKey(
                         name: "FK_IR_Observation",
                         column: x => x.ObservationId,
-                        principalTable: "OBSERVATIONS",
+                        principalTable: "Observations",
                         principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_IR_Target",
                         column: x => x.TargetId,
-                        principalTable: "TARGETS",
+                        principalTable: "Targets",
                         principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "TASKS",
+                name: "Tasks",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -1014,42 +1077,42 @@ namespace Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TASKS", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_TASKS_AspNetUsers_CreatedBy",
-                        column: x => x.CreatedBy,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                    table.PrimaryKey("PK_Tasks", x => x.Id);
                     table.ForeignKey(
                         name: "FK_TSK_Milestone",
                         column: x => x.MilestoneId,
-                        principalTable: "MILESTONES",
+                        principalTable: "Milestones",
                         principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_TSK_Parent",
                         column: x => x.ParentTaskId,
-                        principalTable: "TASKS",
+                        principalTable: "Tasks",
                         principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_TSK_Project",
                         column: x => x.ProjectId,
-                        principalTable: "PROJECTS",
+                        principalTable: "Projects",
                         principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_TSK_Session",
                         column: x => x.SessionId,
-                        principalTable: "OBSERVATION_SESSIONS",
+                        principalTable: "ObservationSessions",
                         principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_TSK_Type",
                         column: x => x.TaskTypeId,
-                        principalTable: "TASK_TYPE",
+                        principalTable: "TaskTypes",
                         principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Tasks_AspNetUsers_CreatedBy",
+                        column: x => x.CreatedBy,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "TASK_ASSIGNMENT",
+                name: "TaskAssignments",
                 columns: table => new
                 {
                     TaskId = table.Column<int>(type: "int", nullable: false),
@@ -1061,11 +1124,11 @@ namespace Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TASK_ASSIGNMENT", x => new { x.TaskId, x.UserId });
+                    table.PrimaryKey("PK_TaskAssignments", x => new { x.TaskId, x.UserId });
                     table.ForeignKey(
                         name: "FK_TA_Task",
                         column: x => x.TaskId,
-                        principalTable: "TASKS",
+                        principalTable: "Tasks",
                         principalColumn: "Id");
                 });
 
@@ -1080,6 +1143,12 @@ namespace Data.Migrations
                 column: "NormalizedName",
                 unique: true,
                 filter: "[NormalizedName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "UK_ROLES_RoleCode",
+                table: "AspNetRoles",
+                column: "RoleCode",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetUserClaims_UserId",
@@ -1102,9 +1171,15 @@ namespace Data.Migrations
                 column: "NormalizedEmail");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AspNetUsers_CreatedByUserId",
+                name: "IX_AspNetUsers_CreatedBy",
                 table: "AspNetUsers",
-                column: "CreatedByUserId");
+                column: "CreatedBy");
+
+            migrationBuilder.CreateIndex(
+                name: "UK_USERS_MemberCode",
+                table: "AspNetUsers",
+                column: "MemberCode",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
@@ -1115,412 +1190,438 @@ namespace Data.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "UK_DPT_Name",
-                table: "DATAPRODUCT_TYPES",
+                table: "DataproductTypes",
                 column: "Name",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "UK_EQUIPMENT_CATEGORY_Name",
-                table: "EQUIPMENT_CATEGORY",
+                table: "EquipmentCategories",
                 column: "Name",
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_EquipmentCompatibilities_CompatibleWithId",
+                table: "EquipmentCompatibilities",
+                column: "CompatibleWithId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_EM_Date",
-                table: "EQUIPMENT_MAINTENANCE",
+                table: "EquipmentMaintenances",
                 column: "MaintenanceDate",
                 descending: new bool[0]);
 
             migrationBuilder.CreateIndex(
                 name: "IX_EM_EquipmentId",
-                table: "EQUIPMENT_MAINTENANCE",
+                table: "EquipmentMaintenances",
                 column: "EquipmentId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_EQ_CategoryId",
-                table: "EQUIPMENTS",
+                table: "Equipments",
                 column: "CategoryId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_EQ_Status",
-                table: "EQUIPMENTS",
+                table: "Equipments",
                 column: "Status");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Equipments_ParentEquipmentId",
+                table: "Equipments",
+                column: "ParentEquipmentId");
+
+            migrationBuilder.CreateIndex(
                 name: "UK_EQUIPMENTS_Code",
-                table: "EQUIPMENTS",
+                table: "Equipments",
                 column: "Code",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_EVENT_OBSERVATION_CreatedBy",
-                table: "EVENT_OBSERVATION",
+                name: "IX_EventObservations_CreatedBy",
+                table: "EventObservations",
                 column: "CreatedBy");
 
             migrationBuilder.CreateIndex(
-                name: "IX_EVENT_OBSERVATION_ObservationId",
-                table: "EVENT_OBSERVATION",
+                name: "IX_EventObservations_ObservationId",
+                table: "EventObservations",
                 column: "ObservationId");
 
             migrationBuilder.CreateIndex(
-                name: "UK_ET_Name",
-                table: "EVENT_TYPES",
-                column: "Name",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_EVENT_VISIBILITY_SiteId",
-                table: "EVENT_VISIBILITY",
-                column: "SiteId");
-
-            migrationBuilder.CreateIndex(
-                name: "UK_EV_EventSite",
-                table: "EVENT_VISIBILITY",
-                columns: new[] { "EventId", "SiteId" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_EV_PeakDate",
-                table: "EVENTS",
+                table: "Events",
                 column: "PeakDateUtc");
 
             migrationBuilder.CreateIndex(
-                name: "IX_EVENTS_EventTypeId",
-                table: "EVENTS",
+                name: "IX_Events_EventTypeId",
+                table: "Events",
                 column: "EventTypeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_EVENTS_TargetId",
-                table: "EVENTS",
+                name: "IX_Events_TargetId",
+                table: "Events",
                 column: "TargetId");
 
             migrationBuilder.CreateIndex(
                 name: "UK_EV_Code",
-                table: "EVENTS",
+                table: "Events",
                 column: "Code",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "UK_FC_Name",
-                table: "FORECAST_CATEGORIES",
+                name: "UK_ET_Name",
+                table: "EventTypes",
                 column: "Name",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_FORECAST_PROJECT_ProjectId",
-                table: "FORECAST_PROJECT",
+                name: "IX_EventVisibilities_SiteId",
+                table: "EventVisibilities",
+                column: "SiteId");
+
+            migrationBuilder.CreateIndex(
+                name: "UK_EV_EventSite",
+                table: "EventVisibilities",
+                columns: new[] { "EventId", "SiteId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "UK_FC_Name",
+                table: "ForecastCategories",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ForecastProjects_ProjectId",
+                table: "ForecastProjects",
                 column: "ProjectId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_FCST_PeriodYear",
-                table: "FORECASTS",
+                table: "Forecasts",
                 column: "PeriodYear");
 
             migrationBuilder.CreateIndex(
                 name: "IX_FCST_Status",
-                table: "FORECASTS",
+                table: "Forecasts",
                 column: "Status");
 
             migrationBuilder.CreateIndex(
-                name: "IX_FORECASTS_CategoryId",
-                table: "FORECASTS",
+                name: "IX_Forecasts_CategoryId",
+                table: "Forecasts",
                 column: "CategoryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_FORECASTS_CreatedBy",
-                table: "FORECASTS",
+                name: "IX_Forecasts_CreatedBy",
+                table: "Forecasts",
                 column: "CreatedBy");
 
             migrationBuilder.CreateIndex(
                 name: "UK_FORECASTS_Code",
-                table: "FORECASTS",
+                table: "Forecasts",
                 column: "Code",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_IR_ObservationId",
-                table: "IMAGE_RECORDS",
+                table: "ImageRecords",
                 column: "ObservationId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_IR_PubStatus",
-                table: "IMAGE_RECORDS",
+                table: "ImageRecords",
                 column: "PublicationStatus");
 
             migrationBuilder.CreateIndex(
                 name: "IX_IR_TargetId",
-                table: "IMAGE_RECORDS",
+                table: "ImageRecords",
                 column: "TargetId");
 
             migrationBuilder.CreateIndex(
                 name: "UK_IR_Code",
-                table: "IMAGE_RECORDS",
+                table: "ImageRecords",
                 column: "Code",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "UK_MCP_UserChannel",
-                table: "MEMBER_CONTACT_PREF",
+                table: "MemberContactPrefs",
                 columns: new[] { "UserId", "Channel" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_MRA_Date",
-                table: "MEMBER_ROLE_AUDIT",
+                table: "MemberRoleAudits",
                 column: "ActionDate",
                 descending: new bool[0]);
 
             migrationBuilder.CreateIndex(
                 name: "IX_MRA_RoleId",
-                table: "MEMBER_ROLE_AUDIT",
+                table: "MemberRoleAudits",
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_MRA_UserId",
-                table: "MEMBER_ROLE_AUDIT",
+                table: "MemberRoleAudits",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_MS_ProjectId",
-                table: "MILESTONES",
+                table: "Milestones",
                 column: "ProjectId");
 
             migrationBuilder.CreateIndex(
-                name: "UK_OST_Name",
-                table: "OBSERVATION_SESSION_TYPES",
-                column: "Name",
+                name: "IX_OBS_JdMid",
+                table: "Observations",
+                column: "JdMid");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OBS_ObserverId",
+                table: "Observations",
+                column: "ObserverId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OBS_RaDec",
+                table: "Observations",
+                columns: new[] { "SRa", "SDec" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OBS_SessionId",
+                table: "Observations",
+                column: "SessionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OBS_TargetId",
+                table: "Observations",
+                column: "TargetId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Observations_CameraId",
+                table: "Observations",
+                column: "CameraId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Observations_DataproductTypeId",
+                table: "Observations",
+                column: "DataproductTypeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Observations_FilterId",
+                table: "Observations",
+                column: "FilterId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Observations_GuiderId",
+                table: "Observations",
+                column: "GuiderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Observations_MountId",
+                table: "Observations",
+                column: "MountId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Observations_ObservationTypeId",
+                table: "Observations",
+                column: "ObservationTypeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Observations_TelescopeId",
+                table: "Observations",
+                column: "TelescopeId");
+
+            migrationBuilder.CreateIndex(
+                name: "UK_OBS_ObsId",
+                table: "Observations",
+                column: "ObsId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_OBSERVATION_SESSIONS_SessionTypeId",
-                table: "OBSERVATION_SESSIONS",
+                name: "IX_ObservationSessions_SessionTypeId",
+                table: "ObservationSessions",
                 column: "SessionTypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SES_SiteId",
-                table: "OBSERVATION_SESSIONS",
+                table: "ObservationSessions",
                 column: "SiteId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SES_StartTimeUTC",
-                table: "OBSERVATION_SESSIONS",
+                table: "ObservationSessions",
                 column: "StartTimeUTC",
                 descending: new bool[0]);
 
             migrationBuilder.CreateIndex(
                 name: "IX_SES_Status",
-                table: "OBSERVATION_SESSIONS",
+                table: "ObservationSessions",
                 column: "Status");
 
             migrationBuilder.CreateIndex(
                 name: "UK_SES_Code",
-                table: "OBSERVATION_SESSIONS",
+                table: "ObservationSessions",
                 column: "Code",
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "UK_OST_Name",
+                table: "ObservationSessionTypes",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "UK_OS_Code",
-                table: "OBSERVATION_SITES",
+                table: "ObservationSites",
                 column: "Code",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "UK_OT_Name",
-                table: "OBSERVATION_TYPES",
+                table: "ObservationTypes",
                 column: "Name",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_OBS_JdMid",
-                table: "OBSERVATIONS",
-                column: "JdMid");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_OBS_ObserverId",
-                table: "OBSERVATIONS",
-                column: "ObserverId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_OBS_RaDec",
-                table: "OBSERVATIONS",
-                columns: new[] { "SRa", "SDec" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_OBS_SessionId",
-                table: "OBSERVATIONS",
-                column: "SessionId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_OBS_TargetId",
-                table: "OBSERVATIONS",
-                column: "TargetId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_OBSERVATIONS_CameraId",
-                table: "OBSERVATIONS",
-                column: "CameraId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_OBSERVATIONS_DataproductTypeId",
-                table: "OBSERVATIONS",
-                column: "DataproductTypeId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_OBSERVATIONS_FilterId",
-                table: "OBSERVATIONS",
-                column: "FilterId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_OBSERVATIONS_GuiderId",
-                table: "OBSERVATIONS",
-                column: "GuiderId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_OBSERVATIONS_MountId",
-                table: "OBSERVATIONS",
-                column: "MountId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_OBSERVATIONS_ObservationTypeId",
-                table: "OBSERVATIONS",
-                column: "ObservationTypeId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_OBSERVATIONS_TelescopeId",
-                table: "OBSERVATIONS",
-                column: "TelescopeId");
-
-            migrationBuilder.CreateIndex(
-                name: "UK_OBS_ObsId",
-                table: "OBSERVATIONS",
-                column: "ObsId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_PM_UserId",
-                table: "PROJECT_MEMBERS",
+                table: "ProjectMembers",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "UK_PT_Name",
-                table: "PROJECT_TYPE",
-                column: "Name",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_PRJ_Status",
-                table: "PROJECTS",
+                table: "Projects",
                 column: "Status");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PRJ_TargetId",
-                table: "PROJECTS",
+                table: "Projects",
                 column: "TargetId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PROJECTS_CreatedBy",
-                table: "PROJECTS",
+                name: "IX_Projects_CreatedBy",
+                table: "Projects",
                 column: "CreatedBy");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PROJECTS_ProjectTypeId",
-                table: "PROJECTS",
+                name: "IX_Projects_ProjectTypeId",
+                table: "Projects",
                 column: "ProjectTypeId");
 
             migrationBuilder.CreateIndex(
                 name: "UK_PRJ_Code",
-                table: "PROJECTS",
+                table: "Projects",
                 column: "Code",
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "UK_PT_Name",
+                table: "ProjectTypes",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RT_IsActive",
+                table: "RefreshTokens",
+                column: "IsActive");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RT_UserId",
+                table: "RefreshTokens",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "UK_REFRESH_TOKEN",
+                table: "RefreshTokens",
+                column: "Token",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_SM_UserId",
-                table: "SESSION_MEMBERS",
+                table: "SessionMembers",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TGT_IsSolarSystem",
-                table: "TARGETS",
+                table: "Targets",
                 column: "IsSolarSystem");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TGT_ObjectTypeCode",
-                table: "TARGETS",
+                table: "Targets",
                 column: "ObjectTypeCode");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TGT_RaDec",
-                table: "TARGETS",
+                table: "Targets",
                 columns: new[] { "RaDeg", "DecDeg" });
 
             migrationBuilder.CreateIndex(
                 name: "UK_TARGETS_Code",
-                table: "TARGETS",
+                table: "Targets",
                 column: "Code",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "UK_TARGETS_SimbadId",
-                table: "TARGETS",
+                table: "Targets",
                 column: "SimbadId",
                 unique: true,
                 filter: "[SimbadId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TA_UserId",
-                table: "TASK_ASSIGNMENT",
+                table: "TaskAssignments",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "UK_TT_Name",
-                table: "TASK_TYPE",
-                column: "Name",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_TASKS_CreatedBy",
-                table: "TASKS",
+                name: "IX_Tasks_CreatedBy",
+                table: "Tasks",
                 column: "CreatedBy");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TASKS_MilestoneId",
-                table: "TASKS",
+                name: "IX_Tasks_MilestoneId",
+                table: "Tasks",
                 column: "MilestoneId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TASKS_ParentTaskId",
-                table: "TASKS",
+                name: "IX_Tasks_ParentTaskId",
+                table: "Tasks",
                 column: "ParentTaskId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TASKS_SessionId",
-                table: "TASKS",
+                name: "IX_Tasks_SessionId",
+                table: "Tasks",
                 column: "SessionId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TASKS_TaskTypeId",
-                table: "TASKS",
+                name: "IX_Tasks_TaskTypeId",
+                table: "Tasks",
                 column: "TaskTypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TSK_DueDate",
-                table: "TASKS",
+                table: "Tasks",
                 column: "DueDate");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TSK_ProjectId",
-                table: "TASKS",
+                table: "Tasks",
                 column: "ProjectId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TSK_Status",
-                table: "TASKS",
+                table: "Tasks",
                 column: "Status");
 
             migrationBuilder.CreateIndex(
                 name: "UK_TSK_Code",
-                table: "TASKS",
+                table: "Tasks",
                 column: "TaskCode",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "UK_TT_Name",
+                table: "TaskTypes",
+                column: "Name",
                 unique: true);
         }
 
@@ -1543,94 +1644,100 @@ namespace Data.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "EQUIPMENT_MAINTENANCE");
+                name: "EquipmentCompatibilities");
 
             migrationBuilder.DropTable(
-                name: "EVENT_OBSERVATION");
+                name: "EquipmentMaintenances");
 
             migrationBuilder.DropTable(
-                name: "EVENT_VISIBILITY");
+                name: "EventObservations");
 
             migrationBuilder.DropTable(
-                name: "FORECAST_PROJECT");
+                name: "EventVisibilities");
 
             migrationBuilder.DropTable(
-                name: "IMAGE_RECORDS");
+                name: "ForecastProjects");
 
             migrationBuilder.DropTable(
-                name: "MEMBER_CONTACT_PREF");
+                name: "ImageRecords");
 
             migrationBuilder.DropTable(
-                name: "MEMBER_ROLE_AUDIT");
+                name: "MemberContactPrefs");
 
             migrationBuilder.DropTable(
-                name: "NOTIFICATION_LOG");
+                name: "MemberRoleAudits");
 
             migrationBuilder.DropTable(
-                name: "PROJECT_MEMBERS");
+                name: "NotificationLogs");
 
             migrationBuilder.DropTable(
-                name: "SESSION_MEMBERS");
+                name: "ProjectMembers");
 
             migrationBuilder.DropTable(
-                name: "TASK_ASSIGNMENT");
+                name: "RefreshTokens");
+
+            migrationBuilder.DropTable(
+                name: "SessionMembers");
+
+            migrationBuilder.DropTable(
+                name: "TaskAssignments");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "EVENTS");
+                name: "Events");
 
             migrationBuilder.DropTable(
-                name: "FORECASTS");
+                name: "Forecasts");
 
             migrationBuilder.DropTable(
-                name: "OBSERVATIONS");
+                name: "Observations");
 
             migrationBuilder.DropTable(
-                name: "TASKS");
+                name: "Tasks");
 
             migrationBuilder.DropTable(
-                name: "EVENT_TYPES");
+                name: "EventTypes");
 
             migrationBuilder.DropTable(
-                name: "FORECAST_CATEGORIES");
+                name: "ForecastCategories");
 
             migrationBuilder.DropTable(
-                name: "EQUIPMENTS");
+                name: "Equipments");
 
             migrationBuilder.DropTable(
-                name: "DATAPRODUCT_TYPES");
+                name: "DataproductTypes");
 
             migrationBuilder.DropTable(
-                name: "OBSERVATION_TYPES");
+                name: "ObservationTypes");
 
             migrationBuilder.DropTable(
-                name: "MILESTONES");
+                name: "Milestones");
 
             migrationBuilder.DropTable(
-                name: "OBSERVATION_SESSIONS");
+                name: "ObservationSessions");
 
             migrationBuilder.DropTable(
-                name: "TASK_TYPE");
+                name: "TaskTypes");
 
             migrationBuilder.DropTable(
-                name: "EQUIPMENT_CATEGORY");
+                name: "EquipmentCategories");
 
             migrationBuilder.DropTable(
-                name: "PROJECTS");
+                name: "Projects");
 
             migrationBuilder.DropTable(
-                name: "OBSERVATION_SESSION_TYPES");
+                name: "ObservationSessionTypes");
 
             migrationBuilder.DropTable(
-                name: "OBSERVATION_SITES");
+                name: "ObservationSites");
 
             migrationBuilder.DropTable(
-                name: "TARGETS");
+                name: "Targets");
 
             migrationBuilder.DropTable(
-                name: "PROJECT_TYPE");
+                name: "ProjectTypes");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");

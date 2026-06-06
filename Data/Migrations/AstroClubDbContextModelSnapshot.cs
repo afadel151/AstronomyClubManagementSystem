@@ -45,7 +45,7 @@ namespace Data.Migrations
                     b.HasIndex(new[] { "Name" }, "UK_DPT_Name")
                         .IsUnique();
 
-                    b.ToTable("DATAPRODUCT_TYPES");
+                    b.ToTable("DataproductTypes");
                 });
 
             modelBuilder.Entity("Data.Entities.Equipment", b =>
@@ -114,6 +114,9 @@ namespace Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<int?>("ParentEquipmentId")
+                        .HasColumnType("int");
+
                     b.Property<DateOnly?>("PurchaseDate")
                         .HasColumnType("date");
 
@@ -124,6 +127,9 @@ namespace Data.Migrations
                         .HasMaxLength(100)
                         .IsUnicode(false)
                         .HasColumnType("varchar(100)");
+
+                    b.Property<string>("Specifications")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -139,6 +145,8 @@ namespace Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ParentEquipmentId");
+
                     b.HasIndex(new[] { "CategoryId" }, "IX_EQ_CategoryId");
 
                     b.HasIndex(new[] { "Status" }, "IX_EQ_Status");
@@ -146,7 +154,7 @@ namespace Data.Migrations
                     b.HasIndex(new[] { "Code" }, "UK_EQUIPMENTS_Code")
                         .IsUnique();
 
-                    b.ToTable("EQUIPMENTS");
+                    b.ToTable("Equipments");
                 });
 
             modelBuilder.Entity("Data.Entities.EquipmentCategory", b =>
@@ -171,7 +179,26 @@ namespace Data.Migrations
                     b.HasIndex(new[] { "Name" }, "UK_EQUIPMENT_CATEGORY_Name")
                         .IsUnique();
 
-                    b.ToTable("EQUIPMENT_CATEGORY");
+                    b.ToTable("EquipmentCategories");
+                });
+
+            modelBuilder.Entity("Data.Entities.EquipmentCompatibility", b =>
+                {
+                    b.Property<int>("EquipmentId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CompatibleWithId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CompatibilityNote")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("EquipmentId", "CompatibleWithId");
+
+                    b.HasIndex("CompatibleWithId");
+
+                    b.ToTable("EquipmentCompatibilities");
                 });
 
             modelBuilder.Entity("Data.Entities.EquipmentMaintenance", b =>
@@ -230,7 +257,7 @@ namespace Data.Migrations
 
                     b.HasIndex(new[] { "EquipmentId" }, "IX_EM_EquipmentId");
 
-                    b.ToTable("EQUIPMENT_MAINTENANCE");
+                    b.ToTable("EquipmentMaintenances");
                 });
 
             modelBuilder.Entity("Data.Entities.Event", b =>
@@ -341,7 +368,7 @@ namespace Data.Migrations
                     b.HasIndex(new[] { "Code" }, "UK_EV_Code")
                         .IsUnique();
 
-                    b.ToTable("EVENTS");
+                    b.ToTable("Events");
                 });
 
             modelBuilder.Entity("Data.Entities.EventObservation", b =>
@@ -372,7 +399,7 @@ namespace Data.Migrations
 
                     b.HasIndex("ObservationId");
 
-                    b.ToTable("EVENT_OBSERVATION");
+                    b.ToTable("EventObservations");
                 });
 
             modelBuilder.Entity("Data.Entities.EventType", b =>
@@ -397,7 +424,7 @@ namespace Data.Migrations
                     b.HasIndex(new[] { "Name" }, "UK_ET_Name")
                         .IsUnique();
 
-                    b.ToTable("EVENT_TYPES");
+                    b.ToTable("EventTypes");
                 });
 
             modelBuilder.Entity("Data.Entities.EventVisibility", b =>
@@ -459,7 +486,7 @@ namespace Data.Migrations
                     b.HasIndex(new[] { "EventId", "SiteId" }, "UK_EV_EventSite")
                         .IsUnique();
 
-                    b.ToTable("EVENT_VISIBILITY");
+                    b.ToTable("EventVisibilities");
                 });
 
             modelBuilder.Entity("Data.Entities.Forecast", b =>
@@ -539,7 +566,7 @@ namespace Data.Migrations
                     b.HasIndex(new[] { "Code" }, "UK_FORECASTS_Code")
                         .IsUnique();
 
-                    b.ToTable("FORECASTS");
+                    b.ToTable("Forecasts");
                 });
 
             modelBuilder.Entity("Data.Entities.ForecastCategory", b =>
@@ -564,7 +591,7 @@ namespace Data.Migrations
                     b.HasIndex(new[] { "Name" }, "UK_FC_Name")
                         .IsUnique();
 
-                    b.ToTable("FORECAST_CATEGORIES");
+                    b.ToTable("ForecastCategories");
                 });
 
             modelBuilder.Entity("Data.Entities.ForecastProject", b =>
@@ -583,7 +610,7 @@ namespace Data.Migrations
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("FORECAST_PROJECT");
+                    b.ToTable("ForecastProjects");
                 });
 
             modelBuilder.Entity("Data.Entities.Identity.ApplicationRole", b =>
@@ -611,7 +638,8 @@ namespace Data.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -629,7 +657,8 @@ namespace Data.Migrations
 
                     b.Property<string>("RoleCode")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
@@ -637,6 +666,9 @@ namespace Data.Migrations
                         .IsUnique()
                         .HasDatabaseName("RoleNameIndex")
                         .HasFilter("[NormalizedName] IS NOT NULL");
+
+                    b.HasIndex(new[] { "RoleCode" }, "UK_ROLES_RoleCode")
+                        .IsUnique();
 
                     b.ToTable("AspNetRoles", (string)null);
                 });
@@ -647,7 +679,8 @@ namespace Data.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("AavsoObserverCode")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
@@ -659,7 +692,8 @@ namespace Data.Migrations
                         .HasColumnType("smallint");
 
                     b.Property<string>("City")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -669,13 +703,11 @@ namespace Data.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CreatedByUserId")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("DisplayName")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -686,10 +718,11 @@ namespace Data.Migrations
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
-                    b.Property<DateOnly>("JoinDate")
-                        .HasColumnType("date");
+                    b.Property<DateTime>("JoinDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTimeOffset?>("LastLoginAt")
                         .HasColumnType("datetimeoffset");
@@ -705,14 +738,16 @@ namespace Data.Migrations
 
                     b.Property<string>("MemberCode")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("MemberStatus")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Nationality")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
@@ -749,7 +784,7 @@ namespace Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatedByUserId");
+                    b.HasIndex("CreatedBy");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -758,6 +793,9 @@ namespace Data.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.HasIndex(new[] { "MemberCode" }, "UK_USERS_MemberCode")
+                        .IsUnique();
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -859,7 +897,7 @@ namespace Data.Migrations
                     b.HasIndex(new[] { "Code" }, "UK_IR_Code")
                         .IsUnique();
 
-                    b.ToTable("IMAGE_RECORDS");
+                    b.ToTable("ImageRecords");
                 });
 
             modelBuilder.Entity("Data.Entities.MemberContactPref", b =>
@@ -909,7 +947,7 @@ namespace Data.Migrations
                     b.HasIndex(new[] { "UserId", "Channel" }, "UK_MCP_UserChannel")
                         .IsUnique();
 
-                    b.ToTable("MEMBER_CONTACT_PREF");
+                    b.ToTable("MemberContactPrefs");
                 });
 
             modelBuilder.Entity("Data.Entities.MemberRoleAudit", b =>
@@ -960,7 +998,7 @@ namespace Data.Migrations
 
                     b.HasIndex(new[] { "UserId" }, "IX_MRA_UserId");
 
-                    b.ToTable("MEMBER_ROLE_AUDIT");
+                    b.ToTable("MemberRoleAudits");
                 });
 
             modelBuilder.Entity("Data.Entities.Milestone", b =>
@@ -1001,7 +1039,7 @@ namespace Data.Migrations
 
                     b.HasIndex(new[] { "ProjectId" }, "IX_MS_ProjectId");
 
-                    b.ToTable("MILESTONES");
+                    b.ToTable("Milestones");
                 });
 
             modelBuilder.Entity("Data.Entities.NotificationLog", b =>
@@ -1084,7 +1122,7 @@ namespace Data.Migrations
 
                     b.HasKey("NotificationId");
 
-                    b.ToTable("NOTIFICATION_LOG");
+                    b.ToTable("NotificationLogs");
                 });
 
             modelBuilder.Entity("Data.Entities.Observation", b =>
@@ -1310,7 +1348,7 @@ namespace Data.Migrations
                     b.HasIndex(new[] { "ObsId" }, "UK_OBS_ObsId")
                         .IsUnique();
 
-                    b.ToTable("OBSERVATIONS");
+                    b.ToTable("Observations");
                 });
 
             modelBuilder.Entity("Data.Entities.ObservationSession", b =>
@@ -1441,7 +1479,7 @@ namespace Data.Migrations
                     b.HasIndex(new[] { "Code" }, "UK_SES_Code")
                         .IsUnique();
 
-                    b.ToTable("OBSERVATION_SESSIONS");
+                    b.ToTable("ObservationSessions");
                 });
 
             modelBuilder.Entity("Data.Entities.ObservationSessionType", b =>
@@ -1467,7 +1505,7 @@ namespace Data.Migrations
                     b.HasIndex(new[] { "Name" }, "UK_OST_Name")
                         .IsUnique();
 
-                    b.ToTable("OBSERVATION_SESSION_TYPES");
+                    b.ToTable("ObservationSessionTypes");
                 });
 
             modelBuilder.Entity("Data.Entities.ObservationSite", b =>
@@ -1550,7 +1588,7 @@ namespace Data.Migrations
                     b.HasIndex(new[] { "Code" }, "UK_OS_Code")
                         .IsUnique();
 
-                    b.ToTable("OBSERVATION_SITES");
+                    b.ToTable("ObservationSites");
                 });
 
             modelBuilder.Entity("Data.Entities.ObservationType", b =>
@@ -1576,7 +1614,7 @@ namespace Data.Migrations
                     b.HasIndex(new[] { "Name" }, "UK_OT_Name")
                         .IsUnique();
 
-                    b.ToTable("OBSERVATION_TYPES");
+                    b.ToTable("ObservationTypes");
                 });
 
             modelBuilder.Entity("Data.Entities.Project", b =>
@@ -1683,7 +1721,7 @@ namespace Data.Migrations
                     b.HasIndex(new[] { "Code" }, "UK_PRJ_Code")
                         .IsUnique();
 
-                    b.ToTable("PROJECTS");
+                    b.ToTable("Projects");
                 });
 
             modelBuilder.Entity("Data.Entities.ProjectMember", b =>
@@ -1713,7 +1751,7 @@ namespace Data.Migrations
 
                     b.HasIndex(new[] { "UserId" }, "IX_PM_UserId");
 
-                    b.ToTable("PROJECT_MEMBERS");
+                    b.ToTable("ProjectMembers");
                 });
 
             modelBuilder.Entity("Data.Entities.ProjectType", b =>
@@ -1738,7 +1776,65 @@ namespace Data.Migrations
                     b.HasIndex(new[] { "Name" }, "UK_PT_Name")
                         .IsUnique();
 
-                    b.ToTable("PROJECT_TYPE");
+                    b.ToTable("ProjectTypes");
+                });
+
+            modelBuilder.Entity("Data.Entities.RefreshToken", b =>
+                {
+                    b.Property<int>("TokenId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TokenId"));
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedByIp")
+                        .HasMaxLength(45)
+                        .HasColumnType("nvarchar(45)");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ReplacedByToken")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTimeOffset?>("RevokedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("RevokedByIp")
+                        .HasMaxLength(45)
+                        .HasColumnType("nvarchar(45)");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("TokenId");
+
+                    b.HasIndex("IsActive")
+                        .HasDatabaseName("IX_RT_IsActive");
+
+                    b.HasIndex("Token")
+                        .IsUnique()
+                        .HasDatabaseName("UK_REFRESH_TOKEN");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("IX_RT_UserId");
+
+                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("Data.Entities.SessionMember", b =>
@@ -1768,7 +1864,7 @@ namespace Data.Migrations
 
                     b.HasIndex(new[] { "UserId" }, "IX_SM_UserId");
 
-                    b.ToTable("SESSION_MEMBERS");
+                    b.ToTable("SessionMembers");
                 });
 
             modelBuilder.Entity("Data.Entities.Target", b =>
@@ -1959,7 +2055,7 @@ namespace Data.Migrations
                         .IsUnique()
                         .HasFilter("[SimbadId] IS NOT NULL");
 
-                    b.ToTable("TARGETS");
+                    b.ToTable("Targets");
                 });
 
             modelBuilder.Entity("Data.Entities.Task", b =>
@@ -2065,7 +2161,7 @@ namespace Data.Migrations
                     b.HasIndex(new[] { "TaskCode" }, "UK_TSK_Code")
                         .IsUnique();
 
-                    b.ToTable("TASKS");
+                    b.ToTable("Tasks");
                 });
 
             modelBuilder.Entity("Data.Entities.TaskAssignment", b =>
@@ -2096,7 +2192,7 @@ namespace Data.Migrations
 
                     b.HasIndex(new[] { "UserId" }, "IX_TA_UserId");
 
-                    b.ToTable("TASK_ASSIGNMENT");
+                    b.ToTable("TaskAssignments");
                 });
 
             modelBuilder.Entity("Data.Entities.TaskType", b =>
@@ -2121,7 +2217,7 @@ namespace Data.Migrations
                     b.HasIndex(new[] { "Name" }, "UK_TT_Name")
                         .IsUnique();
 
-                    b.ToTable("TASK_TYPE");
+                    b.ToTable("TaskTypes");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -2238,7 +2334,32 @@ namespace Data.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_EQ_Category");
 
+                    b.HasOne("Data.Entities.Equipment", "ParentEquipment")
+                        .WithMany("ChildParts")
+                        .HasForeignKey("ParentEquipmentId");
+
                     b.Navigation("Category");
+
+                    b.Navigation("ParentEquipment");
+                });
+
+            modelBuilder.Entity("Data.Entities.EquipmentCompatibility", b =>
+                {
+                    b.HasOne("Data.Entities.Equipment", "CompatibleEquipment")
+                        .WithMany()
+                        .HasForeignKey("CompatibleWithId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Data.Entities.Equipment", "Accessory")
+                        .WithMany()
+                        .HasForeignKey("EquipmentId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Accessory");
+
+                    b.Navigation("CompatibleEquipment");
                 });
 
             modelBuilder.Entity("Data.Entities.EquipmentMaintenance", b =>
@@ -2358,7 +2479,8 @@ namespace Data.Migrations
                 {
                     b.HasOne("Data.Entities.Identity.ApplicationUser", "CreatedByUser")
                         .WithMany()
-                        .HasForeignKey("CreatedByUserId");
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("CreatedByUser");
                 });
@@ -2380,6 +2502,15 @@ namespace Data.Migrations
                     b.Navigation("Observation");
 
                     b.Navigation("Target");
+                });
+
+            modelBuilder.Entity("Data.Entities.MemberContactPref", b =>
+                {
+                    b.HasOne("Data.Entities.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Data.Entities.Milestone", b =>
@@ -2520,6 +2651,17 @@ namespace Data.Migrations
                     b.Navigation("Project");
                 });
 
+            modelBuilder.Entity("Data.Entities.RefreshToken", b =>
+                {
+                    b.HasOne("Data.Entities.Identity.ApplicationUser", "User")
+                        .WithMany("RefreshTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Data.Entities.SessionMember", b =>
                 {
                     b.HasOne("Data.Entities.ObservationSession", "Session")
@@ -2648,6 +2790,8 @@ namespace Data.Migrations
 
             modelBuilder.Entity("Data.Entities.Equipment", b =>
                 {
+                    b.Navigation("ChildParts");
+
                     b.Navigation("EquipmentMaintenances");
 
                     b.Navigation("ObservationCameras");
@@ -2697,6 +2841,8 @@ namespace Data.Migrations
                     b.Navigation("CreatedProjects");
 
                     b.Navigation("CreatedTasks");
+
+                    b.Navigation("RefreshTokens");
                 });
 
             modelBuilder.Entity("Data.Entities.Milestone", b =>

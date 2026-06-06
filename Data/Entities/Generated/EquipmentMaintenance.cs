@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Data.Entities.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data.Entities;
 
-[Table("EQUIPMENT_MAINTENANCE")]
+
 [Index("MaintenanceDate", Name = "IX_EM_Date", AllDescending = true)]
 [Index("EquipmentId", Name = "IX_EM_EquipmentId")]
 public partial class EquipmentMaintenance
@@ -19,7 +20,7 @@ public partial class EquipmentMaintenance
     public DateOnly MaintenanceDate { get; set; }
 
     [StringLength(30)]
-    public string MaintenanceType { get; set; } = null!;
+    public EquipmentMaintenanceTypeEnum MaintenanceType { get; set; }
 
     [StringLength(450)]
     public string PerformedBy { get; set; } = null!;
@@ -28,7 +29,7 @@ public partial class EquipmentMaintenance
     public string Description { get; set; } = null!;
 
     [StringLength(20)]
-    public string Result { get; set; } = null!;
+    public EquipmentMaintenanceResultEnum Result { get; set; }
 
     public DateOnly? NextDueDate { get; set; }
 

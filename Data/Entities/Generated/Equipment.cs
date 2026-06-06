@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Data.Entities.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data.Entities;
 
-[Table("EQUIPMENTS")]
 [Index("CategoryId", Name = "IX_EQ_CategoryId")]
 [Index("Status", Name = "IX_EQ_Status")]
 [Index("Code", Name = "UK_EQUIPMENTS_Code", IsUnique = true)]
@@ -31,7 +31,7 @@ public partial class Equipment
     public int CategoryId { get; set; }
 
     [StringLength(50)]
-    public string? OpticalDesign { get; set; }
+    public EquipmentOpticalDesignEnum? OpticalDesign { get; set; }
 
     [StringLength(100)]
     [Unicode(false)]
@@ -43,7 +43,7 @@ public partial class Equipment
     public decimal? PurchasePrice { get; set; }
 
     [StringLength(20)]
-    public string Status { get; set; } = null!;
+    public EquipmentStatusEnum Status { get; set; }
 
     [StringLength(200)]
     public string? Location { get; set; }
@@ -59,6 +59,16 @@ public partial class Equipment
     [StringLength(68)]
     [Unicode(false)]
     public string? FitsTelescop { get; set; }
+
+    [Column(TypeName = "nvarchar(max)")]
+    public string? Specifications { get; set; }
+    public int? ParentEquipmentId { get; set; }  
+
+    [ForeignKey("ParentEquipmentId")]
+    public virtual Equipment? ParentEquipment { get; set; }
+
+    [InverseProperty("ParentEquipment")]
+    public virtual ICollection<Equipment> ChildParts { get; set; } = new List<Equipment>();
 
     [StringLength(68)]
     [Unicode(false)]

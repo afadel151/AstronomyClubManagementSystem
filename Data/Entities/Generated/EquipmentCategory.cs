@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Data.Entities;
 
-[Table("EQUIPMENT_CATEGORY")]
+
 [Index("Name", Name = "UK_EQUIPMENT_CATEGORY_Name", IsUnique = true)]
 public partial class EquipmentCategory
 {
