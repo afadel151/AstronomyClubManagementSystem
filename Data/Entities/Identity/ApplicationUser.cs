@@ -52,4 +52,5 @@ public class ApplicationUser : IdentityUser
     public virtual ICollection<EventObservation> CreatedEventObservations { get; set; } = [];
     public virtual ICollection<Forecast> CreatedForecasts { get; set; } = [];
     public virtual ICollection<Project> CreatedProjects { get; set; } = [];
+    public virtual ICollection<RefreshToken> RefreshTokens { get; set; } = [];
 }
