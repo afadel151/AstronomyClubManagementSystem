@@ -68,7 +68,7 @@ Instead of running manual SQL scripts, the database is created and managed using
 
 ```bash
 docker exec astro_sqlserver /opt/mssql-tools18/bin/sqlcmd \
-  -S localhost -U sa -P "AstroClub2025" \
+  -S localhost -U sa -P "AstroClub2025" -C \
   -Q "CREATE DATABASE AstroDbClub"
 ```
 
@@ -79,7 +79,8 @@ docker exec astro_sqlserver /opt/mssql-tools18/bin/sqlcmd \
 Ensure your API project is configured with the correct connection string, then run:
 
 ```bash
-dotnet ef database update --context ApplicationDbContext
+cd Data/
+dotnet ef database update --context AstroClubDbContext
 ```
 
 This will:
