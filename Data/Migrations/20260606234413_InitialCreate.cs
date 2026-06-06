@@ -464,7 +464,7 @@ namespace Data.Migrations
                     RevokedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     RevokedByIp = table.Column<string>(type: "nvarchar(45)", maxLength: 45, nullable: true),
                     ReplacedByToken = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false)
+                    IsActive = table.Column<bool>(type: "bit", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -1517,11 +1517,6 @@ namespace Data.Migrations
                 table: "ProjectTypes",
                 column: "Name",
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RT_IsActive",
-                table: "RefreshTokens",
-                column: "IsActive");
 
             migrationBuilder.CreateIndex(
                 name: "IX_RT_UserId",

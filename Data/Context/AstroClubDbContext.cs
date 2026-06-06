@@ -87,10 +87,6 @@ public partial class AstroClubDbContext : IdentityDbContext<ApplicationUser, App
         modelBuilder.Entity<RefreshToken>(entity =>
        {
            entity.HasKey(e => e.TokenId);
-           entity.HasIndex(e => e.Token).IsUnique().HasDatabaseName("UK_REFRESH_TOKEN");
-           entity.HasIndex(e => e.UserId).HasDatabaseName("IX_RT_UserId");
-           entity.HasIndex(e => e.IsActive).HasDatabaseName("IX_RT_IsActive");
-
            entity.HasOne(d => d.User)
                  .WithMany(p => p.RefreshTokens)
                  .HasForeignKey(e => e.UserId)

@@ -2,9 +2,12 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Data.Entities.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace Data.Entities;
 
+[Index("Token", Name = "UK_REFRESH_TOKEN", IsUnique = true)]
+[Index("UserId", Name = "IX_RT_UserId", IsUnique = false)]
 public partial class RefreshToken
 {
     [Key]
@@ -34,7 +37,7 @@ public partial class RefreshToken
     public string? ReplacedByToken { get; set; }
 
     [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-    public bool IsActive { get; set; }
+    public bool? IsActive { get; set; }
 
     [ForeignKey("UserId")]
     [InverseProperty("RefreshTokens")]

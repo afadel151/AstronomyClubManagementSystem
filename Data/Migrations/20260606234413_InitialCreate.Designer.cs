@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Migrations
 {
     [DbContext(typeof(AstroClubDbContext))]
-    [Migration("20260606134211_InitialCreate")]
+    [Migration("20260606234413_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -1800,7 +1800,7 @@ namespace Data.Migrations
                     b.Property<DateTimeOffset>("ExpiresAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<bool>("IsActive")
+                    b.Property<bool?>("IsActive")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("bit");
 
@@ -1827,15 +1827,10 @@ namespace Data.Migrations
 
                     b.HasKey("TokenId");
 
-                    b.HasIndex("IsActive")
-                        .HasDatabaseName("IX_RT_IsActive");
+                    b.HasIndex(new[] { "UserId" }, "IX_RT_UserId");
 
-                    b.HasIndex("Token")
-                        .IsUnique()
-                        .HasDatabaseName("UK_REFRESH_TOKEN");
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("IX_RT_UserId");
+                    b.HasIndex(new[] { "Token" }, "UK_REFRESH_TOKEN")
+                        .IsUnique();
 
                     b.ToTable("RefreshTokens");
                 });
