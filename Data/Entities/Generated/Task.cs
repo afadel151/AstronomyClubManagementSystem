@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Data.Entities.Enums;
 using Data.Entities.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data.Entities;
 
-[Table("TASKS")]
 [Index("DueDate", Name = "IX_TSK_DueDate")]
 [Index("ProjectId", Name = "IX_TSK_ProjectId")]
 [Index("Status", Name = "IX_TSK_Status")]
@@ -35,10 +35,10 @@ public partial class Task
     public int TaskTypeId { get; set; }
 
     [StringLength(20)]
-    public string Status { get; set; } = null!;
+    public TaskStatusEnum Status { get; set; }
 
     [StringLength(10)]
-    public string Priority { get; set; } = null!;
+    public TaskPriorityEnum Priority { get; set; }
 
     public DateOnly? DueDate { get; set; }
 

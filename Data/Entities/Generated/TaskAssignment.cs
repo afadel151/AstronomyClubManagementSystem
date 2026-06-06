@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 namespace Data.Entities;
 
 [PrimaryKey("TaskId", "UserId")]
-[Table("TASK_ASSIGNMENT")]
 [Index("UserId", Name = "IX_TA_UserId")]
 public partial class TaskAssignment
 {

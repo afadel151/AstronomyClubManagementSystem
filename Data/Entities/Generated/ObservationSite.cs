@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Data.Entities.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data.Entities;
 
-[Table("OBSERVATION_SITES")]
 [Index("Code", Name = "UK_OS_Code", IsUnique = true)]
 public partial class ObservationSite
 {
@@ -21,7 +21,7 @@ public partial class ObservationSite
     public string Name { get; set; } = null!;
 
     [StringLength(30)]
-    public string SiteType { get; set; } = null!;
+    public ObservationSiteTypeEnum SiteType { get; set; }
 
     [Column(TypeName = "decimal(9, 6)")]
     public decimal LatitudeDeg { get; set; }

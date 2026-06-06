@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Data.Entities;
 
-[Table("PROJECT_TYPE")]
 [Index("Name", Name = "UK_PT_Name", IsUnique = true)]
 public partial class ProjectType
 {

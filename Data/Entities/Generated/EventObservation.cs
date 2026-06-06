@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Data.Entities;
 
 [PrimaryKey("EventId", "ObservationId")]
-[Table("EVENT_OBSERVATION")]
+
 public partial class EventObservation
 {
     [Key]

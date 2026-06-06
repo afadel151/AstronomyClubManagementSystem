@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Data.Entities.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data.Entities;
 
-[Table("OBSERVATION_SESSIONS")]
+
 [Index("SiteId", Name = "IX_SES_SiteId")]
 [Index("StartTimeUtc", Name = "IX_SES_StartTimeUTC", AllDescending = true)]
 [Index("Status", Name = "IX_SES_Status")]
@@ -41,7 +42,7 @@ public partial class ObservationSession
     public string LeadUserId { get; set; } = null!;
 
     [StringLength(20)]
-    public string Status { get; set; } = null!;
+    public ObservationSessionStatusEnum Status { get; set; }
 
     public int SessionTypeId { get; set; }
 

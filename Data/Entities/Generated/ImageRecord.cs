@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Data.Entities.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data.Entities;
 
-[Table("IMAGE_RECORDS")]
+
 [Index("ObservationId", Name = "IX_IR_ObservationId")]
 [Index("PublicationStatus", Name = "IX_IR_PubStatus")]
 [Index("TargetId", Name = "IX_IR_TargetId")]
@@ -31,11 +32,11 @@ public partial class ImageRecord
     public string? ProcessedBy { get; set; }
 
     [StringLength(20)]
-    public string ImageType { get; set; } = null!;
+    public ImageTypeEnum ImageType { get; set; }
 
     public DateTimeOffset CaptureDateUtc { get; set; }
 
-    public byte CalibLevel { get; set; }
+    public ImageCalibLevelEnum CalibLevel { get; set; }
 
     [StringLength(10)]
     [Unicode(false)]
@@ -47,7 +48,7 @@ public partial class ImageRecord
     public int? FrameCount { get; set; }
 
     [StringLength(20)]
-    public string PublicationStatus { get; set; } = null!;
+    public ImagePublicationStatusEnum PublicationStatus { get; set; }
 
     public bool IsShowcase { get; set; }
 

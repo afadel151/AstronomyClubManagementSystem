@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Data.Entities;
 
-[Table("TASK_TYPE")]
 [Index("Name", Name = "UK_TT_Name", IsUnique = true)]
 public partial class TaskType
 {

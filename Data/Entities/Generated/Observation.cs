@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Data.Entities.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data.Entities;
 
-[Table("OBSERVATIONS")]
+
 [Index("JdMid", Name = "IX_OBS_JdMid")]
 [Index("ObserverId", Name = "IX_OBS_ObserverId")]
 [Index("Sra", "Sdec", Name = "IX_OBS_RaDec")]
@@ -52,7 +53,7 @@ public partial class Observation
 
     [StringLength(10)]
     [Unicode(false)]
-    public string Timesys { get; set; } = null!;
+    public ObservationTimeSystemEnum Timesys { get; set; }
 
     [Column(TypeName = "decimal(10, 3)")]
     public decimal? ExposureTimeS { get; set; }
@@ -61,7 +62,7 @@ public partial class Observation
 
     public int DataproductTypeId { get; set; }
 
-    public byte CalibLevel { get; set; }
+    public ImageCalibLevelEnum CalibLevel { get; set; }
 
     [StringLength(100)]
     [Unicode(false)]
@@ -107,7 +108,7 @@ public partial class Observation
 
     [StringLength(10)]
     [Unicode(false)]
-    public string? MagnitudeSystem { get; set; }
+    public MagnitudeSystemEnum? MagnitudeSystem { get; set; }
 
     public bool FainterThan { get; set; }
 

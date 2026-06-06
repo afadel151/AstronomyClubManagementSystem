@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Data.Entities.Enums;
 using Data.Entities.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data.Entities;
 
-[Table("PROJECTS")]
+
 [Index("Status", Name = "IX_PRJ_Status")]
 [Index("TargetId", Name = "IX_PRJ_TargetId")]
 [Index("Code", Name = "UK_PRJ_Code", IsUnique = true)]
@@ -28,13 +29,13 @@ public partial class Project
     public int ProjectTypeId { get; set; }
 
     [StringLength(20)]
-    public string Status { get; set; } = null!;
+    public ProjectStatusEnum Status { get; set; }
 
     [StringLength(10)]
-    public string Priority { get; set; } = null!;
+    public ProjectPriorityEnum Priority { get; set; }
 
     [StringLength(15)]
-    public string Visibility { get; set; } = null!;
+    public ProjectVisibilityEnum Visibility { get; set; }
 
     public DateOnly? StartDate { get; set; }
 

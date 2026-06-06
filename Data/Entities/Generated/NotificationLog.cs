@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Data.Entities.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data.Entities;
 
-[Table("NOTIFICATION_LOG")]
 public partial class NotificationLog
 {
     [Key]
@@ -17,7 +17,7 @@ public partial class NotificationLog
 
     [StringLength(20)]
     [Unicode(false)]
-    public string Channel { get; set; } = null!;
+    public ContactChannelEnum Channel { get; set; }
 
     [StringLength(200)]
     public string ChannelAddress { get; set; } = null!;
@@ -44,7 +44,7 @@ public partial class NotificationLog
 
     [StringLength(20)]
     [Unicode(false)]
-    public string Status { get; set; } = null!;
+    public NotificationStatusEnum Status { get; set; }
 
     public DateTimeOffset? ScheduledFor { get; set; }
 

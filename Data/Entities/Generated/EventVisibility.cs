@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Data.Entities;
 
-[Table("EVENT_VISIBILITY")]
+
 [Index("EventId", "SiteId", Name = "UK_EV_EventSite", IsUnique = true)]
 public partial class EventVisibility
 {

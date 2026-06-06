@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Data.Entities;
 
-[Table("DATAPRODUCT_TYPES")]
+
 [Index("Name", Name = "UK_DPT_Name", IsUnique = true)]
 public partial class DataproductType
 {

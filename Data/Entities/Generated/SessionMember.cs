@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Data.Entities.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data.Entities;
 
 [PrimaryKey("SessionId", "UserId")]
-[Table("SESSION_MEMBERS")]
 [Index("UserId", Name = "IX_SM_UserId")]
 public partial class SessionMember
 {
@@ -18,7 +18,7 @@ public partial class SessionMember
     public string UserId { get; set; } = null!;
 
     [StringLength(30)]
-    public string SessionRole { get; set; } = null!;
+    public SessionMemberRoleEnum SessionRole { get; set; }
 
     public DateTimeOffset? ArrivalTimeUtc { get; set; }
 

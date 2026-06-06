@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Data.Entities;
 
-[Table("EVENT_TYPES")]
+
 [Index("Name", Name = "UK_ET_Name", IsUnique = true)]
 public partial class EventType
 {

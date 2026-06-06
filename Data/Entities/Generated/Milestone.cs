@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Data.Entities;
 
-[Table("MILESTONES")]
+
 [Index("ProjectId", Name = "IX_MS_ProjectId")]
 public partial class Milestone
 {

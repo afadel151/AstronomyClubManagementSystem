@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Data.Entities.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data.Entities;
 
 [PrimaryKey("ProjectId", "UserId")]
-[Table("PROJECT_MEMBERS")]
+
 [Index("UserId", Name = "IX_PM_UserId")]
 public partial class ProjectMember
 {
@@ -18,7 +19,7 @@ public partial class ProjectMember
     public string UserId { get; set; } = null!;
 
     [StringLength(20)]
-    public string Role { get; set; } = null!;
+    public ProjectMemberRoleEnum Role { get; set; }
 
     public DateOnly JoinDate { get; set; }
 

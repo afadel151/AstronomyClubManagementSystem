@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Data.Entities;
 
 [PrimaryKey("ForecastId", "ProjectId")]
-[Table("FORECAST_PROJECT")]
+
 public partial class ForecastProject
 {
     [Key]

@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Data.Entities.Enums;
 using Data.Entities.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data.Entities;
 
-[Table("FORECASTS")]
 [Index("PeriodYear", Name = "IX_FCST_PeriodYear")]
 [Index("Status", Name = "IX_FCST_Status")]
 [Index("Code", Name = "UK_FORECASTS_Code", IsUnique = true)]
@@ -28,7 +28,7 @@ public partial class Forecast
     public int CategoryId { get; set; }
 
     [StringLength(20)]
-    public string Status { get; set; } = null!;
+    public ForecastStatusEnum Status { get; set; }
 
     public short PeriodYear { get; set; }
 

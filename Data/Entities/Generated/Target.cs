@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Data.Entities.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data.Entities;
 
-[Table("TARGETS")]
 [Index("IsSolarSystem", Name = "IX_TGT_IsSolarSystem")]
 [Index("ObjectTypeCode", Name = "IX_TGT_ObjectTypeCode")]
 [Index("RaDeg", "DecDeg", Name = "IX_TGT_RaDec")]
@@ -99,7 +99,7 @@ public partial class Target
 
     [StringLength(10)]
     [Unicode(false)]
-    public string? MagnitudeSystem { get; set; }
+    public MagnitudeSystemEnum? MagnitudeSystem { get; set; }
 
     [StringLength(3)]
     [Unicode(false)]

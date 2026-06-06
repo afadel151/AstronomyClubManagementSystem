@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Data.Entities;
 
-[Table("OBSERVATION_SESSION_TYPES")]
+
 [Index("Name", Name = "UK_OST_Name", IsUnique = true)]
 public partial class ObservationSessionType
 {

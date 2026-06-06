@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Data.Entities.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data.Entities;
 
-[Table("EVENTS")]
 [Index("PeakDateUtc", Name = "IX_EV_PeakDate")]
 [Index("Code", Name = "UK_EV_Code", IsUnique = true)]
 public partial class Event
@@ -38,7 +38,7 @@ public partial class Event
     public DateTimeOffset? EventEndUtc { get; set; }
 
     [StringLength(30)]
-    public string? VisibilityGlobal { get; set; }
+    public EventGlobalVisibilityEnum? VisibilityGlobal { get; set; }
 
     [Column(TypeName = "decimal(13, 9)")]
     public decimal? RaPeakDeg { get; set; }

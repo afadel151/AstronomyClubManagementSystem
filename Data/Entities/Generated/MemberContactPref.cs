@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Data.Entities.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data.Entities;
 
-[Table("MEMBER_CONTACT_PREF")]
 [Index("UserId", "Channel", Name = "UK_MCP_UserChannel", IsUnique = true)]
 public partial class MemberContactPref
 {
@@ -17,7 +17,7 @@ public partial class MemberContactPref
 
     [StringLength(20)]
     [Unicode(false)]
-    public string Channel { get; set; } = null!;
+    public ContactChannelEnum Channel { get; set; }
 
     [StringLength(200)]
     public string? ChannelAddress { get; set; }

@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Data.Entities.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data.Entities;
 
-[Table("MEMBER_ROLE_AUDIT")]
 [Index("ActionDate", Name = "IX_MRA_Date", AllDescending = true)]
 [Index("RoleId", Name = "IX_MRA_RoleId")]
 [Index("UserId", Name = "IX_MRA_UserId")]
@@ -21,7 +21,7 @@ public partial class MemberRoleAudit
 
     [StringLength(10)]
     [Unicode(false)]
-    public string Action { get; set; } = null!;
+    public MemberRoleAuditActionEnum Action { get; set; }
 
     public DateTimeOffset ActionDate { get; set; }
 
