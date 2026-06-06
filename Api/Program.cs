@@ -2,6 +2,7 @@ using Data.Context;
 using Data.Entities.Identity;
 using Data.MongoDB;
 using Infrastructure.Storage;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -30,35 +31,59 @@ builder.Services.AddDbContext<AstroClubDbContext>(options =>
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 {
-    options.Password.RequiredLength         = 10;
-    options.Password.RequireDigit           = true;
-    options.Password.RequireUppercase       = true;
-    options.Password.RequireNonAlphanumeric = true;
-    options.Lockout.MaxFailedAccessAttempts = 5;
-    options.Lockout.DefaultLockoutTimeSpan  = TimeSpan.FromMinutes(15);
+    options.Password.RequiredLength         = 8;
+    options.Password.RequireDigit           = false;
+    options.Password.RequireUppercase       = false;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Lockout.MaxFailedAccessAttempts = 10;
+    options.Lockout.DefaultLockoutTimeSpan  = TimeSpan.FromMinutes(2);
     options.User.RequireUniqueEmail         = true;
-    options.SignIn.RequireConfirmedEmail     = true;
+    options.SignIn.RequireConfirmedEmail     = false;
 })
 .AddEntityFrameworkStores<AstroClubDbContext>()
 .AddDefaultTokenProviders();
 
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme    = JwtBearerDefaults.AuthenticationScheme;
+    // No global default , each endpoint declare its scheme
+    options.DefaultScheme = "smart";
 })
-.AddJwtBearer(options =>
+.AddPolicyScheme("smart", "Cookie or JWT", options =>
 {
-    options.TokenValidationParameters = new TokenValidationParameters
+    options.ForwardDefaultSelector = ctx =>
     {
-        ValidateIssuer           = true,
-        ValidateAudience         = true,
-        ValidateLifetime         = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer              = builder.Configuration["Jwt:Issuer"],
-        ValidAudience            = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey         = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+        var auth = ctx.Request.Headers["Authorization"].FirstOrDefault();
+        if (auth?.StartsWith("Bearer ") == true)
+            return JwtBearerDefaults.AuthenticationScheme;
+
+        return CookieAuthenticationDefaults.AuthenticationScheme;
+    };
+})
+.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+{
+    options.LoginPath         = "/account/login";
+    options.AccessDeniedPath  = "/account/access-denied";
+    options.ExpireTimeSpan    = TimeSpan.FromDays(1);
+    options.SlidingExpiration = true;
+    options.Cookie.HttpOnly   = true;
+    options.Cookie.SameSite   = SameSiteMode.Strict;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+})
+.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters();
+
+    // Also allow JWT from websocket query string (SignalR for future use)
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = ctx =>
+        {
+            var token = ctx.Request.Query["access_token"];
+            if (!string.IsNullOrEmpty(token) &&
+                ctx.HttpContext.Request.Path.StartsWithSegments("/hubs"))
+                ctx.Token = token;
+            return Task.CompletedTask;
+        }
     };
 });
 
