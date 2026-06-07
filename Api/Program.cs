@@ -53,7 +53,7 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 .AddEntityFrameworkStores<AstroClubDbContext>()
 .AddDefaultTokenProviders();
 
-// ── Authentication ────────────────────────────────────────────────────────────
+// Auth
 
 builder.Services.AddAuthentication(options =>
 {
@@ -99,7 +99,7 @@ builder.Services.AddAuthentication(options =>
 
     options.Events = new JwtBearerEvents
     {
-        // Allow JWT from websocket query string (SignalR).
+        // Allow JWT from websocket ( SignalR )
         OnMessageReceived = ctx =>
         {
             var token = ctx.Request.Query["access_token"];
@@ -109,7 +109,7 @@ builder.Services.AddAuthentication(options =>
             return Task.CompletedTask;
         },
 
-        // Return JSON 401 instead of a redirect — Vue / mobile clients need this.
+        // Return JSON 401 instead of a redirect — Vue / mobile clients need this
         OnChallenge = async ctx =>
         {
             ctx.HandleResponse();
@@ -123,7 +123,7 @@ builder.Services.AddAuthentication(options =>
             await ctx.Response.WriteAsync(body);
         },
 
-        // Return JSON 403 instead of a redirect.
+        // Return JSON 403 instead of a redirect
         OnForbidden = async ctx =>
         {
             ctx.Response.StatusCode = (int)HttpStatusCode.Forbidden;
@@ -138,7 +138,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-// ── Authorization ─────────────────────────────────────────────────────────────
+// authorization
 
 builder.Services.AddAuthorization(options =>
 {
@@ -166,7 +166,7 @@ builder.Services.AddCors(options =>
         policy.WithOrigins(corsOrigins)
               .AllowAnyHeader()
               .AllowAnyMethod()
-              .AllowCredentials());         // needed for cookie auth from Blazor
+              .AllowCredentials());         // needed for cookie auth  Blazor
 });
 
 
@@ -174,7 +174,7 @@ builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices();
 
 
-// ── Infrastructure ────────────────────────────────────────────────────────────
+// Infra
 
 builder.Services.AddSingleton<IMongoClient>(_ =>
     new MongoClient(builder.Configuration.GetConnectionString("MongoDB")));
@@ -192,15 +192,15 @@ builder.Services.AddSingleton<IMinioClient>(_ =>
 builder.Services.AddScoped<IStorageService, MinioStorageService>();
 
 // Configure Microservices options
-builder.Services.Configure<Infrastructure.Microservices.MicroserviceOptions>(
-    builder.Configuration.GetSection(Infrastructure.Microservices.MicroserviceOptions.SectionName));
+builder.Services.Configure<MicroserviceOptions>(
+    builder.Configuration.GetSection(MicroserviceOptions.SectionName));
 
 // Register Typed Resilient HttpClient for the Example Client
 builder.Services.AddMicroserviceClient<
-    Infrastructure.Microservices.IExampleServiceClient,
-    Infrastructure.Microservices.ExampleServiceClient>("Example");
+    IExampleServiceClient,
+    ExampleServiceClient>("Example");
 
-// ── API ───────────────────────────────────────────────────────────────────────
+// API
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
