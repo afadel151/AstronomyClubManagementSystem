@@ -1,7 +1,39 @@
 ﻿@page "/"
-
+@inject NavigationManager Navigation
+@using Domain.Shared.Schemas
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<RadzenStack Gap="1rem">
+    <RadzenText Text="Astronomy Club Albattani" TextStyle="TextStyle.H3" />
 
-Welcome to your new app.
+    <AuthorizeView>
+        <Authorized>
+            <RadzenAlert Severity="AlertSeverity.Success"
+                         Summary="Signed in"
+                         Detail="@($"Welcome back, {context.User.Identity?.Name}.")" />
+        </Authorized>
+        <NotAuthorized>
+            <RadzenAlert Severity="AlertSeverity.Info"
+                         Summary="Member portal"
+                         Detail="Sign in to access club management tools." />
+            <RadzenButton Icon="login"
+                          Text="Sign in"
+                          Click="@(() => Navigation.NavigateTo("/account/login"))"
+                          ButtonStyle="ButtonStyle.Primary"
+                          Style="width: fit-content" />
+        </NotAuthorized>
+    </AuthorizeView>
+
+    <AuthorizeView Roles="@Admins">
+        <RadzenCard Style="width: min(100%, 36rem)">
+            <RadzenStack Gap="0.5rem">
+                <RadzenText Text="Administration" TextStyle="TextStyle.H5" />
+                <RadzenText Text="This section is rendered only for Admin and SuperAdmin roles." />
+            </RadzenStack>
+        </RadzenCard>
+    </AuthorizeView>
+</RadzenStack>
+
+@code {
+    private const string Admins = $"{AuthConstants.Roles.Admin},{AuthConstants.Roles.SuperAdmin}";
+}

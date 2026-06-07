@@ -1,0 +1,39 @@
+@inherits LayoutComponentBase
+@inject NavigationManager Navigation
+
+<RadzenComponents />
+<RadzenNotification />
+<RadzenDialog />
+<RadzenContextMenu />
+<RadzenTooltip />
+
+<RadzenLayout class="guest-layout">
+    <RadzenHeader class="guest-header">
+        <RadzenStack Orientation="Orientation.Horizontal"
+                     AlignItems="AlignItems.Center"
+                     JustifyContent="JustifyContent.SpaceBetween"
+                     Gap="1rem"
+                     class="guest-header-content">
+            <RadzenButton ButtonStyle="ButtonStyle.Light"
+                          Variant="Variant.Text"
+                          Icon="travel_explore"
+                          Text="Astronomy Club Albattani"
+                          Click="@(() => Navigation.NavigateTo("/"))" />
+
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                <RadzenAppearanceToggle />
+                <RadzenButton ButtonStyle="ButtonStyle.Primary"
+                              Size="ButtonSize.Small"
+                              Icon="login"
+                              Text="Sign in"
+                              Click="@(() => Navigation.NavigateTo("/account/login"))" />
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenHeader>
+
+    <RadzenBody class="guest-body">
+        <main class="guest-shell">
+            @Body
+        </main>
+    </RadzenBody>
+</RadzenLayout>

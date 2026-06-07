@@ -1,0 +1,25 @@
+@page "/account/logout"
+@attribute [Authorize]
+@inject Web.Club.Services.AuthenticationService AuthApi
+@inject ApiCookieAuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Navigation
+
+<PageTitle>Logout</PageTitle>
+
+<RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="min-height: 40vh">
+    <RadzenProgressBar Mode="ProgressBarMode.Indeterminate" Style="width: 12rem" />
+</RadzenStack>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        await AuthApi.LogoutAsync();
+        AuthStateProvider.MarkUserAsLoggedOut();
+        Navigation.NavigateTo("/account/login");
+    }
+}

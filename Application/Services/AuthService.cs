@@ -5,6 +5,7 @@ using Data.Entities.Enums;
 using Data.Entities.Identity;
 using Domain.Shared.DTO;
 using Domain.Shared.Exceptions;
+using Domain.Shared.Schemas;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using RefreshTokenEntity = Data.Entities.RefreshToken;

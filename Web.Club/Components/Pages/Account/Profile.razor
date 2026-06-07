@@ -1,0 +1,39 @@
+@page "/account/profile"
+@attribute [Authorize]
+@using Domain.Shared.Schemas
+<PageTitle>Profile</PageTitle>
+
+<AuthorizeView>
+    <Authorized Context="profileContext">
+        <RadzenStack Gap="1rem">
+            <RadzenText Text="Profile" TextStyle="TextStyle.H4" />
+
+            <RadzenCard Style="width: min(100%, 42rem)">
+                <RadzenStack Gap="0.75rem">
+                    <RadzenText Text="@profileContext.User.Identity?.Name" TextStyle="TextStyle.H5" />
+                    <RadzenText Text="@profileContext.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value" />
+
+                    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" Style="flex-wrap: wrap">
+                        @foreach (var role in profileContext.User.FindAll(System.Security.Claims.ClaimTypes.Role).Select(claim => claim.Value))
+                        {
+                            <RadzenBadge Text="@role" BadgeStyle="BadgeStyle.Info" />
+                        }
+                    </RadzenStack>
+                </RadzenStack>
+            </RadzenCard>
+
+            <AuthorizeView Roles="@Admins" Context="adminContext">
+                <RadzenAlert Severity="AlertSeverity.Info" Summary="Admin area" Detail="This block is visible only to Admin and SuperAdmin roles." />
+            </AuthorizeView>
+
+            <AuthorizeView Policy="@AuthConstants.Policies.ManageMembers" Context="memberManagerContext">
+                <RadzenAlert Severity="AlertSeverity.Success" Summary="Member management" Detail="This block is visible to roles allowed by the ManageMembers policy." />
+            </AuthorizeView>
+        </RadzenStack>
+    </Authorized>
+</AuthorizeView>
+
+@code {
+    
+    private const string Admins = $"{AuthConstants.Roles.Admin},{AuthConstants.Roles.SuperAdmin}";
+}

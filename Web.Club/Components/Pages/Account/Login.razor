@@ -1,0 +1,95 @@
+@page "/account/login"
+@layout GuestLayout
+@attribute [AllowAnonymous]
+@inject Web.Club.Services.AuthenticationService AuthApi
+@inject ApiCookieAuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Navigation
+@inject NotificationService Notifications
+
+
+<PageTitle>Login</PageTitle>
+
+<RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="min-height: calc(100vh - 6rem)">
+    <RadzenCard Style="width: min(100%, 28rem)">
+        <RadzenStack Gap="1rem">
+            <RadzenStack Gap="0.25rem">
+                <RadzenText Text="Sign in" TextStyle="TextStyle.H4" />
+                <RadzenText Text="Use your astronomy club account." TextStyle="TextStyle.Body2" />
+            </RadzenStack>
+
+            <RadzenTemplateForm TItem="LoginFormModel" Data="@model" Submit=LoginAsync>
+                <DataAnnotationsValidator />
+
+                <RadzenStack Gap="1rem">
+                    <RadzenFormField Text="Email" Variant="Variant.Outlined">
+                        <RadzenTextBox Name="Email" @bind-Value="@model.Email" Style="width: 100%" />
+                    </RadzenFormField>
+                    <ValidationMessage For="@(() => model.Email)" />
+
+                    <RadzenFormField Text="Password" Variant="Variant.Outlined">
+                        <RadzenPassword Name="Password" @bind-Value="@model.Password" Style="width: 100%" />
+                    </RadzenFormField>
+                    <ValidationMessage For="@(() => model.Password)" />
+
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                        <RadzenCheckBox Name="RememberMe" @bind-Value="@model.RememberMe" />
+                        <RadzenLabel Text="Remember me" Component="RememberMe" />
+                    </RadzenStack>
+
+                    <RadzenButton ButtonType="ButtonType.Submit"
+                                  ButtonStyle="ButtonStyle.Primary"
+                                  Icon="login"
+                                  Text="Sign in"
+                                  IsBusy="@isBusy"
+                                  BusyText="Signing in"
+                                  Style="width: 100%" />
+
+                    <RadzenButton ButtonStyle="ButtonStyle.Light"
+                                  Icon="person_add"
+                                  Text="Create account"
+                                  Click="@(() => Navigation.NavigateTo("/account/register"))"
+                                  Style="width: 100%" />
+                </RadzenStack>
+            </RadzenTemplateForm>
+        </RadzenStack>
+    </RadzenCard>
+</RadzenStack>
+
+@code {
+    [SupplyParameterFromQuery]
+    public string? ReturnUrl { get; set; }
+
+    private readonly LoginFormModel model = new();
+    private bool isBusy;
+
+    private async Task LoginAsync()
+    {
+        isBusy = true;
+
+        try
+        {
+            var response = await AuthApi.LoginAsync(model.Email, model.Password, model.RememberMe);
+            AuthStateProvider.MarkUserAsAuthenticated(response.User);
+
+            Navigation.NavigateTo(GetSafeReturnUrl(), forceLoad: false);
+        }
+        catch (Exception ex)
+        {
+            Notifications.Notify(NotificationSeverity.Error, "Login failed", ex.Message);
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+
+    private string GetSafeReturnUrl()
+    {
+        if (string.IsNullOrWhiteSpace(ReturnUrl) || ReturnUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+        {
+            return "/";
+        }
+
+        return ReturnUrl.StartsWith('/') ? ReturnUrl : $"/{ReturnUrl}";
+    }
+}

@@ -4,6 +4,7 @@ using Application.Helpers;
 using Data.Context;
 using Data.Entities.Identity;
 using Data.MongoDB;
+using Domain.Shared.Schemas;
 using Infrastructure.Helpers;
 using Infrastructure.Microservices;
 using Infrastructure.Storage;

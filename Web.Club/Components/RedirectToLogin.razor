@@ -1,0 +1,15 @@
+@inject NavigationManager Navigation
+
+<RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="min-height: 40vh">
+    <RadzenProgressBar Mode="ProgressBarMode.Indeterminate" Style="width: 12rem" />
+</RadzenStack>
+
+@code {
+    protected override void OnInitialized()
+    {
+        var relativePath = Navigation.ToBaseRelativePath(Navigation.Uri);
+        var returnUrl = string.IsNullOrWhiteSpace(relativePath) ? "/" : $"/{relativePath}";
+
+        Navigation.NavigateTo($"/account/login?returnUrl={Uri.EscapeDataString(returnUrl)}");
+    }
+}

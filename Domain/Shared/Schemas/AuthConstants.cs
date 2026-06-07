@@ -1,4 +1,4 @@
-namespace Application.Auth;
+namespace Domain.Shared.Schemas;
 
 public static class AuthConstants
 {

@@ -1,6 +1,7 @@
 using Application.Auth;
 using Application.Services;
 using Domain.Shared.DTO;
+using Domain.Shared.Schemas;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;

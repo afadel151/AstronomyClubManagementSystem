@@ -1,30 +1,82 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">Web.Club</a>
-    </div>
-</div>
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@inject NavigationManager Nav
+@inject NavigationManager UriHelper
+@using Domain.Shared.Schemas
+<RadzenHeader>
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
+                 JustifyContent="JustifyContent.SpaceBetween" Style="width: 100%">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0">
+            <RadzenSidebarToggle Click="@(() => sidebarExpanded = !sidebarExpanded)" />
+            <RadzenLabel Text="Astronomy Club Albattani" />
+        </RadzenStack>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+       
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem"
+                     Style="padding-right: 1rem">
+            <RadzenAppearanceToggle />
+            <AuthorizeView>
+                <Authorized>
+                    <RadzenText Text="@context.User.Identity?.Name" TextStyle="TextStyle.Body2" />
+                    <RadzenButton Icon="logout"
+                                  ButtonStyle="ButtonStyle.Light"
+                                  Size="ButtonSize.Small"
+                                  Click="@(() => Nav.NavigateTo("/account/logout"))" />
+                </Authorized>
+                <NotAuthorized>
+                    <RadzenButton Icon="login"
+                                  Text="Sign in"
+                                  ButtonStyle="ButtonStyle.Primary"
+                                  Size="ButtonSize.Small"
+                                  Click="@(() => Nav.NavigateTo("/account/login"))" />
+                </NotAuthorized>
+            </AuthorizeView>
+        </RadzenStack>
 
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="nav flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
+    </RadzenStack>
+</RadzenHeader>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
+<RadzenSidebar FullHeight="true" Responsive="false" @bind-Expanded="@sidebarExpanded">
+    <RadzenPanelMenu DisplayStyle="@(sidebarExpanded ? MenuItemDisplayStyle.IconAndText : MenuItemDisplayStyle.Icon)">
+        <RadzenPanelMenuItem Text="Menu" Icon="apps" Path="/" />
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
-    </nav>
-</div>
+        <AuthorizeView>
+            <Authorized>
+                <RadzenPanelMenuItem Text="Profile" Icon="badge" Path="/account/profile" />
+            </Authorized>
+        </AuthorizeView>
 
+        <AuthorizeView Roles="@ManagersAndBoard">
+            <RadzenPanelMenuItem Text="LoanManagement" Icon="hand_package" Path="/prets" />
+            <RadzenPanelMenuItem Text="RestitutionManagment" Icon="source_notes" Path="/restitutions" />
+            <RadzenPanelMenuItem Text="DocumentManagment" Icon="article">
+                <RadzenPanelMenuItem Text="AllDocuments" Icon="newsstand" Match="NavLinkMatch.All" Path="/documents" />
+                <RadzenPanelMenuItem Text="DocsOnLoan" Icon="assignment_turned_in" Path="/documents/en_pret" />
+                <RadzenPanelMenuItem Text="ReservedDocuments" Icon="date_range" Path="/documents/reservees" />
+                <RadzenPanelMenuItem Text="BlockedCopies" Icon="date_range" Path="/exemplaire/bloques" />
+            </RadzenPanelMenuItem>
+            <RadzenPanelMenuItem Text="Availability" Icon="timelapse" Path="/availability" />
+            <RadzenPanelMenuItem Text="RemindersManagment" Icon="notifications_active" Path="/relances" />
+        </AuthorizeView>
+
+        <AuthorizeView Roles="@MemberManagers">
+            <RadzenPanelMenuItem Text="MemberManagement" Icon="person" Path="/adherents" />
+        </AuthorizeView>
+
+        <AuthorizeView Roles="@Admins">
+            <RadzenPanelMenuItem Text="CategoriesManagment" Icon="category" Path="/categories" />
+            <RadzenPanelMenuItem Text="Parameters" Icon="settings">
+                <RadzenPanelMenuItem Text="Holidays" Icon="celebration" Path="/jours_feries" />
+                <RadzenPanelMenuItem Text="Penalties" Icon="block" Path="/penalites" />
+            </RadzenPanelMenuItem>
+        </AuthorizeView>
+
+    </RadzenPanelMenu>
+</RadzenSidebar>
+
+@code {
+    bool sidebarExpanded = true;
+
+    private const string Admins = $"{AuthConstants.Roles.Admin},{AuthConstants.Roles.SuperAdmin}";
+    private const string MemberManagers = $"{AuthConstants.Roles.Admin},{AuthConstants.Roles.SuperAdmin},{AuthConstants.Roles.BoardMember}";
+    private const string ManagersAndBoard = $"{AuthConstants.Roles.Admin},{AuthConstants.Roles.SuperAdmin},{AuthConstants.Roles.BoardMember},{AuthConstants.Roles.EventManager},{AuthConstants.Roles.InventoryManager}";
+}
