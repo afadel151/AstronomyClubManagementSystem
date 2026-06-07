@@ -1,11 +1,10 @@
-using Api.Auth;
-using Api.Factories;
 using Api.Middleware;
 using Application.Auth;
-using Application.Services;
+using Application.Helpers;
 using Data.Context;
 using Data.Entities.Identity;
 using Data.MongoDB;
+using Infrastructure.Helpers;
 using Infrastructure.Microservices;
 using Infrastructure.Storage;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -170,13 +169,10 @@ builder.Services.AddCors(options =>
               .AllowCredentials());         // needed for cookie auth from Blazor
 });
 
-// ── Application Services ──────────────────────────────────────────────────────
 
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, ApplicationUserClaimsPrincipalFactory>();
-builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
-builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddApplicationServices();
+builder.Services.AddInfrastructureServices();
+
 
 // ── Infrastructure ────────────────────────────────────────────────────────────
 

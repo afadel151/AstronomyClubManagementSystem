@@ -1,6 +1,7 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
 
-namespace Api.Auth;
+namespace Application.Services;
 
 public interface ICurrentUserService
 {

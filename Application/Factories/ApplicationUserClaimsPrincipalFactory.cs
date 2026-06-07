@@ -4,7 +4,7 @@ using Data.Entities.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 
-namespace Api.Factories;
+namespace Application.Factories;
 
 public sealed class ApplicationUserClaimsPrincipalFactory(
     UserManager<ApplicationUser> userManager,

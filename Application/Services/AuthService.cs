@@ -1,13 +1,13 @@
 using System.Security.Claims;
 using Application.Auth;
-using Data.Context;
-using Data.Entities;
+using Application.Repositories;
 using Data.Entities.Enums;
 using Data.Entities.Identity;
 using Domain.Shared.DTO;
 using Domain.Shared.Exceptions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using RefreshTokenEntity = Data.Entities.RefreshToken;
 
 namespace Application.Services;
 
@@ -23,7 +23,8 @@ public interface IAuthService
 public sealed class AuthService(
     UserManager<ApplicationUser> userManager,
     SignInManager<ApplicationUser> signInManager,
-    AstroClubDbContext dbContext,
+    IBaseRepository<ApplicationUser> userRepository,
+    IBaseRepository<RefreshTokenEntity> refreshTokenRepository,
     ITokenService tokenService) : IAuthService
 {
     // ── Login ─────────────────────────────────────────────────────────────────
@@ -45,11 +46,11 @@ public sealed class AuthService(
         var accessToken = tokenService.GenerateAccessToken(user, roles);
         var refreshToken = tokenService.GenerateRefreshToken(user, ipAddress);
 
-        dbContext.RefreshTokens.Add(refreshToken.RefreshToken);
+        await refreshTokenRepository.AddAsync(refreshToken.RefreshToken, saveChanges: false, cancellationToken: ct);
         user.LastLoginAt = DateTimeOffset.UtcNow;
         user.LastLoginIp = ipAddress;
         await userManager.UpdateAsync(user);
-        await dbContext.SaveChangesAsync(ct);
+        await refreshTokenRepository.SaveChangesAsync(ct);
 
         // Only issue an Identity cookie for browser clients (Blazor, MVC).
         var issueCookie = request.ClientType == AuthClientType.Browser;
@@ -115,10 +116,10 @@ public sealed class AuthService(
 
         var (Token, ExpiresAt) = tokenService.GenerateAccessToken(user, roles);
         var refreshToken = tokenService.GenerateRefreshToken(user, ipAddress);
-        dbContext.RefreshTokens.Add(refreshToken.RefreshToken);
+        await refreshTokenRepository.AddAsync(refreshToken.RefreshToken, saveChanges: false, cancellationToken: ct);
         user.LastLoginAt = DateTimeOffset.UtcNow;
         user.LastLoginIp = ipAddress;
-        await dbContext.SaveChangesAsync(ct);
+        await refreshTokenRepository.SaveChangesAsync(ct);
 
         // Only issue an Identity cookie for browser clients.
         var issueCookie = request.ClientType == AuthClientType.Browser;
@@ -147,9 +148,11 @@ public sealed class AuthService(
         }
 
         var hashedToken = tokenService.HashRefreshToken(refreshToken);
-        var storedToken = await dbContext.RefreshTokens
-            .Include(token => token.User)
-            .SingleOrDefaultAsync(token => token.Token == hashedToken, ct);
+        var storedToken = await refreshTokenRepository.SingleOrDefaultAsync(
+            token => token.Token == hashedToken,
+            query => query.Include(token => token.User),
+            asNoTracking: false,
+            cancellationToken: ct);
 
         if (storedToken is null || storedToken.RevokedAt is not null || storedToken.ExpiresAt <= DateTimeOffset.UtcNow)
         {
@@ -169,8 +172,8 @@ public sealed class AuthService(
         storedToken.RevokedAt = DateTimeOffset.UtcNow;
         storedToken.RevokedByIp = ipAddress;
         storedToken.ReplacedByToken = replacement.RefreshToken.Token;
-        dbContext.RefreshTokens.Add(replacement.RefreshToken);
-        await dbContext.SaveChangesAsync(ct);
+        await refreshTokenRepository.AddAsync(replacement.RefreshToken, saveChanges: false, cancellationToken: ct);
+        await refreshTokenRepository.SaveChangesAsync(ct);
 
         return new RefreshResponse(accessToken.Token, accessToken.ExpiresAt)
         {
@@ -185,14 +188,16 @@ public sealed class AuthService(
         if (!string.IsNullOrWhiteSpace(refreshToken))
         {
             var hashedToken = tokenService.HashRefreshToken(refreshToken);
-            var storedToken = await dbContext.RefreshTokens
-                .SingleOrDefaultAsync(token => token.Token == hashedToken, ct);
+            var storedToken = await refreshTokenRepository.SingleOrDefaultAsync(
+                token => token.Token == hashedToken,
+                asNoTracking: false,
+                cancellationToken: ct);
 
             if (storedToken is not null && storedToken.RevokedAt is null)
             {
                 storedToken.RevokedAt = DateTimeOffset.UtcNow;
                 storedToken.RevokedByIp = ipAddress;
-                await dbContext.SaveChangesAsync(ct);
+                await refreshTokenRepository.SaveChangesAsync(ct);
             }
         }
 
@@ -254,7 +259,7 @@ public sealed class AuthService(
         {
             code = prefix + Guid.NewGuid().ToString("N")[..4].ToUpperInvariant();
         }
-        while (await dbContext.Users.AnyAsync(u => u.MemberCode == code, ct));
+        while (await userRepository.AnyAsync(user => user.MemberCode == code, ct));
 
         return code;
     }
