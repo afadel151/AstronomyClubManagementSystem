@@ -48,8 +48,30 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
+  redis:
+      image: redis:7.2-alpine
+      container_name: astro_redis
+      command: >
+        redis-server
+        --requirepass AstroRedis2025
+        --appendonly yes
+        --appendfsync everysec
+        --maxmemory 256mb
+        --maxmemory-policy allkeys-lru
+        --loglevel notice
+      ports:
+        - "6379:6379"
+      volumes:
+        - redis_data:/data
+      healthcheck:
+        test: ["CMD", "redis-cli", "-a", "AstroRedis2025", "ping"]
+        interval: 10s
+        timeout: 5s
+        retries: 5
+        start_period: 10s
+      restart: unless-stopped
 volumes:
   sqlserver_data:
   mongodb_data:
   minio_data:
+  redis_data:  

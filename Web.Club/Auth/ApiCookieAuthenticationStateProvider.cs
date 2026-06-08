@@ -6,6 +6,7 @@ using Web.Club.Services;
 namespace Web.Club.Auth;
 
 public sealed class ApiCookieAuthenticationStateProvider(
+    IHttpContextAccessor httpContextAccessor,
     AuthenticationService authService,
     CircuitTokenStore tokenStore) : AuthenticationStateProvider
 {
@@ -13,14 +14,24 @@ public sealed class ApiCookieAuthenticationStateProvider(
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
+        var httpUser = httpContextAccessor.HttpContext?.User;
 
+        // 🔥 1. TRUST SERVER FIRST
+        if (httpUser?.Identity?.IsAuthenticated == true)
+        {
+            return new AuthenticationState(httpUser);
+        }
+
+        // 🔁 2. fallback (optional)
         var user = await authService.TryRestoreSessionAsync();
         return new AuthenticationState(CreatePrincipal(user));
     }
 
-    public void MarkUserAsAuthenticated(UserDto user) =>
+    public void MarkUserAsAuthenticated(UserDto user)
+    {
         NotifyAuthenticationStateChanged(
             Task.FromResult(new AuthenticationState(CreatePrincipal(user))));
+    }
 
     public void MarkUserAsLoggedOut()
     {
@@ -36,23 +47,21 @@ public sealed class ApiCookieAuthenticationStateProvider(
         var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, user.Id),
-            new(ClaimTypes.Name,           GetDisplayName(user)),
-            new(ClaimTypes.Email,          user.Email),
-            new(ClaimTypes.GivenName,      user.FirstName),
-            new(ClaimTypes.Surname,        user.LastName),
-            new("member_id",               user.MemberId)
+            new(ClaimTypes.Name, GetDisplayName(user)),
+            new(ClaimTypes.Email, user.Email),
+            new(ClaimTypes.GivenName, user.FirstName),
+            new(ClaimTypes.Surname, user.LastName),
+            new("member_id", user.MemberId)
         };
+
         claims.AddRange(user.Roles.Select(r => new Claim(ClaimTypes.Role, r)));
 
         return new ClaimsPrincipal(new ClaimsIdentity(claims, "Bff"));
     }
-
     private static string GetDisplayName(UserDto user)
     {
-        var full = string.Join(' ',
-            new[] { user.FirstName, user.LastName }
-                .Where(s => !string.IsNullOrWhiteSpace(s)));
+        var full = string.Join(' ', new[] { user.FirstName, user.LastName }
+            .Where(s => !string.IsNullOrWhiteSpace(s)));
         return string.IsNullOrWhiteSpace(full) ? user.Email : full;
     }
-    
 }

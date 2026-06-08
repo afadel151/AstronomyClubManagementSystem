@@ -3,6 +3,7 @@ using Domain.Shared.Schemas;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Json;
 using System.Text.Json;
+using MiniValidation;
 
 namespace Web.Club.Auth;
 
@@ -21,55 +22,63 @@ public static class BffEndpointRouteBuilderExtensions
         var group = endpoints.MapGroup("/bff").DisableAntiforgery();
 
         group.MapPost("/login", async (
-            [FromForm] string email,
-            [FromForm] string password,
-            [FromForm] bool rememberMe,
+            [FromForm] LoginFormModel model,
             [FromForm] string? returnUrl,
             [FromServices] IHttpClientFactory factory,
             HttpContext ctx) =>
         {
+            if (!MiniValidator.TryValidate(model, out var errors))
+            {
+                return Results.Redirect($"/account/login?error=true");
+            }
+
             var api = factory.CreateClient("Api");
+
             var response = await api.PostAsJsonAsync("/api/auth/login",
-                new LoginRequest(email, password, rememberMe, AuthClientType.Browser));
+                new LoginRequest(
+                    model.Email,
+                    model.Password,
+                    model.RememberMe,
+                    AuthClientType.Browser));
 
             if (!response.IsSuccessStatusCode)
                 return RedirectWithError("/account/login", returnUrl);
 
             var result = await Deserialize<LoginResponse>(response);
-            if (result is null) return RedirectWithError("/account/login", returnUrl);
+            if (result is null)
+                return RedirectWithError("/account/login", returnUrl);
 
             SetAuthCookies(ctx, result.AccessToken, result.RefreshToken,
-                result.ExpiresAt, rememberMe);
+                result.ExpiresAt, model.RememberMe);
 
             return Results.Redirect(SafeReturnUrl(returnUrl));
         });
 
         // ── Register ──────────────────────────────────────────────────────────
         group.MapPost("/register", async (
-            [FromForm] string fullName,
-            [FromForm] string email,
-            [FromForm] string password,
-            [FromForm] string confirmPassword,
-            [FromForm] string? displayName,
-            [FromForm] string? nationality,
-            [FromForm] string? city,
-            [FromForm] string? aavsoObserverCode,
+            [FromForm] RegisterFormModel model,
             [FromForm] string? returnUrl,
             [FromServices] IHttpClientFactory factory,
             HttpContext ctx) =>
         {
+            if (!MiniValidator.TryValidate(model, out var errors))
+            {
+                return Results.Redirect($"/account/register?error=true");
+            }
+
             var api = factory.CreateClient("Api");
+
             var response = await api.PostAsJsonAsync("/api/auth/register",
                 new RegisterRequest
                 {
-                    FullName = fullName,
-                    Email = email,
-                    Password = password,
-                    ConfirmPassword = confirmPassword,
-                    DisplayName = displayName,
-                    Nationality = nationality,
-                    City = city,
-                    AavsoObserverCode = aavsoObserverCode,
+                    FullName = model.FullName,
+                    Email = model.Email,
+                    Password = model.Password,
+                    ConfirmPassword = model.ConfirmPassword,
+                    DisplayName = model.DisplayName,
+                    Nationality = model.Nationality,
+                    City = model.City,
+                    AavsoObserverCode = model.AavsoObserverCode,
                     ClientType = AuthClientType.Browser
                 });
 
@@ -77,7 +86,8 @@ public static class BffEndpointRouteBuilderExtensions
                 return RedirectWithError("/account/register", returnUrl);
 
             var result = await Deserialize<RegisterResponse>(response);
-            if (result is null) return RedirectWithError("/account/register", returnUrl);
+            if (result is null)
+                return RedirectWithError("/account/register", returnUrl);
 
             SetAuthCookies(ctx, result.AccessToken, result.RefreshToken,
                 result.ExpiresAt, persistent: false);
@@ -85,9 +95,7 @@ public static class BffEndpointRouteBuilderExtensions
             return Results.Redirect(SafeReturnUrl(returnUrl));
         });
 
-        // ── Refresh ───────────────────────────────────────────────────────────
-        // Called by TryRestoreSessionAsync at circuit start.
-        // Reads bff_rt, exchanges it with the API, rotates both cookies.
+        
         group.MapPost("/refresh", async (
             [FromServices] IHttpClientFactory factory,
             HttpContext ctx) =>

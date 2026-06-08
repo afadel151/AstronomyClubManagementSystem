@@ -15,15 +15,24 @@ builder.Services.AddRazorComponents()
 // ── Auth config ───────────────────────────────────────────────────────────────
 builder.Services.Configure<AuthApiOptions>(
     builder.Configuration.GetSection(AuthApiOptions.SectionName));
-
-builder.Services.AddAuthorizationCore(options =>
+builder.Services
+    .AddAuthentication("Cookies")
+    .AddCookie("Cookies", options =>
+    {
+        options.LoginPath = "/login";
+        options.AccessDeniedPath = "/forbidden";
+    });
+builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy(AuthConstants.Policies.ManageEvents, p =>
         p.RequireRole(AuthConstants.Roles.Admin, AuthConstants.Roles.SuperAdmin, AuthConstants.Roles.EventManager));
+
     options.AddPolicy(AuthConstants.Policies.ManageInventory, p =>
         p.RequireRole(AuthConstants.Roles.Admin, AuthConstants.Roles.SuperAdmin, AuthConstants.Roles.InventoryManager));
+
     options.AddPolicy(AuthConstants.Policies.ManageMembers, p =>
         p.RequireRole(AuthConstants.Roles.Admin, AuthConstants.Roles.SuperAdmin, AuthConstants.Roles.BoardMember));
+
     options.AddPolicy(AuthConstants.Policies.ManageUsers, p =>
         p.RequireRole(AuthConstants.Roles.Admin, AuthConstants.Roles.SuperAdmin));
 });
@@ -62,6 +71,10 @@ if (!app.Environment.IsDevelopment())
 app.UseStatusCodePagesWithReExecute("/not-found");
 app.UseHttpsRedirection();
 app.UseAntiforgery();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapStaticAssets();
 
 // BFF cookie endpoints — the only place cookies are written

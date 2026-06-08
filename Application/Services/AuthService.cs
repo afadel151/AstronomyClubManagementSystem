@@ -112,7 +112,6 @@ public sealed class AuthService(
         };
     }
 
-    // ── Refresh ───────────────────────────────────────────────────────────────
 
     public async Task<RefreshResponse> RefreshAsync(
         string? refreshToken, string? ipAddress, CancellationToken ct)

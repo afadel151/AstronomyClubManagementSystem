@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Application.Auth;
 using Application.Services;
 using Domain.Shared.DTO;
@@ -25,16 +26,24 @@ public sealed class AuthController(
 
         return Ok(response);
     }
-    
+
 
     [HttpPost("register")]
     [AllowAnonymous]
     public async Task<ActionResult<RegisterResponse>> Register(
         RegisterRequest request, CancellationToken ct)
     {
-        var response = await authService.RegisterAsync(request, GetIpAddress(), ct);
+        try
+        {
+            var response = await authService.RegisterAsync(request, GetIpAddress(), ct);
 
-        return Ok(response);
+            return Ok(response);
+        }
+        catch (ValidationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+
     }
 
     [HttpPost("refresh")]

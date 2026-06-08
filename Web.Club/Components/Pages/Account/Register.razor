@@ -6,7 +6,8 @@
 
 <PageTitle>Register</PageTitle>
 
-<RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="min-height: calc(100vh - 6rem)">
+<RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center"
+             Style="min-height: calc(100vh - 6rem)">
     <RadzenCard Style="width: min(100%, 38rem)">
         <RadzenStack Gap="1rem">
             <RadzenStack Gap="0.25rem">
@@ -14,10 +15,11 @@
                 <RadzenText Text="Join the club member portal." TextStyle="TextStyle.Body2" />
                 @if (Error == "true")
                 {
-                    <RadzenText Text="Registration failed. Check if email already exists or passwords match." TextStyle="TextStyle.Body2" style="color: var(--rz-danger)" />
+                    <RadzenText Text="Registration failed. Check if email already exists or passwords match."
+                                TextStyle="TextStyle.Body2" style="color: var(--rz-danger)" />
                 }
             </RadzenStack>
-
+            @* <RadzenTemplateForm Data="@model" Submit="@HandleSubmit"> *@
             <form method="post" action="/bff/register" style="width: 100%">
                 <input type="hidden" name="returnUrl" value="@ReturnUrl" />
 
@@ -29,8 +31,12 @@
                     <RadzenFormField Text="Email" Variant="Variant.Outlined" Style="width: 100%">
                         <RadzenTextBox Name="Email" Style="width: 100%" />
                     </RadzenFormField>
-
-                    <RadzenStack Orientation="Orientation.Horizontal" Gap="1rem" Style="width: 100%" class="account-form-grid">
+                    @* @if (errors.ContainsKey(nameof(model.Email)))
+                    {
+                        <RadzenText Text="@errors[nameof(model.Email)][0]" style="color:red" />
+                    } *@
+                    <RadzenStack Orientation="Orientation.Horizontal" Gap="1rem" Style="width: 100%"
+                                 class="account-form-grid">
                         <RadzenStack Gap="0.25rem" Style="flex: 1">
                             <RadzenFormField Text="Password" Variant="Variant.Outlined" Style="width: 100%">
                                 <RadzenPassword Name="Password" Style="width: 100%" />
@@ -44,7 +50,8 @@
                         </RadzenStack>
                     </RadzenStack>
 
-                    <RadzenStack Orientation="Orientation.Horizontal" Gap="1rem" Style="width: 100%" class="account-form-grid">
+                    <RadzenStack Orientation="Orientation.Horizontal" Gap="1rem" Style="width: 100%"
+                                 class="account-form-grid">
                         <RadzenFormField Text="Display name" Variant="Variant.Outlined" Style="flex: 1">
                             <RadzenTextBox Name="DisplayName" Style="width: 100%" />
                         </RadzenFormField>
@@ -54,7 +61,8 @@
                         </RadzenFormField>
                     </RadzenStack>
 
-                    <RadzenStack Orientation="Orientation.Horizontal" Gap="1rem" Style="width: 100%" class="account-form-grid">
+                    <RadzenStack Orientation="Orientation.Horizontal" Gap="1rem" Style="width: 100%"
+                                 class="account-form-grid">
                         <RadzenFormField Text="Nationality" Variant="Variant.Outlined" Style="flex: 1">
                             <RadzenTextBox Name="Nationality" Style="width: 100%" />
                         </RadzenFormField>
@@ -64,18 +72,11 @@
                         </RadzenFormField>
                     </RadzenStack>
 
-                    <button type="submit" class="rz-button rz-button-primary rz-border-radius-1" style="width: 100%; border: none;">
-                        <span class="rz-button-box">
-                            <i class="rz-button-icon-left rzi">person_add</i>
-                            <span class="rz-button-text">Create account</span>
-                        </span>
-                    </button>
+                    <RadzenButton ButtonType="ButtonType.Submit" ButtonStyle="ButtonStyle.Primary" Icon="person_add"
+                                  Text="Create account" Style="width: 100%" />
 
-                    <RadzenButton ButtonType="ButtonType.Button"
-                                  ButtonStyle="ButtonStyle.Light"
-                                  Icon="login"
-                                  Text="Back to sign in"
-                                  Click="@(() => Navigation.NavigateTo("/account/login"))"
+                    <RadzenButton ButtonType="ButtonType.Button" ButtonStyle="ButtonStyle.Light" Icon="login"
+                                  Text="Back to sign in" Click="@(() => Navigation.NavigateTo("/account/login"))"
                                   Style="width: 100%" />
                 </RadzenStack>
             </form>
@@ -86,7 +87,9 @@
 @code {
     [SupplyParameterFromQuery]
     public string? ReturnUrl { get; set; }
-    
+
     [SupplyParameterFromQuery]
     public string? Error { get; set; }
+    private RegisterFormModel model = new();
+
 }

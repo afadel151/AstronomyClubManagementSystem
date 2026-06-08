@@ -6,3 +6,6 @@ public sealed class AuthApiOptions
 
     public string BaseUrl { get; init; } = "http://localhost:5218";
 }
+
+
+    

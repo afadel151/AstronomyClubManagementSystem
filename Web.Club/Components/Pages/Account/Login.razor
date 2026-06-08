@@ -6,7 +6,8 @@
 
 <PageTitle>Login</PageTitle>
 
-<RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="min-height: calc(100vh - 6rem)">
+<RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center"
+             Style="min-height: calc(100vh - 6rem)">
     <RadzenCard Style="width: min(100%, 28rem)">
         <RadzenStack Gap="1rem">
             <RadzenStack Gap="0.25rem">
@@ -14,39 +15,33 @@
                 <RadzenText Text="Use your astronomy club account." TextStyle="TextStyle.Body2" />
                 @if (Error == "true")
                 {
-                    <RadzenText Text="Invalid email or password." TextStyle="TextStyle.Body2" style="color: var(--rz-danger)" />
+                    <RadzenText Text="Invalid email or password." TextStyle="TextStyle.Body2"
+                                style="color: var(--rz-danger)" />
                 }
             </RadzenStack>
 
             <form method="post" action="/bff/login" style="width: 100%">
                 <input type="hidden" name="returnUrl" value="@ReturnUrl" />
-                
+
                 <RadzenStack Gap="1rem">
                     <RadzenFormField Text="Email" Variant="Variant.Outlined" Style="width: 100%">
-                        <RadzenTextBox Name="email" Style="width: 100%" />
+                        <RadzenTextBox Name="Email" Style="width: 100%" />
                     </RadzenFormField>
 
                     <RadzenFormField Text="Password" Variant="Variant.Outlined" Style="width: 100%">
-                        <RadzenPassword Name="password" Style="width: 100%" />
+                        <RadzenPassword Name="Password" Style="width: 100%" />
                     </RadzenFormField>
 
                     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
-                        <input type="checkbox" name="rememberMe" value="true" id="rememberMe" />
+                        <input type="checkbox" name="RememberMe" value="true" id="rememberMe" />
                         <label for="rememberMe" style="font-size: 0.875rem">Remember me</label>
                     </RadzenStack>
 
-                    <button type="submit" class="rz-button rz-button-primary rz-border-radius-1" style="width: 100%; border: none;">
-                        <span class="rz-button-box">
-                            <i class="rz-button-icon-left rzi">login</i>
-                            <span class="rz-button-text">Sign in</span>
-                        </span>
-                    </button>
+                    <RadzenButton ButtonType="ButtonType.Submit" ButtonStyle="ButtonStyle.Primary" Icon="login"
+                                  Text="Sign in" Style="width: 100%" />
 
-                    <RadzenButton ButtonType="ButtonType.Button"
-                                  ButtonStyle="ButtonStyle.Light"
-                                  Icon="person_add"
-                                  Text="Create account"
-                                  Click="@(() => Navigation.NavigateTo("/account/register"))"
+                    <RadzenButton ButtonType="ButtonType.Button" ButtonStyle="ButtonStyle.Light" Icon="person_add"
+                                  Text="Create account" Click="@(() => Navigation.NavigateTo("/account/register"))"
                                   Style="width: 100%" />
                 </RadzenStack>
             </form>
@@ -57,7 +52,7 @@
 @code {
     [SupplyParameterFromQuery]
     public string? ReturnUrl { get; set; }
-    
+
     [SupplyParameterFromQuery]
     public string? Error { get; set; }
 }
