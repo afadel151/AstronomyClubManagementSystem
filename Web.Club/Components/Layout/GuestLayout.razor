@@ -7,14 +7,10 @@
 <RadzenContextMenu />
 <RadzenTooltip />
 
-<RadzenLayout class="guest-layout">
-    <RadzenHeader class="guest-header">
-        <RadzenStack Orientation="Orientation.Horizontal"
-                     AlignItems="AlignItems.Center"
-                     JustifyContent="JustifyContent.SpaceBetween"
-                     Gap="1rem"
-                     class="guest-header-content">
-            <RadzenButton ButtonStyle="ButtonStyle.Light"
+<RadzenLayout>
+    <RadzenHeader>
+        <RadzenStack Style="height: 100%;padding: 10px;"  Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"  JustifyContent="JustifyContent.SpaceBetween"  >
+            <RadzenButton 
                           Variant="Variant.Text"
                           Icon="travel_explore"
                           Text="Astronomy Club Albattani"
@@ -31,8 +27,8 @@
         </RadzenStack>
     </RadzenHeader>
 
-    <RadzenBody class="guest-body">
-        <main class="guest-shell">
+    <RadzenBody >
+        <main>
             @Body
         </main>
     </RadzenBody>

@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MiniValidation" Version="0.10.0" />
     <PackageReference Include="Radzen.Blazor" Version="10.4.7" />
   </ItemGroup>
 

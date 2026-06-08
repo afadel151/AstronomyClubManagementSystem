@@ -7,7 +7,7 @@
             <NotAuthorized Context="authContext">
                 @if (authContext.User.Identity?.IsAuthenticated == true)
                 {
-                    <LayoutView Layout="typeof(Layout.MainLayout)">
+                    <LayoutView Layout="typeof(Layout.GuestLayout)">
                         <RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center" Style="min-height: 40vh">
                             <RadzenCard Style="width: min(100%, 30rem)">
                                 <RadzenStack Gap="1rem" AlignItems="AlignItems.Center">

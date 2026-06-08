@@ -1,8 +1,6 @@
 @page "/account/register"
 @layout GuestLayout
 @attribute [AllowAnonymous]
-@inject Web.Club.Services.AuthenticationService AuthApi
-@inject ApiCookieAuthenticationStateProvider AuthStateProvider
 @inject NavigationManager Navigation
 @inject NotificationService Notifications
 
@@ -14,99 +12,81 @@
             <RadzenStack Gap="0.25rem">
                 <RadzenText Text="Create account" TextStyle="TextStyle.H4" />
                 <RadzenText Text="Join the club member portal." TextStyle="TextStyle.Body2" />
+                @if (Error == "true")
+                {
+                    <RadzenText Text="Registration failed. Check if email already exists or passwords match." TextStyle="TextStyle.Body2" style="color: var(--rz-danger)" />
+                }
             </RadzenStack>
 
-            <RadzenTemplateForm TItem="RegisterFormModel" Data="@model" Submit="@RegisterAsync">
-                <DataAnnotationsValidator />
+            <form method="post" action="/bff/register" style="width: 100%">
+                <input type="hidden" name="returnUrl" value="@ReturnUrl" />
 
                 <RadzenStack Gap="1rem">
-                    <RadzenFormField Text="Full name" Variant="Variant.Outlined">
-                        <RadzenTextBox @bind-Value="@model.FullName" Style="width: 100%" />
+                    <RadzenFormField Text="Full name" Variant="Variant.Outlined" Style="width: 100%">
+                        <RadzenTextBox Name="FullName" Style="width: 100%" />
                     </RadzenFormField>
-                    <ValidationMessage For="@(() => model.FullName)" />
 
-                    <RadzenFormField Text="Email" Variant="Variant.Outlined">
-                        <RadzenTextBox @bind-Value="@model.Email" Style="width: 100%" />
+                    <RadzenFormField Text="Email" Variant="Variant.Outlined" Style="width: 100%">
+                        <RadzenTextBox Name="Email" Style="width: 100%" />
                     </RadzenFormField>
-                    <ValidationMessage For="@(() => model.Email)" />
 
                     <RadzenStack Orientation="Orientation.Horizontal" Gap="1rem" Style="width: 100%" class="account-form-grid">
                         <RadzenStack Gap="0.25rem" Style="flex: 1">
-                            <RadzenFormField Text="Password" Variant="Variant.Outlined">
-                                <RadzenPassword @bind-Value="@model.Password" Style="width: 100%" />
+                            <RadzenFormField Text="Password" Variant="Variant.Outlined" Style="width: 100%">
+                                <RadzenPassword Name="Password" Style="width: 100%" />
                             </RadzenFormField>
-                            <ValidationMessage For="@(() => model.Password)" />
                         </RadzenStack>
 
                         <RadzenStack Gap="0.25rem" Style="flex: 1">
-                            <RadzenFormField Text="Confirm password" Variant="Variant.Outlined">
-                                <RadzenPassword @bind-Value="@model.ConfirmPassword" Style="width: 100%" />
+                            <RadzenFormField Text="Confirm password" Variant="Variant.Outlined" Style="width: 100%">
+                                <RadzenPassword Name="ConfirmPassword" Style="width: 100%" />
                             </RadzenFormField>
-                            <ValidationMessage For="@(() => model.ConfirmPassword)" />
                         </RadzenStack>
                     </RadzenStack>
 
                     <RadzenStack Orientation="Orientation.Horizontal" Gap="1rem" Style="width: 100%" class="account-form-grid">
                         <RadzenFormField Text="Display name" Variant="Variant.Outlined" Style="flex: 1">
-                            <RadzenTextBox @bind-Value="@model.DisplayName" Style="width: 100%" />
+                            <RadzenTextBox Name="DisplayName" Style="width: 100%" />
                         </RadzenFormField>
 
                         <RadzenFormField Text="City" Variant="Variant.Outlined" Style="flex: 1">
-                            <RadzenTextBox @bind-Value="@model.City" Style="width: 100%" />
+                            <RadzenTextBox Name="City" Style="width: 100%" />
                         </RadzenFormField>
                     </RadzenStack>
 
                     <RadzenStack Orientation="Orientation.Horizontal" Gap="1rem" Style="width: 100%" class="account-form-grid">
                         <RadzenFormField Text="Nationality" Variant="Variant.Outlined" Style="flex: 1">
-                            <RadzenTextBox @bind-Value="@model.Nationality" Style="width: 100%" />
+                            <RadzenTextBox Name="Nationality" Style="width: 100%" />
                         </RadzenFormField>
 
                         <RadzenFormField Text="AAVSO observer code" Variant="Variant.Outlined" Style="flex: 1">
-                            <RadzenTextBox @bind-Value="@model.AavsoObserverCode" Style="width: 100%" />
+                            <RadzenTextBox Name="AavsoObserverCode" Style="width: 100%" />
                         </RadzenFormField>
                     </RadzenStack>
 
-                    <RadzenButton ButtonType="ButtonType.Submit"
-                                  ButtonStyle="ButtonStyle.Primary"
-                                  Icon="person_add"
-                                  Text="Create account"
-                                  IsBusy="@isBusy"
-                                  BusyText="Creating account"
-                                  Style="width: 100%" />
+                    <button type="submit" class="rz-button rz-button-primary rz-border-radius-1" style="width: 100%; border: none;">
+                        <span class="rz-button-box">
+                            <i class="rz-button-icon-left rzi">person_add</i>
+                            <span class="rz-button-text">Create account</span>
+                        </span>
+                    </button>
 
-                    <RadzenButton ButtonStyle="ButtonStyle.Light"
+                    <RadzenButton ButtonType="ButtonType.Button"
+                                  ButtonStyle="ButtonStyle.Light"
                                   Icon="login"
                                   Text="Back to sign in"
                                   Click="@(() => Navigation.NavigateTo("/account/login"))"
                                   Style="width: 100%" />
                 </RadzenStack>
-            </RadzenTemplateForm>
+            </form>
         </RadzenStack>
     </RadzenCard>
 </RadzenStack>
 
 @code {
-    private readonly RegisterFormModel model = new();
-    private bool isBusy;
-
-    private async Task RegisterAsync()
-    {
-        isBusy = true;
-
-        try
-        {
-            var response = await AuthApi.RegisterAsync(model);
-            AuthStateProvider.MarkUserAsAuthenticated(response.User);
-
-            Navigation.NavigateTo("/");
-        }
-        catch (Exception ex)
-        {
-            Notifications.Notify(NotificationSeverity.Error, "Registration failed", ex.Message);
-        }
-        finally
-        {
-            isBusy = false;
-        }
-    }
+    [SupplyParameterFromQuery]
+    public string? ReturnUrl { get; set; }
+    
+    [SupplyParameterFromQuery]
+    public string? Error { get; set; }
 }

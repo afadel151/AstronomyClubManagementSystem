@@ -1,6 +1,7 @@
 ﻿@page "/"
 @inject NavigationManager Navigation
 @using Domain.Shared.Schemas
+
 <PageTitle>Home</PageTitle>
 
 <RadzenStack Gap="1rem">
@@ -8,19 +9,16 @@
 
     <AuthorizeView>
         <Authorized>
-            <RadzenAlert Severity="AlertSeverity.Success"
-                         Summary="Signed in"
-                         Detail="@($"Welcome back, {context.User.Identity?.Name}.")" />
+            <RadzenAlert Style=AlertStyle.Success Variant="Variant.Flat" Shade="Shade.Lighter">
+                @($"Welcome back, {context.User.Identity?.Name}.")
+            </RadzenAlert>
         </Authorized>
         <NotAuthorized>
-            <RadzenAlert Severity="AlertSeverity.Info"
-                         Summary="Member portal"
-                         Detail="Sign in to access club management tools." />
-            <RadzenButton Icon="login"
-                          Text="Sign in"
-                          Click="@(() => Navigation.NavigateTo("/account/login"))"
-                          ButtonStyle="ButtonStyle.Primary"
-                          Style="width: fit-content" />
+            <RadzenAlert Style=AlertStyle.Success Variant="Variant.Flat" Shade="Shade.Lighter">
+                Sign in to access Club's Managment system
+            </RadzenAlert>
+            <RadzenButton Icon="login" Text="Sign in" Click="@(() => Navigation.NavigateTo("/account/login"))"
+                          ButtonStyle="ButtonStyle.Primary" Style="width: fit-content" />
         </NotAuthorized>
     </AuthorizeView>
 

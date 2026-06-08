@@ -32,23 +32,32 @@ public sealed record LoginResponse(
     DateTimeOffset ExpiresAt,
     UserDto User)
 {
-    [JsonIgnore]
     public string RefreshToken { get; init; } = string.Empty;
-
-    /// <summary>True when the server issued an Identity cookie alongside the JWT.</summary>
-    public bool CookieIssued { get; init; }
 }
 
+
 // ── Refresh ───────────────────────────────────────────────────────────────────
+
+public sealed record RegisterResponse(
+    string AccessToken,
+    DateTimeOffset ExpiresAt,
+    UserDto User)
+{
+    public string RefreshToken { get; init; } = string.Empty;
+}
 
 public sealed record RefreshResponse(
     string AccessToken,
     DateTimeOffset ExpiresAt)
 {
-    [JsonIgnore]
     public string RefreshToken { get; init; } = string.Empty;
 }
 
+public sealed record BffRefreshRequest(string RefreshToken);
+public sealed record BffRefreshResponse(
+    string AccessToken,
+    DateTimeOffset ExpiresAt,
+    string RefreshToken);
 // ── User ──────────────────────────────────────────────────────────────────────
 
 public sealed record UserDto(
@@ -107,14 +116,3 @@ public sealed record RegisterRequest
 /// Access token is issued immediately so the user is logged in right away.
 /// Refresh token goes in an HttpOnly cookie (same as login).
 /// </summary>
-public sealed record RegisterResponse(
-    string AccessToken,
-    DateTimeOffset ExpiresAt,
-    UserDto User)
-{
-    [JsonIgnore]
-    public string RefreshToken { get; init; } = string.Empty;
-
-    /// <summary>True when the server issued an Identity cookie alongside the JWT.</summary>
-    public bool CookieIssued { get; init; }
-}

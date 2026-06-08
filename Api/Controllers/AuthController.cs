@@ -18,69 +18,67 @@ public sealed class AuthController(
 {
     [HttpPost("login")]
     [AllowAnonymous]
-    public async Task<ActionResult<LoginResponse>> Login(LoginRequest request, CancellationToken ct)
+    public async Task<ActionResult<LoginResponse>> Login(
+        LoginRequest request, CancellationToken ct)
     {
         var response = await authService.LoginAsync(request, GetIpAddress(), ct);
-        SetRefreshTokenCookie(response.RefreshToken, request.RememberMe);
 
         return Ok(response);
     }
+    
 
     [HttpPost("register")]
     [AllowAnonymous]
-    public async Task<ActionResult<RegisterResponse>> Register(RegisterRequest request, CancellationToken ct)
+    public async Task<ActionResult<RegisterResponse>> Register(
+        RegisterRequest request, CancellationToken ct)
     {
         var response = await authService.RegisterAsync(request, GetIpAddress(), ct);
-        SetRefreshTokenCookie(response.RefreshToken, rememberMe: false);
 
         return Ok(response);
     }
 
     [HttpPost("refresh")]
     [AllowAnonymous]
-    public async Task<ActionResult<RefreshResponse>> Refresh(CancellationToken ct)
+    public async Task<ActionResult<RefreshResponse>> Refresh(
+       [FromBody] BffRefreshRequest request,
+       CancellationToken ct)
     {
-        var response = await authService.RefreshAsync(GetRefreshTokenCookie(), GetIpAddress(), ct);
-        SetRefreshTokenCookie(response.RefreshToken, rememberMe: true);
+        var response = await authService.RefreshAsync(
+            request.RefreshToken,
+            GetIpAddress(),
+            ct);
 
         return Ok(response);
     }
 
     [HttpPost("logout")]
-    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme + "," + JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(AuthenticationSchemes =
+        CookieAuthenticationDefaults.AuthenticationScheme + "," +
+        JwtBearerDefaults.AuthenticationScheme)]
     public async Task<IActionResult> Logout(CancellationToken ct)
     {
-        await authService.LogoutAsync(GetRefreshTokenCookie(), GetIpAddress(), ct);
+        await authService.LogoutAsync(
+            GetRefreshTokenCookie(), GetIpAddress(), ct);
         Response.Cookies.Delete(AuthConstants.RefreshTokenCookieName);
 
         return NoContent();
     }
 
     [HttpGet("me")]
-    [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme + "," + JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(AuthenticationSchemes =
+        JwtBearerDefaults.AuthenticationScheme)]
     public ActionResult<UserDto> Me()
     {
-        // Build UserDto entirely from claims — no DB hit.
         return Ok(authService.GetCurrentUserFromClaims(User));
     }
 
     private string? GetRefreshTokenCookie() =>
-        Request.Cookies.TryGetValue(AuthConstants.RefreshTokenCookieName, out var token) ? token : null;
+        Request.Cookies.TryGetValue(AuthConstants.RefreshTokenCookieName, out var token)
+            ? token
+            : null;
 
     private string? GetIpAddress() =>
         HttpContext.Connection.RemoteIpAddress?.ToString();
 
-    private void SetRefreshTokenCookie(string refreshToken, bool rememberMe)
-    {
-        Response.Cookies.Append(
-            AuthConstants.RefreshTokenCookieName,
-            refreshToken,
-            new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Strict,
-                Expires = rememberMe ? DateTimeOffset.UtcNow.AddDays(authOptions.Value.RefreshTokenExpiryDays) : null
-            });
-    }
+
 }
