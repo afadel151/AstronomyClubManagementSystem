@@ -18,11 +18,24 @@
 
             <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
                 <RadzenAppearanceToggle />
-                <RadzenButton ButtonStyle="ButtonStyle.Primary"
+                <AuthorizeView>
+
+                    <Authorized>
+                        <RadzenButton ButtonStyle="ButtonStyle.Primary"
+                              Size="ButtonSize.Small"
+                              Icon="home"
+                              Text="Dashboard"
+                              Click="@(() => Navigation.NavigateTo("/dashboard"))" />
+                    </Authorized>
+                    <NotAuthorized>
+                        <RadzenButton ButtonStyle="ButtonStyle.Primary"
                               Size="ButtonSize.Small"
                               Icon="login"
                               Text="Sign in"
                               Click="@(() => Navigation.NavigateTo("/account/login"))" />
+                    </NotAuthorized>
+                </AuthorizeView>
+                
             </RadzenStack>
         </RadzenStack>
     </RadzenHeader>
