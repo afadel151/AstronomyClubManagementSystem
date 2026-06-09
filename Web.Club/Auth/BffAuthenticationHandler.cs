@@ -1,11 +1,13 @@
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
 using Domain.Shared.DTO;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Web.Club.Auth;
 
@@ -13,9 +15,12 @@ public sealed class BffAuthenticationHandler(
     IOptionsMonitor<AuthenticationSchemeOptions> options,
     ILoggerFactory logger,
     UrlEncoder encoder,
-    IHttpClientFactory httpClientFactory)
+    IHttpClientFactory httpClientFactory,
+    IOptions<JwtOptions> jwtOptions)
     : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
+    private readonly JwtOptions _jwtOptions = jwtOptions.Value;
+
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNameCaseInsensitive = true
@@ -26,9 +31,9 @@ public sealed class BffAuthenticationHandler(
         var accessToken = Request.Cookies[BffAuthenticationDefaults.AccessTokenCookie];
 
         if (!string.IsNullOrWhiteSpace(accessToken)
-            && (await TryGetUserAsync(accessToken)) is { } user)
+            && TryCreateTicket(accessToken) is { } ticket)
         {
-            return AuthenticateResult.Success(CreateTicket(user));
+            return AuthenticateResult.Success(ticket);
         }
 
         var refreshToken = Request.Cookies[BffAuthenticationDefaults.RefreshTokenCookie];
@@ -44,10 +49,10 @@ public sealed class BffAuthenticationHandler(
 
         SetAuthCookies(refreshed.AccessToken, refreshed.RefreshToken, refreshed.ExpiresAt, persistent: true);
 
-        user = await TryGetUserAsync(refreshed.AccessToken);
-        return user is null
+        ticket = TryCreateTicket(refreshed.AccessToken);
+        return ticket is null
             ? AuthenticateResult.NoResult()
-            : AuthenticateResult.Success(CreateTicket(user));
+            : AuthenticateResult.Success(ticket);
     }
 
     protected override Task HandleChallengeAsync(AuthenticationProperties properties)
@@ -64,20 +69,24 @@ public sealed class BffAuthenticationHandler(
         return Task.CompletedTask;
     }
 
-    private async Task<UserDto?> TryGetUserAsync(string accessToken)
+    private AuthenticationTicket? TryCreateTicket(string accessToken)
     {
         try
         {
-            using var request = new HttpRequestMessage(HttpMethod.Get, "/api/auth/me");
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            var principal = new JwtSecurityTokenHandler
+            {
+                MapInboundClaims = false
+            }.ValidateToken(accessToken, CreateValidationParameters(), out _);
 
-            var api = httpClientFactory.CreateClient("AuthApi");
-            using var response = await api.SendAsync(request, Context.RequestAborted);
+            var identity = new ClaimsIdentity(
+                principal.Claims,
+                BffAuthenticationDefaults.AuthenticationScheme,
+                ClaimTypes.Name,
+                ClaimTypes.Role);
 
-            if (!response.IsSuccessStatusCode)
-                return null;
-
-            return await response.Content.ReadFromJsonAsync<UserDto>(JsonOptions, Context.RequestAborted);
+            return new AuthenticationTicket(
+                new ClaimsPrincipal(identity),
+                BffAuthenticationDefaults.AuthenticationScheme);
         }
         catch
         {
@@ -106,26 +115,6 @@ public sealed class BffAuthenticationHandler(
         {
             return null;
         }
-    }
-
-    private AuthenticationTicket CreateTicket(UserDto user)
-    {
-        var claims = new List<Claim>
-        {
-            new(ClaimTypes.NameIdentifier, user.Id),
-            new(ClaimTypes.Name, GetDisplayName(user)),
-            new(ClaimTypes.Email, user.Email),
-            new(ClaimTypes.GivenName, user.FirstName),
-            new(ClaimTypes.Surname, user.LastName),
-            new("member_id", user.MemberId)
-        };
-
-        claims.AddRange(user.Roles.Select(role => new Claim(ClaimTypes.Role, role)));
-
-        var identity = new ClaimsIdentity(claims, BffAuthenticationDefaults.AuthenticationScheme);
-        return new AuthenticationTicket(
-            new ClaimsPrincipal(identity),
-            BffAuthenticationDefaults.AuthenticationScheme);
     }
 
     private void SetAuthCookies(
@@ -161,11 +150,17 @@ public sealed class BffAuthenticationHandler(
         Response.Cookies.Delete(BffAuthenticationDefaults.RefreshTokenCookie);
     }
 
-    private static string GetDisplayName(UserDto user)
+    private TokenValidationParameters CreateValidationParameters() => new()
     {
-        var fullName = string.Join(' ', new[] { user.FirstName, user.LastName }
-            .Where(part => !string.IsNullOrWhiteSpace(part)));
-
-        return string.IsNullOrWhiteSpace(fullName) ? user.Email : fullName;
-    }
+        ValidateIssuer = true,
+        ValidIssuer = _jwtOptions.Issuer,
+        ValidateAudience = true,
+        ValidAudience = _jwtOptions.Audience,
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Key)),
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.FromMinutes(2),
+        NameClaimType = ClaimTypes.Name,
+        RoleClaimType = ClaimTypes.Role
+    };
 }

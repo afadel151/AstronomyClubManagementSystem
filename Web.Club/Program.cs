@@ -15,6 +15,8 @@ builder.Services.AddRazorComponents()
 // ── Auth config ───────────────────────────────────────────────────────────────
 builder.Services.Configure<AuthApiOptions>(
     builder.Configuration.GetSection(AuthApiOptions.SectionName));
+builder.Services.Configure<JwtOptions>(
+    builder.Configuration.GetSection(JwtOptions.SectionName));
 builder.Services
     .AddAuthentication(BffAuthenticationDefaults.AuthenticationScheme)
     .AddScheme<AuthenticationSchemeOptions, BffAuthenticationHandler>(
