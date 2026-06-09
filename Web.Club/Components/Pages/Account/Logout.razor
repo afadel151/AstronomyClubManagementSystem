@@ -1,8 +1,6 @@
 @page "/account/logout"
 @attribute [AllowAnonymous]
 @inject NavigationManager Navigation
-@inject Web.Club.Services.AuthenticationService AuthService
-@inject ApiCookieAuthenticationStateProvider AuthStateProvider
 
 <PageTitle>Logging out...</PageTitle>
 
@@ -17,9 +15,6 @@
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
-
-        await AuthService.LogoutAsync();
-        AuthStateProvider.MarkUserAsLoggedOut();
 
         Navigation.NavigateTo("/bff/logout", forceLoad: true);
     }

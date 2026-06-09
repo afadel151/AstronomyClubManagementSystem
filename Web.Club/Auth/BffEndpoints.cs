@@ -9,9 +9,6 @@ namespace Web.Club.Auth;
 
 public static class BffEndpointRouteBuilderExtensions
 {
-    private const string AccessTokenCookie = "bff_at";
-    private const string RefreshTokenCookie = "bff_rt";
-
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNameCaseInsensitive = true
@@ -27,12 +24,12 @@ public static class BffEndpointRouteBuilderExtensions
             [FromServices] IHttpClientFactory factory,
             HttpContext ctx) =>
         {
-            if (!MiniValidator.TryValidate(model, out var errors))
+            if (!MiniValidator.TryValidate(model, out _))
             {
                 return Results.Redirect($"/account/login?error=true");
             }
 
-            var api = factory.CreateClient("Api");
+            var api = factory.CreateClient("AuthApi");
 
             var response = await api.PostAsJsonAsync("/api/auth/login",
                 new LoginRequest(
@@ -61,12 +58,12 @@ public static class BffEndpointRouteBuilderExtensions
             [FromServices] IHttpClientFactory factory,
             HttpContext ctx) =>
         {
-            if (!MiniValidator.TryValidate(model, out var errors))
+            if (!MiniValidator.TryValidate(model, out _))
             {
                 return Results.Redirect($"/account/register?error=true");
             }
 
-            var api = factory.CreateClient("Api");
+            var api = factory.CreateClient("AuthApi");
 
             var response = await api.PostAsJsonAsync("/api/auth/register",
                 new RegisterRequest
@@ -100,12 +97,12 @@ public static class BffEndpointRouteBuilderExtensions
             [FromServices] IHttpClientFactory factory,
             HttpContext ctx) =>
         {
-            var rt = ctx.Request.Cookies[RefreshTokenCookie];
-            if (rt is null) return Results.Unauthorized();
+            var refreshToken = ctx.Request.Cookies[BffAuthenticationDefaults.RefreshTokenCookie];
+            if (refreshToken is null) return Results.Unauthorized();
 
-            var api = factory.CreateClient("Api");
-            var response = await api.PostAsJsonAsync("/api/auth/refresh/bff",
-                new { RefreshToken = rt });
+            var api = factory.CreateClient("AuthApi");
+            var response = await api.PostAsJsonAsync("/api/auth/refresh",
+                new BffRefreshRequest(refreshToken));
 
             if (!response.IsSuccessStatusCode)
             {
@@ -131,14 +128,24 @@ public static class BffEndpointRouteBuilderExtensions
             [FromServices] IHttpClientFactory factory,
             HttpContext ctx) =>
         {
-            var rt = ctx.Request.Cookies[RefreshTokenCookie];
-            if (rt is not null)
+            var accessToken = ctx.Request.Cookies[BffAuthenticationDefaults.AccessTokenCookie];
+            var refreshToken = ctx.Request.Cookies[BffAuthenticationDefaults.RefreshTokenCookie];
+
+            if (refreshToken is not null)
             {
                 try
                 {
-                    var api = factory.CreateClient("Api");
-                    await api.PostAsJsonAsync("/api/auth/logout",
-                        new { RefreshToken = rt });
+                    var api = factory.CreateClient("AuthApi");
+                    using var request = new HttpRequestMessage(HttpMethod.Post, "/api/auth/logout");
+                    request.Headers.TryAddWithoutValidation("Cookie", $"refreshToken={refreshToken}");
+
+                    if (!string.IsNullOrWhiteSpace(accessToken))
+                    {
+                        request.Headers.Authorization =
+                            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+                    }
+
+                    await api.SendAsync(request);
                 }
                 catch { }
             }
@@ -161,8 +168,7 @@ public static class BffEndpointRouteBuilderExtensions
     {
         var isHttps = ctx.Request.IsHttps;
 
-        // Access token — expires with the token itself
-        ctx.Response.Cookies.Append(AccessTokenCookie, accessToken, new CookieOptions
+        ctx.Response.Cookies.Append(BffAuthenticationDefaults.AccessTokenCookie, accessToken, new CookieOptions
         {
             HttpOnly = true,
             Secure = isHttps,
@@ -172,7 +178,7 @@ public static class BffEndpointRouteBuilderExtensions
         });
 
         // Refresh token — long-lived if persistent
-        ctx.Response.Cookies.Append(RefreshTokenCookie, refreshToken, new CookieOptions
+        ctx.Response.Cookies.Append(BffAuthenticationDefaults.RefreshTokenCookie, refreshToken, new CookieOptions
         {
             HttpOnly = true,
             Secure = isHttps,
@@ -184,8 +190,8 @@ public static class BffEndpointRouteBuilderExtensions
 
     private static void DeleteAuthCookies(HttpContext ctx)
     {
-        ctx.Response.Cookies.Delete(AccessTokenCookie);
-        ctx.Response.Cookies.Delete(RefreshTokenCookie);
+        ctx.Response.Cookies.Delete(BffAuthenticationDefaults.AccessTokenCookie);
+        ctx.Response.Cookies.Delete(BffAuthenticationDefaults.RefreshTokenCookie);
     }
 
     private static IResult RedirectWithError(string path, string? returnUrl)
