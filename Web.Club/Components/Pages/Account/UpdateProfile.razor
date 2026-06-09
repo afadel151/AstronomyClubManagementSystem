@@ -1,0 +1,218 @@
+@page "/account/profile/edit"
+@attribute [Authorize]
+@using System.ComponentModel.DataAnnotations
+@using Domain.Shared.DTO
+@inject Web.Club.Services.IProfileService ProfileService
+@inject NavigationManager Navigation
+@inject NotificationService Notifications
+
+<PageTitle>Update profile</PageTitle>
+
+<RadzenStack Gap="1rem">
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween" Gap="1rem" Style="flex-wrap: wrap">
+        <RadzenStack Gap="0.25rem">
+            <RadzenText Text="Update profile" TextStyle="TextStyle.H4" />
+            <RadzenText Text="Keep your member details current." TextStyle="TextStyle.Body2" />
+        </RadzenStack>
+
+        <RadzenButton Text="Back to profile" Icon="arrow_back" ButtonStyle="ButtonStyle.Light"
+                      Click="@(() => Navigation.NavigateTo("/account/profile"))" />
+    </RadzenStack>
+
+    @if (isLoading)
+    {
+        <RadzenProgressBarCircular Mode="ProgressBarMode.Indeterminate" />
+    }
+    else
+    {
+        <RadzenCard Style="width: min(100%, 64rem)">
+            <EditForm Model="@model" OnValidSubmit="@SaveAsync">
+                <DataAnnotationsValidator />
+
+                <RadzenStack Gap="1rem">
+                    @if (!string.IsNullOrWhiteSpace(error))
+                    {
+                        <RadzenAlert Severity="AlertSeverity.Error" Summary="Update failed" Detail="@error" />
+                    }
+
+                    <RadzenRow>
+                        <RadzenColumn Size="12" SizeMD="6">
+                            <RadzenFormField Text="Full name" Variant="Variant.Outlined" Style="width: 100%">
+                                <RadzenTextBox @bind-Value="@model.FullName" Name="FullName" Style="width: 100%" />
+                            </RadzenFormField>
+                            <ValidationMessage For="@(() => model.FullName)" />
+                        </RadzenColumn>
+
+                        <RadzenColumn Size="12" SizeMD="6">
+                            <RadzenFormField Text="Display name" Variant="Variant.Outlined" Style="width: 100%">
+                                <RadzenTextBox @bind-Value="@model.DisplayName" Name="DisplayName" Style="width: 100%" />
+                            </RadzenFormField>
+                            <ValidationMessage For="@(() => model.DisplayName)" />
+                        </RadzenColumn>
+                    </RadzenRow>
+
+                    <RadzenRow>
+                        <RadzenColumn Size="12" SizeMD="6">
+                            <RadzenFormField Text="Phone" Variant="Variant.Outlined" Style="width: 100%">
+                                <RadzenTextBox @bind-Value="@model.PhoneNumber" Name="PhoneNumber" Style="width: 100%" />
+                            </RadzenFormField>
+                            <ValidationMessage For="@(() => model.PhoneNumber)" />
+                        </RadzenColumn>
+
+                        <RadzenColumn Size="12" SizeMD="6">
+                            <RadzenFormField Text="Birth year" Variant="Variant.Outlined" Style="width: 100%">
+                                <RadzenNumeric TValue="short?" @bind-Value="@model.BirthYear" Name="BirthYear" Style="width: 100%" />
+                            </RadzenFormField>
+                            <ValidationMessage For="@(() => model.BirthYear)" />
+                        </RadzenColumn>
+                    </RadzenRow>
+
+                    <RadzenRow>
+                        <RadzenColumn Size="12" SizeMD="6">
+                            <RadzenFormField Text="Nationality" Variant="Variant.Outlined" Style="width: 100%">
+                                <RadzenTextBox @bind-Value="@model.Nationality" Name="Nationality" Style="width: 100%" />
+                            </RadzenFormField>
+                            <ValidationMessage For="@(() => model.Nationality)" />
+                        </RadzenColumn>
+
+                        <RadzenColumn Size="12" SizeMD="6">
+                            <RadzenFormField Text="City" Variant="Variant.Outlined" Style="width: 100%">
+                                <RadzenTextBox @bind-Value="@model.City" Name="City" Style="width: 100%" />
+                            </RadzenFormField>
+                            <ValidationMessage For="@(() => model.City)" />
+                        </RadzenColumn>
+                    </RadzenRow>
+
+                    <RadzenRow>
+                        <RadzenColumn Size="12" SizeMD="6">
+                            <RadzenFormField Text="AAVSO observer code" Variant="Variant.Outlined" Style="width: 100%">
+                                <RadzenTextBox @bind-Value="@model.AavsoObserverCode" Name="AavsoObserverCode" Style="width: 100%" />
+                            </RadzenFormField>
+                            <ValidationMessage For="@(() => model.AavsoObserverCode)" />
+                        </RadzenColumn>
+
+                        <RadzenColumn Size="12" SizeMD="6">
+                            <RadzenFormField Text="Profile image URL" Variant="Variant.Outlined" Style="width: 100%">
+                                <RadzenTextBox @bind-Value="@model.ProfileImageUrl" Name="ProfileImageUrl" Style="width: 100%" />
+                            </RadzenFormField>
+                            <ValidationMessage For="@(() => model.ProfileImageUrl)" />
+                        </RadzenColumn>
+                    </RadzenRow>
+
+                    <RadzenFormField Text="Bio" Variant="Variant.Outlined" Style="width: 100%">
+                        <RadzenTextArea @bind-Value="@model.Bio" Name="Bio" Rows="5" Style="width: 100%" />
+                    </RadzenFormField>
+                    <ValidationMessage For="@(() => model.Bio)" />
+
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem" Style="flex-wrap: wrap">
+                        <RadzenButton ButtonType="ButtonType.Button" Text="Cancel" Icon="close" ButtonStyle="ButtonStyle.Light"
+                                      Disabled="@isSaving" Click="@(() => Navigation.NavigateTo("/account/profile"))" />
+                        <RadzenButton ButtonType="ButtonType.Submit" Text="Save changes" Icon="save"
+                                      ButtonStyle="ButtonStyle.Primary" IsBusy="@isSaving" />
+                    </RadzenStack>
+                </RadzenStack>
+            </EditForm>
+        </RadzenCard>
+    }
+</RadzenStack>
+
+@code {
+    private ProfileEditForm model = new();
+    private bool isLoading = true;
+    private bool isSaving;
+    private string? error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var profile = await ProfileService.GetProfileAsync();
+        if (profile is not null)
+        {
+            model = ProfileEditForm.FromProfile(profile);
+        }
+
+        isLoading = false;
+    }
+
+    private async Task SaveAsync()
+    {
+        isSaving = true;
+        error = null;
+
+        try
+        {
+            var updated = await ProfileService.UpdateProfileAsync(model.ToRequest());
+            if (updated is null)
+            {
+                error = "The profile update did not return a result.";
+                return;
+            }
+
+            Notifications.Notify(NotificationSeverity.Success, "Profile updated", "Your changes were saved.");
+            Navigation.NavigateTo("/account/profile");
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private sealed class ProfileEditForm
+    {
+        [Required, MaxLength(200)]
+        public string FullName { get; set; } = string.Empty;
+
+        [MaxLength(100)]
+        public string? DisplayName { get; set; }
+
+        [Phone, MaxLength(50)]
+        public string? PhoneNumber { get; set; }
+
+        [Range(1900, 9999)]
+        public short? BirthYear { get; set; }
+
+        [MaxLength(50)]
+        public string? AavsoObserverCode { get; set; }
+
+        [MaxLength(4000)]
+        public string? Bio { get; set; }
+
+        [Url, MaxLength(1000)]
+        public string? ProfileImageUrl { get; set; }
+
+        [MaxLength(100)]
+        public string? Nationality { get; set; }
+
+        [MaxLength(100)]
+        public string? City { get; set; }
+
+        public static ProfileEditForm FromProfile(ProfileDetailsDto profile) => new()
+        {
+            FullName = profile.FullName,
+            DisplayName = profile.DisplayName,
+            PhoneNumber = profile.PhoneNumber,
+            BirthYear = profile.BirthYear,
+            AavsoObserverCode = profile.AavsoObserverCode,
+            Bio = profile.Bio,
+            ProfileImageUrl = profile.ProfileImageUrl,
+            Nationality = profile.Nationality,
+            City = profile.City
+        };
+
+        public UpdateProfileRequest ToRequest() => new()
+        {
+            FullName = FullName,
+            DisplayName = DisplayName,
+            PhoneNumber = PhoneNumber,
+            BirthYear = BirthYear,
+            AavsoObserverCode = AavsoObserverCode,
+            Bio = Bio,
+            ProfileImageUrl = ProfileImageUrl,
+            Nationality = Nationality,
+            City = City
+        };
+    }
+}

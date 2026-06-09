@@ -1,39 +1,135 @@
 @page "/account/profile"
 @attribute [Authorize]
-@using Domain.Shared.Schemas
+@using Domain.Shared.DTO
+@inject Web.Club.Services.IProfileService ProfileService
+@inject NavigationManager Navigation
+
 <PageTitle>Profile</PageTitle>
 
-<AuthorizeView>
-    <Authorized Context="profileContext">
-        <RadzenStack Gap="1rem">
+<RadzenStack Gap="1rem">
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.SpaceBetween" Gap="1rem" Style="flex-wrap: wrap">
+        <RadzenStack Gap="0.25rem">
             <RadzenText Text="Profile" TextStyle="TextStyle.H4" />
+            <RadzenText Text="Club identity, contact details, and member status." TextStyle="TextStyle.Body2" />
+        </RadzenStack>
 
-            <RadzenCard Style="width: min(100%, 42rem)">
-                <RadzenStack Gap="0.75rem">
-                    <RadzenText Text="@profileContext.User.Identity?.Name" TextStyle="TextStyle.H5" />
-                    <RadzenText Text="@profileContext.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value" />
+        <RadzenButton Text="Update profile" Icon="edit" ButtonStyle="ButtonStyle.Primary"
+                      Click="@(() => Navigation.NavigateTo("/account/profile/edit"))" />
+    </RadzenStack>
 
-                    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" Style="flex-wrap: wrap">
-                        @foreach (var role in profileContext.User.FindAll(System.Security.Claims.ClaimTypes.Role).Select(claim => claim.Value))
-                        {
-                            <RadzenBadge Text="@role" BadgeStyle="BadgeStyle.Info" />
-                        }
+    @if (isLoading)
+    {
+        <RadzenProgressBarCircular Mode="ProgressBarMode.Indeterminate" />
+    }
+    else if (profile is null)
+    {
+        <RadzenAlert Severity="AlertSeverity.Warning" Summary="Profile unavailable"
+                     Detail="Your profile could not be loaded." />
+    }
+    else
+    {
+        <RadzenCard Style="width: min(100%, 64rem)">
+            <RadzenStack Gap="1rem">
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem" Style="flex-wrap: wrap">
+                    @if (!string.IsNullOrWhiteSpace(profile.ProfileImageUrl))
+                    {
+                        <img src="@profile.ProfileImageUrl" alt="@profile.FullName"
+                             style="width: 5rem; height: 5rem; border-radius: 50%; object-fit: cover" />
+                    }
+                    else
+                    {
+                        <RadzenAvatar Text="@Initials" Size="AvatarSize.Large" />
+                    }
+
+                    <RadzenStack Gap="0.25rem">
+                        <RadzenText Text="@DisplayName" TextStyle="TextStyle.H5" />
+                        <RadzenText Text="@profile.Email" TextStyle="TextStyle.Body2" />
+                        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" Style="flex-wrap: wrap">
+                            <RadzenBadge Text="@profile.MemberStatus" BadgeStyle="BadgeStyle.Success" />
+                            <RadzenBadge Text="@profile.MemberCode" BadgeStyle="BadgeStyle.Info" />
+                        </RadzenStack>
                     </RadzenStack>
                 </RadzenStack>
-            </RadzenCard>
 
-            <AuthorizeView Roles="@Admins" Context="adminContext">
-                <RadzenAlert Severity="AlertSeverity.Info" Summary="Admin area" Detail="This block is visible only to Admin and SuperAdmin roles." />
-            </AuthorizeView>
+                <RadzenRow>
+                    <RadzenColumn Size="12" SizeMD="6">
+                        <RadzenStack Gap="0.75rem">
+                            <RadzenText Text="Personal" TextStyle="TextStyle.H6" />
+                            @Detail("Full name", profile.FullName)
+                            @Detail("Display name", profile.DisplayName)
+                            @Detail("Birth year", profile.BirthYear?.ToString())
+                            @Detail("Nationality", profile.Nationality)
+                            @Detail("City", profile.City)
+                        </RadzenStack>
+                    </RadzenColumn>
 
-            <AuthorizeView Policy="@AuthConstants.Policies.ManageMembers" Context="memberManagerContext">
-                <RadzenAlert Severity="AlertSeverity.Success" Summary="Member management" Detail="This block is visible to roles allowed by the ManageMembers policy." />
-            </AuthorizeView>
-        </RadzenStack>
-    </Authorized>
-</AuthorizeView>
+                    <RadzenColumn Size="12" SizeMD="6">
+                        <RadzenStack Gap="0.75rem">
+                            <RadzenText Text="Membership" TextStyle="TextStyle.H6" />
+                            @Detail("Joined", profile.JoinDate.ToString("MMM d, yyyy"))
+                            @Detail("AAVSO code", profile.AavsoObserverCode)
+                            @Detail("Phone", profile.PhoneNumber)
+                            @Detail("Last login", profile.LastLoginAt?.ToString("MMM d, yyyy h:mm tt"))
+                            @Detail("Updated", profile.UpdatedAt.ToString("MMM d, yyyy h:mm tt"))
+                        </RadzenStack>
+                    </RadzenColumn>
+                </RadzenRow>
+
+                @if (profile.Roles.Count > 0)
+                {
+                    <RadzenStack Gap="0.5rem">
+                        <RadzenText Text="Roles" TextStyle="TextStyle.H6" />
+                        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" Style="flex-wrap: wrap">
+                            @foreach (var role in profile.Roles)
+                            {
+                                <RadzenBadge Text="@role" BadgeStyle="BadgeStyle.Light" />
+                            }
+                        </RadzenStack>
+                    </RadzenStack>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(profile.Bio))
+                {
+                    <RadzenStack Gap="0.5rem">
+                        <RadzenText Text="Bio" TextStyle="TextStyle.H6" />
+                        <RadzenText Text="@profile.Bio" TextStyle="TextStyle.Body1" />
+                    </RadzenStack>
+                }
+            </RadzenStack>
+        </RadzenCard>
+    }
+</RadzenStack>
 
 @code {
-    
-    private const string Admins = $"{AuthConstants.Roles.Admin},{AuthConstants.Roles.SuperAdmin}";
+    private ProfileDetailsDto? profile;
+    private bool isLoading = true;
+
+    private string DisplayName => profile?.DisplayName ?? profile?.FullName ?? string.Empty;
+
+    private string Initials
+    {
+        get
+        {
+            var source = DisplayName;
+            var parts = source.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+            return parts.Length switch
+            {
+                0 => "?",
+                1 => parts[0][..1].ToUpperInvariant(),
+                _ => string.Concat(parts.Take(2).Select(part => part[0])).ToUpperInvariant()
+            };
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        profile = await ProfileService.GetProfileAsync();
+        isLoading = false;
+    }
+
+    private RenderFragment Detail(string label, string? value) => @<RadzenStack Gap="0.15rem">
+        <RadzenText Text="@label" TextStyle="TextStyle.Caption" />
+        <RadzenText Text="@(string.IsNullOrWhiteSpace(value) ? "Not set" : value)" TextStyle="TextStyle.Body1" />
+    </RadzenStack>;
 }

@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
-namespace Api.Controllers;
+namespace Api.Controllers.Users;
 
 [ApiController]
 [Route("api/auth")]

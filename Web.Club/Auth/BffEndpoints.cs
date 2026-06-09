@@ -1,7 +1,5 @@
 using Domain.Shared.DTO;
-using Domain.Shared.Schemas;
 using Microsoft.AspNetCore.Mvc;
-using System.Net.Http.Json;
 using System.Text.Json;
 using MiniValidation;
 

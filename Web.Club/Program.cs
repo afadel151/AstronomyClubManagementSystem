@@ -1,10 +1,10 @@
 using Domain.Shared.Schemas;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.Options;
 using Radzen;
 using Web.Club.Auth;
 using Web.Club.Components;
+using Web.Club.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,7 +39,7 @@ builder.Services.AddAuthorization(options =>
 
 builder.Services.AddCascadingAuthenticationState();
 
-builder.Services.AddHttpContextAccessor();
+builder.Services.AddApplicationServices();
 builder.Services.AddTransient<BearerTokenHandler>();
 
 builder.Services.AddHttpClient("AuthApi", (sp, client) =>
@@ -54,10 +54,6 @@ builder.Services.AddHttpClient("Api", (sp, client) =>
     client.BaseAddress = new Uri(opts.BaseUrl);
 })
     .AddHttpMessageHandler<BearerTokenHandler>();
-
-builder.Services.AddScoped<BffAuthenticationStateProvider>();
-builder.Services.AddScoped<AuthenticationStateProvider>(sp =>
-    sp.GetRequiredService<BffAuthenticationStateProvider>());
 
 // ── Other services ─────────────────────────────────────────────────────────────
 builder.Services.AddRadzenComponents();

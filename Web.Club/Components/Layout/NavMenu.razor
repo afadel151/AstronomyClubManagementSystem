@@ -17,9 +17,13 @@
             <AuthorizeView>
                 <Authorized>
                     <RadzenText Text="@context.User.Identity?.Name" TextStyle="TextStyle.Body2" />
+                    <RadzenButton Icon="person"
+                                  ButtonStyle="ButtonStyle.Info"
+                                  Size="ButtonSize.Medium"
+                                  Click="@(() => Nav.NavigateTo("/account/profile"))" />
                     <RadzenButton Icon="logout"
                                   ButtonStyle="ButtonStyle.Light"
-                                  Size="ButtonSize.Small"
+                                  Size="ButtonSize.Medium"
                                   Click="@(() => Nav.NavigateTo("/account/logout"))" />
                 </Authorized>
                 <NotAuthorized>
@@ -37,38 +41,7 @@
 
 <RadzenSidebar FullHeight="true" Responsive="false" @bind-Expanded="@sidebarExpanded">
     <RadzenPanelMenu DisplayStyle="@(sidebarExpanded ? MenuItemDisplayStyle.IconAndText : MenuItemDisplayStyle.Icon)">
-        <RadzenPanelMenuItem Text="Menu" Icon="apps" Path="/" />
-
-        <AuthorizeView>
-            <Authorized>
-                <RadzenPanelMenuItem Text="Profile" Icon="badge" Path="/account/profile" />
-            </Authorized>
-        </AuthorizeView>
-
-        <AuthorizeView Roles="@ManagersAndBoard">
-            <RadzenPanelMenuItem Text="LoanManagement" Icon="hand_package" Path="/prets" />
-            <RadzenPanelMenuItem Text="RestitutionManagment" Icon="source_notes" Path="/restitutions" />
-            <RadzenPanelMenuItem Text="DocumentManagment" Icon="article">
-                <RadzenPanelMenuItem Text="AllDocuments" Icon="newsstand" Match="NavLinkMatch.All" Path="/documents" />
-                <RadzenPanelMenuItem Text="DocsOnLoan" Icon="assignment_turned_in" Path="/documents/en_pret" />
-                <RadzenPanelMenuItem Text="ReservedDocuments" Icon="date_range" Path="/documents/reservees" />
-                <RadzenPanelMenuItem Text="BlockedCopies" Icon="date_range" Path="/exemplaire/bloques" />
-            </RadzenPanelMenuItem>
-            <RadzenPanelMenuItem Text="Availability" Icon="timelapse" Path="/availability" />
-            <RadzenPanelMenuItem Text="RemindersManagment" Icon="notifications_active" Path="/relances" />
-        </AuthorizeView>
-
-        <AuthorizeView Roles="@MemberManagers">
-            <RadzenPanelMenuItem Text="MemberManagement" Icon="person" Path="/adherents" />
-        </AuthorizeView>
-
-        <AuthorizeView Roles="@Admins">
-            <RadzenPanelMenuItem Text="CategoriesManagment" Icon="category" Path="/categories" />
-            <RadzenPanelMenuItem Text="Parameters" Icon="settings">
-                <RadzenPanelMenuItem Text="Holidays" Icon="celebration" Path="/jours_feries" />
-                <RadzenPanelMenuItem Text="Penalties" Icon="block" Path="/penalites" />
-            </RadzenPanelMenuItem>
-        </AuthorizeView>
+        <RadzenPanelMenuItem Text="Dashboard" Icon="apps" Path="/" />
 
     </RadzenPanelMenu>
 </RadzenSidebar>

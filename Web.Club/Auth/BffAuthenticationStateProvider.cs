@@ -3,17 +3,12 @@ using Microsoft.AspNetCore.Components.Authorization;
 
 namespace Web.Club.Auth;
 
-public sealed class BffAuthenticationStateProvider : AuthenticationStateProvider
+public sealed class BffAuthenticationStateProvider(IHttpContextAccessor httpContextAccessor) : AuthenticationStateProvider
 {
     private static readonly AuthenticationState Anonymous =
         new(new ClaimsPrincipal(new ClaimsIdentity()));
 
-    private readonly ClaimsPrincipal _user;
-
-    public BffAuthenticationStateProvider(IHttpContextAccessor httpContextAccessor)
-    {
-        _user = httpContextAccessor.HttpContext?.User ?? Anonymous.User;
-    }
+    private readonly ClaimsPrincipal _user = httpContextAccessor.HttpContext?.User ?? Anonymous.User;
 
     public override Task<AuthenticationState> GetAuthenticationStateAsync()
     {
