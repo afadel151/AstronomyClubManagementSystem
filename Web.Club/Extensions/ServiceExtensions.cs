@@ -16,6 +16,14 @@ public static class ServiceExtensions
             sp.GetRequiredService<BffAuthenticationStateProvider>());
         services.AddScoped<ApiHttpClient>();
         services.AddScoped<IProfileService,ProfileService>();
+        services.AddScoped<ICatalogueService,CatalogueService>();
+        services.AddScoped<IChatService,ChatService>();
+        services.AddScoped<IEventService,EventService>();
+        services.AddScoped<IForecastService,ForecastService>();
+        services.AddScoped<IMemberService,MemberService>();
+        services.AddScoped<IObservationService,ObservationService>();
+        services.AddScoped<IProjectService,ProjectService>();
+        services.AddScoped<ITargetService,TargetService>();
         return services;
     }
 }
