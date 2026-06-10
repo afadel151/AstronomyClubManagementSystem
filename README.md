@@ -13,6 +13,7 @@ Built with a **hybrid architecture** combining relational and document databases
 * **Relational DB:** SQL Server 2022 (Dockerized)
 * **NoSQL DB:** MongoDB 7
 * **Object Storage:** MinIO (S3-compatible)
+* **Cache:** Redis
 * **ORM:** Entity Framework Core (Database First)
 * **Auth:** ASP.NET Identity + JWT
 * **Background Jobs:** Hangfire
@@ -43,6 +44,7 @@ The system runs a full backend stack using Docker:
 * SQL Server
 * MongoDB
 * MinIO
+* Redis
 
 ### Start Services
 
@@ -123,7 +125,7 @@ Microsoft.EntityFrameworkCore.SqlServer \
 * ASP.NET Identity (Users, Roles)
 * JWT-based authentication
 * Refresh token support
-
+* Backend-For-Frontend in Blazor server
 ---
 
 ## MongoDB Integration
@@ -152,7 +154,11 @@ Used for storing:
 * Raw images
 * Thumbnails
 * User uploads
-
+## Redis Caching 
+* BFF Session Store
+* Notification Worker Distributed Lock
+* Caching Slowly-Changing Astronomy Data
+* Astronomy Event Visibility Cache
 ### Access
 
 * API: http://localhost:9000
@@ -169,6 +175,34 @@ Used for storing:
   "ConnectionStrings": {
     "SqlServer": "Server=localhost,1433;Database=AstroDbClub;User Id=sa;Password=AstroClub2025;TrustServerCertificate=True",
     "MongoDB": "mongodb://admin:AstroMongo2025@localhost:27017/AstroClubMongo?authSource=admin"
+  },
+  "MinIO": {
+    "Endpoint":        "localhost:9000",
+    "AccessKey":       "astro_admin",
+    "SecretKey":       "AstroMinio2025",
+    "UseSSL":          false,
+    "DefaultBuckets":  ["fits","raw","previews","thumbs","sketches","profiles","horizons","maintenance"]
+  },
+  "Jwt": {
+    "Key":      "your-256-bit-secret-key-here-change-this",
+    "Issuer":   "AstroPlatform",
+    "Audience": "AstroPlatformUsers",
+    "AccessTokenExpiryMinutes":  60,
+    "RefreshTokenExpiryDays":    30
+  },
+  "Serilog": {
+    "MinimumLevel": "Information",
+    "WriteTo": [
+      { "Name": "Console" },
+      { "Name": "File",
+        "Args": { "path": "logs/astro-.log", "rollingInterval": "Day" } }
+    ],
+    "Enrich": ["FromLogContext", "WithMachineName"]
+  },
+  "Redis": {
+    "ConnectionString": "localhost:6379,password=AstroRedis2025,ssl=false,abortConnect=false",
+    "KeyPrefix": "astro:session:",
+    "SessionExpiryDays": 30
   }
 }
 ```
