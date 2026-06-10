@@ -17,20 +17,13 @@
             <AuthorizeView>
                 <Authorized>
                     <RadzenText Text="@context.User.Identity?.Name" TextStyle="TextStyle.Body2" />
-                    <RadzenButton Icon="person"
-                                  ButtonStyle="ButtonStyle.Info"
-                                  Size="ButtonSize.Medium"
+                    <RadzenButton Icon="person" ButtonStyle="ButtonStyle.Info" Size="ButtonSize.Medium"
                                   Click="@(() => Nav.NavigateTo("/account/profile"))" />
-                    <RadzenButton Icon="logout"
-                                  ButtonStyle="ButtonStyle.Light"
-                                  Size="ButtonSize.Medium"
+                    <RadzenButton Icon="logout" ButtonStyle="ButtonStyle.Light" Size="ButtonSize.Medium"
                                   Click="@(() => Nav.NavigateTo("/account/logout"))" />
                 </Authorized>
                 <NotAuthorized>
-                    <RadzenButton Icon="login"
-                                  Text="Sign in"
-                                  ButtonStyle="ButtonStyle.Primary"
-                                  Size="ButtonSize.Small"
+                    <RadzenButton Icon="login" Text="Sign in" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"
                                   Click="@(() => Nav.NavigateTo("/account/login"))" />
                 </NotAuthorized>
             </AuthorizeView>
@@ -41,8 +34,34 @@
 
 <RadzenSidebar FullHeight="true" Responsive="false" @bind-Expanded="@sidebarExpanded">
     <RadzenPanelMenu DisplayStyle="@(sidebarExpanded ? MenuItemDisplayStyle.IconAndText : MenuItemDisplayStyle.Icon)">
-        <RadzenPanelMenuItem Text="Dashboard" Icon="apps" Path="/dashboard" />
-
+        <RadzenPanelMenuItem Text="Dashboard" Icon="home" Path="/dashboard" />
+        <RadzenPanelMenuItem Text="Events" Icon="event_note">
+            <RadzenPanelMenuItem Text="All Events" Icon="calendar_view_month" Match="NavLinkMatch.All" />
+            <RadzenPanelMenuItem Text="New Event" Icon="calendar_add_on" />
+        </RadzenPanelMenuItem>
+        <RadzenPanelMenuItem Text="Projects" Icon="folder">
+            <RadzenPanelMenuItem Text="All Projects" Icon="folder_open" Match="NavLinkMatch.All" />
+            <RadzenPanelMenuItem Text="My Projects" Icon="bookmark" />
+            <RadzenPanelMenuItem Text="New Project" Icon="create_new_folder" />
+        </RadzenPanelMenuItem>
+        <RadzenPanelMenuItem Text="Observations" Icon="table_eye">
+            <RadzenPanelMenuItem Text="Observation Sessions" Icon="schedule" Match="NavLinkMatch.All" />
+            <RadzenPanelMenuItem Text="My Sessions" Icon="view_timeline" />
+            <RadzenPanelMenuItem Text="New Session" Icon="alarm_add" />
+        </RadzenPanelMenuItem>
+        <RadzenPanelMenuItem Text="Objectives" Icon="flag">
+            <RadzenPanelMenuItem Text="Our Objectives" Icon="calendar_view_week" Match="NavLinkMatch.All" />
+            <RadzenPanelMenuItem Text="Forecasts" Icon="deployed_code_history" />
+            <RadzenPanelMenuItem Text="New Objective" Icon="add_ad" />
+        </RadzenPanelMenuItem>
+        <RadzenPanelMenuItem Text="Targets" Icon="planet">
+            <RadzenPanelMenuItem Text="All Targets" Icon="assignment_globe" Match="NavLinkMatch.All" />
+            <RadzenPanelMenuItem Text="Catalogues" Icon="bookmark_stacks" />
+        </RadzenPanelMenuItem>
+        <RadzenPanelMenuItem Text="Members" Icon="groups">
+            <RadzenPanelMenuItem Text="All Members" Icon="patient_list" Match="NavLinkMatch.All" />
+            <RadzenPanelMenuItem Text="Club chat" Icon="chat" />
+        </RadzenPanelMenuItem>
     </RadzenPanelMenu>
 </RadzenSidebar>
 
@@ -50,6 +69,8 @@
     bool sidebarExpanded = true;
 
     private const string Admins = $"{AuthConstants.Roles.Admin},{AuthConstants.Roles.SuperAdmin}";
-    private const string MemberManagers = $"{AuthConstants.Roles.Admin},{AuthConstants.Roles.SuperAdmin},{AuthConstants.Roles.BoardMember}";
-    private const string ManagersAndBoard = $"{AuthConstants.Roles.Admin},{AuthConstants.Roles.SuperAdmin},{AuthConstants.Roles.BoardMember},{AuthConstants.Roles.EventManager},{AuthConstants.Roles.InventoryManager}";
+    private const string MemberManagers =
+$"{AuthConstants.Roles.Admin},{AuthConstants.Roles.SuperAdmin},{AuthConstants.Roles.BoardMember}";
+    private const string ManagersAndBoard =
+$"{AuthConstants.Roles.Admin},{AuthConstants.Roles.SuperAdmin},{AuthConstants.Roles.BoardMember},{AuthConstants.Roles.EventManager},{AuthConstants.Roles.InventoryManager}";
 }
