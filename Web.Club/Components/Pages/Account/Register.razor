@@ -1,8 +1,8 @@
 @page "/account/register"
+@inherits Web.Club.Components.Base.AnonymousOnlyComponentBase
 @layout GuestLayout
 @attribute [AllowAnonymous]
-@inject NavigationManager Navigation
-@inject NotificationService Notifications
+
 
 <PageTitle>Register</PageTitle>
 
@@ -76,7 +76,7 @@
                                   Text="Create account" Style="width: 100%" />
 
                     <RadzenButton ButtonType="ButtonType.Button" ButtonStyle="ButtonStyle.Light" Icon="login"
-                                  Text="Back to sign in" Click="@(() => Navigation.NavigateTo("/account/login"))"
+                                  Text="Back to sign in" Click="@(() => Nav.NavigateTo("/account/login"))"
                                   Style="width: 100%" />
                 </RadzenStack>
             </form>
@@ -85,11 +85,5 @@
 </RadzenStack>
 
 @code {
-    [SupplyParameterFromQuery]
-    public string? ReturnUrl { get; set; }
-
-    [SupplyParameterFromQuery]
-    public string? Error { get; set; }
     private RegisterFormModel model = new();
-
 }

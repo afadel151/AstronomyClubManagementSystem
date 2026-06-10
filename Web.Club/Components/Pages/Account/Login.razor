@@ -1,9 +1,8 @@
 @page "/account/login"
+
+@inherits Web.Club.Components.Base.AnonymousOnlyComponentBase
 @layout GuestLayout
 @attribute [AllowAnonymous]
-@inject NavigationManager Navigation
-@inject NotificationService Notifications
-
 <PageTitle>Login</PageTitle>
 
 <RadzenStack AlignItems="AlignItems.Center" JustifyContent="JustifyContent.Center"
@@ -41,7 +40,7 @@
                                   Text="Sign in" Style="width: 100%" />
 
                     <RadzenButton ButtonType="ButtonType.Button" ButtonStyle="ButtonStyle.Light" Icon="person_add"
-                                  Text="Create account" Click="@(() => Navigation.NavigateTo("/account/register"))"
+                                  Text="Create account" Click="@(() => Nav.NavigateTo("/account/register"))"
                                   Style="width: 100%" />
                 </RadzenStack>
             </form>
@@ -49,10 +48,3 @@
     </RadzenCard>
 </RadzenStack>
 
-@code {
-    [SupplyParameterFromQuery]
-    public string? ReturnUrl { get; set; }
-
-    [SupplyParameterFromQuery]
-    public string? Error { get; set; }
-}
