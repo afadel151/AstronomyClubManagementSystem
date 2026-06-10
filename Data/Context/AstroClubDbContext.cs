@@ -1,5 +1,5 @@
 ﻿using System.Text;
-using Data.Entities;
+using Data.Entities.Generated;
 using Data.Entities.Enums;
 using Data.Entities.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -47,7 +47,7 @@ public partial class AstroClubDbContext : IdentityDbContext<ApplicationUser, App
     public virtual DbSet<Project> Projects { get; set; }
     public virtual DbSet<Milestone> Milestones { get; set; }
     public virtual DbSet<TaskType> TaskTypes { get; set; }
-    public virtual DbSet<Data.Entities.Task> Tasks { get; set; }
+    public virtual DbSet<Data.Entities.Generated.Task> Tasks { get; set; }
     public virtual DbSet<TaskAssignment> TaskAssignments { get; set; }
     public virtual DbSet<ProjectMember> ProjectMembers { get; set; }
 
@@ -362,7 +362,7 @@ public partial class AstroClubDbContext : IdentityDbContext<ApplicationUser, App
             entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(sysdatetimeoffset())");
         });
 
-        modelBuilder.Entity<Data.Entities.Task>(entity =>
+        modelBuilder.Entity<Data.Entities.Generated.Task>(entity =>
         {
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetimeoffset())");
             entity.Property(e => e.Priority).HasConversion(CreateSnakeCaseEnumConverter<TaskPriorityEnum>());

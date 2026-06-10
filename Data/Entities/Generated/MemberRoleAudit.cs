@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Data.Entities.Enums;
 using Microsoft.EntityFrameworkCore;
 
-namespace Data.Entities;
+namespace Data.Entities.Generated;
 
 [Index("ActionDate", Name = "IX_MRA_Date", AllDescending = true)]
 [Index("RoleId", Name = "IX_MRA_RoleId")]

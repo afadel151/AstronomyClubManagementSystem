@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Data.Entities.Enums;
 using Microsoft.EntityFrameworkCore;
 
-namespace Data.Entities;
+namespace Data.Entities.Generated;
 
 [PrimaryKey("SessionId", "UserId")]
 [Index("UserId", Name = "IX_SM_UserId")]

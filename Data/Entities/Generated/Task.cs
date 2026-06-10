@@ -6,7 +6,7 @@ using Data.Entities.Enums;
 using Data.Entities.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace Data.Entities;
+namespace Data.Entities.Generated;
 
 [Index("DueDate", Name = "IX_TSK_DueDate")]
 [Index("ProjectId", Name = "IX_TSK_ProjectId")]

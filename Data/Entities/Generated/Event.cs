@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Data.Entities.Enums;
 using Microsoft.EntityFrameworkCore;
 
-namespace Data.Entities;
+namespace Data.Entities.Generated;
 
 [Index("PeakDateUtc", Name = "IX_EV_PeakDate")]
 [Index("Code", Name = "UK_EV_Code", IsUnique = true)]

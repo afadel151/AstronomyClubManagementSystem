@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Data.Entities.Enums;
 using Microsoft.EntityFrameworkCore;
 
-namespace Data.Entities;
+namespace Data.Entities.Generated;
 
 [Index("UserId", "Channel", Name = "UK_MCP_UserChannel", IsUnique = true)]
 public partial class MemberContactPref

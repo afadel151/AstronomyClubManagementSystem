@@ -9,7 +9,7 @@ using Domain.Shared.Exceptions;
 using Domain.Shared.Schemas;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using RefreshTokenEntity = Data.Entities.RefreshToken;
+using RefreshTokenEntity = Data.Entities.Generated.RefreshToken;
 
 namespace Application.Services;
 

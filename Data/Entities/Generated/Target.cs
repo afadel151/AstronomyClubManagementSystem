@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Data.Entities.Enums;
 using Microsoft.EntityFrameworkCore;
 
-namespace Data.Entities;
+namespace Data.Entities.Generated;
 
 [Index("IsSolarSystem", Name = "IX_TGT_IsSolarSystem")]
 [Index("ObjectTypeCode", Name = "IX_TGT_ObjectTypeCode")]

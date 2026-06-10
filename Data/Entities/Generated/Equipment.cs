@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Data.Entities.Enums;
 using Microsoft.EntityFrameworkCore;
 
-namespace Data.Entities;
+namespace Data.Entities.Generated;
 
 [Index("CategoryId", Name = "IX_EQ_CategoryId")]
 [Index("Status", Name = "IX_EQ_Status")]

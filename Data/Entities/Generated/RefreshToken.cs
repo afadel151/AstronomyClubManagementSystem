@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Data.Entities.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace Data.Entities;
+namespace Data.Entities.Generated;
 
 [Index("Token", Name = "UK_REFRESH_TOKEN", IsUnique = true)]
 [Index("UserId", Name = "IX_RT_UserId", IsUnique = false)]

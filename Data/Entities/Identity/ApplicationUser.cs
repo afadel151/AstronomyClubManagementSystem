@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 using Data.Entities.Enums;
+using Data.Entities.Generated;
 
 namespace Data.Entities.Identity;
 
@@ -48,7 +49,7 @@ public class ApplicationUser : IdentityUser
     [ForeignKey(nameof(CreatedBy))]
     public ApplicationUser? CreatedByUser { get; set; }
 
-    public virtual ICollection<Task> CreatedTasks { get; set; } = [];
+    public virtual ICollection<Data.Entities.Generated.Task> CreatedTasks { get; set; } = [];
     public virtual ICollection<EventObservation> CreatedEventObservations { get; set; } = [];
     public virtual ICollection<Forecast> CreatedForecasts { get; set; } = [];
     public virtual ICollection<Project> CreatedProjects { get; set; } = [];

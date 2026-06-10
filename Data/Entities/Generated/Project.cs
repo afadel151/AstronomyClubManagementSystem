@@ -6,7 +6,7 @@ using Data.Entities.Enums;
 using Data.Entities.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace Data.Entities;
+namespace Data.Entities.Generated;
 
 
 [Index("Status", Name = "IX_PRJ_Status")]

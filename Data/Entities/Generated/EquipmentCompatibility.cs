@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Data.Entities;
+namespace Data.Entities.Generated;
 public class EquipmentCompatibility
 {
     public int EquipmentId { get; set; }          

@@ -6,7 +6,7 @@ using Data.Entities.Enums;
 using Data.Entities.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace Data.Entities;
+namespace Data.Entities.Generated;
 
 [Index("PeriodYear", Name = "IX_FCST_PeriodYear")]
 [Index("Status", Name = "IX_FCST_Status")]
