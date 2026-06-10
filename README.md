@@ -2,7 +2,7 @@
 
 A modern, scalable platform for managing astronomy club operations, observations, equipment, and data processing.
 
-Built with a **hybrid architecture** combining relational and document databases, object storage, and a modular .NET backend.
+Built with a **hybrid architecture** combining relational and document databases, object storage, caching, and a modular .NET backend.
 
 ---
 
