@@ -1,6 +1,5 @@
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
-using Application.Auth;
 using Application.Repositories;
 using Data.Entities.Enums;
 using Data.Entities.Identity;
@@ -42,20 +41,20 @@ public sealed class AuthService(
             throw new AccountDisabledException("User account is disabled.");
 
         var roles        = await userManager.GetRolesAsync(user);
-        var accessToken  = tokenService.GenerateAccessToken(user, roles);
-        var refreshToken = tokenService.GenerateRefreshToken(user, ipAddress);
+        var (Token, ExpiresAt) = tokenService.GenerateAccessToken(user, roles);
+        var (RawToken, RefreshToken) = tokenService.GenerateRefreshToken(user, ipAddress);
 
         await refreshTokenRepository.AddAsync(
-            refreshToken.RefreshToken, saveChanges: false, cancellationToken: ct);
+            RefreshToken, saveChanges: false, cancellationToken: ct);
 
         user.LastLoginAt = DateTimeOffset.UtcNow;
         user.LastLoginIp = ipAddress;
         await userManager.UpdateAsync(user);
         await refreshTokenRepository.SaveChangesAsync(ct);
 
-        return new LoginResponse(accessToken.Token, accessToken.ExpiresAt, CreateUserDto(user, roles))
+        return new LoginResponse(Token, ExpiresAt, CreateUserDto(user, roles))
         {
-            RefreshToken = refreshToken.RawToken
+            RefreshToken = RawToken
         };
     }
 
@@ -95,20 +94,20 @@ public sealed class AuthService(
 
         await userManager.AddToRoleAsync(user, AuthConstants.Roles.Member);
         var roles        = await userManager.GetRolesAsync(user);
-        var accessToken  = tokenService.GenerateAccessToken(user, roles);
-        var refreshToken = tokenService.GenerateRefreshToken(user, ipAddress);
+        var (Token, ExpiresAt) = tokenService.GenerateAccessToken(user, roles);
+        var (RawToken, RefreshToken) = tokenService.GenerateRefreshToken(user, ipAddress);
 
         await refreshTokenRepository.AddAsync(
-            refreshToken.RefreshToken, saveChanges: false, cancellationToken: ct);
+            RefreshToken, saveChanges: false, cancellationToken: ct);
 
         user.LastLoginAt = DateTimeOffset.UtcNow;
         user.LastLoginIp = ipAddress;
         await userManager.UpdateAsync(user);
         await refreshTokenRepository.SaveChangesAsync(ct);
 
-        return new RegisterResponse(accessToken.Token, accessToken.ExpiresAt, CreateUserDto(user, roles))
+        return new RegisterResponse(Token, ExpiresAt, CreateUserDto(user, roles))
         {
-            RefreshToken = refreshToken.RawToken
+            RefreshToken = RawToken
         };
     }
 
@@ -137,21 +136,21 @@ public sealed class AuthService(
             throw new AccountDisabledException("User account is disabled.");
 
         var roles        = await userManager.GetRolesAsync(user);
-        var accessToken  = tokenService.GenerateAccessToken(user, roles);
-        var replacement  = tokenService.GenerateRefreshToken(user, ipAddress);
+        var (Token, ExpiresAt) = tokenService.GenerateAccessToken(user, roles);
+        var (RawToken, RefreshToken) = tokenService.GenerateRefreshToken(user, ipAddress);
 
         // Rotate: revoke old, persist new
         storedToken.RevokedAt       = DateTimeOffset.UtcNow;
         storedToken.RevokedByIp     = ipAddress;
-        storedToken.ReplacedByToken = replacement.RefreshToken.Token;
+        storedToken.ReplacedByToken = RefreshToken.Token;
 
         await refreshTokenRepository.AddAsync(
-            replacement.RefreshToken, saveChanges: false, cancellationToken: ct);
+            RefreshToken, saveChanges: false, cancellationToken: ct);
         await refreshTokenRepository.SaveChangesAsync(ct);
 
-        return new RefreshResponse(accessToken.Token, accessToken.ExpiresAt)
+        return new RefreshResponse(Token, ExpiresAt)
         {
-            RefreshToken = replacement.RawToken
+            RefreshToken = RawToken
         };
     }
 
