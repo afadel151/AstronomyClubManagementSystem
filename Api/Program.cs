@@ -1,6 +1,6 @@
 using Api.Middleware;
 using Application.Auth;
-using Application.Helpers;
+using Application.Extensions;
 using Data.Context;
 using Data.Entities.Identity;
 using Data.MongoDB;
