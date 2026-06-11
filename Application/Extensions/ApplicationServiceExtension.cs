@@ -25,7 +25,7 @@ public static class ServiceExtensions
         services.AddScoped<ITargetService, TargetService>();
         services.AddScoped<IEventService, EventService>();
         services.AddScoped<IMemberService, MemberService>();
-        services.AddScoped<IObservationService, ObservationService>();
+        // services.AddScoped<IObservationService, ObservationService>();
         services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, ApplicationUserClaimsPrincipalFactory>();
 
         return services;
