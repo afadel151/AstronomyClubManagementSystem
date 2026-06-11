@@ -7,11 +7,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Data.Entities.Generated;
 
-[Index("CategoryId", Name = "IX_EQ_CategoryId")]
 [Index("Status", Name = "IX_EQ_Status")]
 [Index("Code", Name = "UK_EQUIPMENTS_Code", IsUnique = true)]
 public partial class Equipment
 {
+    // identity
     [Key]
     public int Id { get; set; }
 
@@ -19,84 +19,94 @@ public partial class Equipment
     [Unicode(false)]
     public string Code { get; set; } = null!;
 
-    [StringLength(200)]
-    public string Name { get; set; } = null!;
-
-    [StringLength(100)]
-    public string Brand { get; set; } = null!;
-
-    [StringLength(150)]
-    public string Model { get; set; } = null!;
-
-    public int CategoryId { get; set; }
-
-    [StringLength(50)]
-    public EquipmentOpticalDesignEnum? OpticalDesign { get; set; }
-
     [StringLength(100)]
     [Unicode(false)]
     public string? SerialNumber { get; set; }
-
-    public DateOnly? PurchaseDate { get; set; }
-
-    [Column(TypeName = "decimal(10, 2)")]
-    public decimal? PurchasePrice { get; set; }
-
+    public int ModelId { get; set; }
+    
+    // status
     [StringLength(20)]
     public EquipmentStatusEnum Status { get; set; }
 
+
+
+    // purchase
+    public DateOnly? PurchaseDate { get; set; }
+
+    [Column(TypeName = "decimal(10, 2)")]
+    public decimal? PurchasePriceUs { get; set; }
+
+    // location
     [StringLength(200)]
     public string? Location { get; set; }
-
-    [StringLength(450)]
-    public string? LoanedTo { get; set; }
-
-    public DateOnly? LoanDueDate { get; set; }
+    
 
     [StringLength(1000)]
     public string? Notes { get; set; }
 
+    // FITS
     [StringLength(68)]
     [Unicode(false)]
     public string? FitsTelescop { get; set; }
 
+    [StringLength(68)]
+    [Unicode(false)]
+    public string? FitsInstrume { get; set; }
+
+    // specs
     [Column(TypeName = "nvarchar(max)")]
     public string? Specifications { get; set; }
+
+    // hierarchy
     public int? ParentEquipmentId { get; set; }  
 
     [ForeignKey("ParentEquipmentId")]
     public virtual Equipment? ParentEquipment { get; set; }
 
     [InverseProperty("ParentEquipment")]
-    public virtual ICollection<Equipment> ChildParts { get; set; } = new List<Equipment>();
+    public virtual ICollection<Equipment> ChildParts { get; set; } = [];
 
-    [StringLength(68)]
-    [Unicode(false)]
-    public string? FitsInstrume { get; set; }
 
-    public DateTimeOffset CreatedAt { get; set; }
+    // usage
+    public int TotalUsageHours {get;set;}
 
-    public DateTimeOffset UpdatedAt { get; set; }
 
-    [ForeignKey("CategoryId")]
+    // is accessory
+    public bool Accessory {get;set;} = false;
+
+
+    // retirement
+    public DateOnly? RetiredDate { get; set; }
+    [StringLength(500)]
+    public string? RetirementReason { get; set; }
+
+    // model
+    [ForeignKey("ModelId")]
+    [InverseProperty("Equipments")]
+    public virtual EquipmentModel EquipmentModel  { get; set; } = null!;
+
+    // timestamps
+   public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
+
     [InverseProperty("Equipment")]
-    public virtual EquipmentCategory Category { get; set; } = null!;
+    public virtual ICollection<EquipmentMaintenance> EquipmentMaintenances { get; set; } = [];
 
     [InverseProperty("Equipment")]
-    public virtual ICollection<EquipmentMaintenance> EquipmentMaintenances { get; set; } = new List<EquipmentMaintenance>();
+    public virtual ICollection<EquipmentUpload> EquipmentUploads { get; set; } = [];
 
     [InverseProperty("Camera")]
-    public virtual ICollection<Observation> ObservationCameras { get; set; } = new List<Observation>();
+    public virtual ICollection<Observation> ObservationCameras { get; set; } = [];
 
     [InverseProperty("Filter")]
-    public virtual ICollection<Observation> ObservationFilters { get; set; } = new List<Observation>();
+    public virtual ICollection<Observation> ObservationFilters { get; set; } = [];
 
     [InverseProperty("Guider")]
-    public virtual ICollection<Observation> ObservationGuiders { get; set; } = new List<Observation>();
+    public virtual ICollection<Observation> ObservationGuiders { get; set; } = [];
 
     [InverseProperty("Mount")]
-    public virtual ICollection<Observation> ObservationMounts { get; set; } = new List<Observation>();
+    public virtual ICollection<Observation> ObservationMounts { get; set; } = [];
 
     [InverseProperty("Telescope")]
-    public virtual ICollection<Observation> ObservationTelescopes { get; set; } = new List<Observation>();
+    public virtual ICollection<Observation> ObservationTelescopes { get; set; } = [];
 }

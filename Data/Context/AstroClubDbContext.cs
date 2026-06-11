@@ -22,8 +22,11 @@ public partial class AstroClubDbContext : IdentityDbContext<ApplicationUser, App
 
     // ── Equipment ─────────────────────────────────────────────────────────
     public virtual DbSet<EquipmentCategory> EquipmentCategories { get; set; }
+    public virtual DbSet<EquipmentBrand> EquipmentBrands { get; set; }
+    public virtual DbSet<EquipmentModel> EquipmentModels { get; set; }
     public virtual DbSet<Equipment> Equipments { get; set; }
     public virtual DbSet<EquipmentMaintenance> EquipmentMaintenances { get; set; }
+    public virtual DbSet<EquipmentUpload> EquipmentUploads { get; set; }
     public virtual DbSet<EquipmentCompatibility> EquipmentCompatibilities { get; set; }
 
     // ── Observation sites ─────────────────────────────────────────────────
@@ -98,17 +101,32 @@ public partial class AstroClubDbContext : IdentityDbContext<ApplicationUser, App
             entity.HasKey(e => e.Id).HasName("PK_DPT");
         });
 
+
+        modelBuilder.Entity<EquipmentUpload>(entity =>
+        {
+            entity.HasOne(d => d.Equipment).WithMany(p => p.EquipmentUploads)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_EQ_Upload");
+        });
+        modelBuilder.Entity<EquipmentModel>(entity =>
+        {
+            entity.Property(e => e.OpticalDesign).HasConversion(CreateNullableEquipmentOpticalDesignConverter());
+            entity.HasOne(d => d.EquipmentCategory).WithMany(p => p.EquipmentModels)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_EQM_Category");
+
+            entity.HasOne(d => d.EquipmentBrand).WithMany(p => p.EquipmentModels)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_EQM_Brand");
+        });
         modelBuilder.Entity<Equipment>(entity =>
         {
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysdatetimeoffset())");
-            entity.Property(e => e.OpticalDesign).HasConversion(CreateNullableEquipmentOpticalDesignConverter());
             entity.Property(e => e.Status).HasDefaultValue(EquipmentStatusEnum.Operational);
             entity.Property(e => e.Status).HasConversion(CreateSnakeCaseEnumConverter<EquipmentStatusEnum>());
-            entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(sysdatetimeoffset())");
 
-            entity.HasOne(d => d.Category).WithMany(p => p.Equipment)
+            entity.HasOne(d => d.EquipmentModel).WithMany(p => p.Equipments)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_EQ_Category");
+                .HasConstraintName("FK_EQ_Model");
         });
 
         modelBuilder.Entity<EquipmentMaintenance>(entity =>

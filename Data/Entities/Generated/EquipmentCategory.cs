@@ -19,6 +19,6 @@ public partial class EquipmentCategory
     [StringLength(500)]
     public string? Description { get; set; }
 
-    [InverseProperty("Category")]
-    public virtual ICollection<Equipment> Equipment { get; set; } = new List<Equipment>();
+    [InverseProperty("EquipmentCategory")]
+    public virtual ICollection<EquipmentModel> EquipmentModels { get; set; } = [];
 }
