@@ -27,7 +27,7 @@ public partial class AstroClubDbContext : IdentityDbContext<ApplicationUser, App
     public virtual DbSet<Equipment> Equipments { get; set; }
     public virtual DbSet<EquipmentMaintenance> EquipmentMaintenances { get; set; }
     public virtual DbSet<EquipmentUpload> EquipmentUploads { get; set; }
-    public virtual DbSet<EquipmentCompatibility> EquipmentCompatibilities { get; set; }
+    public virtual DbSet<EquipmentModelCompatibility> EquipmentCompatibilities { get; set; }
 
     // ── Observation sites ─────────────────────────────────────────────────
     public virtual DbSet<ObservationSite> ObservationSites { get; set; }
@@ -134,7 +134,7 @@ public partial class AstroClubDbContext : IdentityDbContext<ApplicationUser, App
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_EM_Equipment");
         });
-        modelBuilder.Entity<EquipmentCompatibility>(entity =>
+        modelBuilder.Entity<EquipmentModelCompatibility>(entity =>
         {
             entity.HasKey(e => new { e.AccessoryId, e.CompatibleWithId });
 
