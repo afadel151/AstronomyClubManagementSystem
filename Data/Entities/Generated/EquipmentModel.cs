@@ -25,7 +25,7 @@ public partial class EquipmentModel
 
     public int CategoryId { get; set; }
     public int BrandId { get; set; }
-    public bool Accessory { get; set; } = false;
+
     [StringLength(68)]
     [Unicode(false)]
     public string? FitsTelescop { get; set; }
@@ -36,11 +36,9 @@ public partial class EquipmentModel
 
     [Column(TypeName = "nvarchar(max)")]
     public string? Specifications { get; set; }
+
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
-
-
-    public EquipmentOpticalDesignEnum? OpticalDesign { get; set; }
 
     [InverseProperty("EquipmentModel")]
     public virtual ICollection<Equipment> Equipments { get; set; } = [];
@@ -54,8 +52,8 @@ public partial class EquipmentModel
     public virtual EquipmentBrand EquipmentBrand { get; set; } = null!;
 
     [InverseProperty("Accessory")]
-    public virtual ICollection<EquipmentCompatibility> Compatibilities { get; set; } = [];
+    public virtual ICollection<EquipmentModelCompatibility> Compatibilities { get; set; } = [];
 
     [InverseProperty("CompatibleWith")]
-    public virtual ICollection<EquipmentCompatibility> CompatibleWith { get; set; } = [];
+    public virtual ICollection<EquipmentModelCompatibility> CompatibleWith { get; set; } = [];
 }
