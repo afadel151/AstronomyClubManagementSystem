@@ -6,7 +6,7 @@ namespace Application.Services;
 
 public interface IEquipmentService
 {
-
+    Task<List<Equipment>> GetAll();
 }
 
 public sealed class EquipmentService(
@@ -18,6 +18,9 @@ public sealed class EquipmentService(
     IBaseRepository<EquipmentMaintenance> equipmentMaintenanceRepository
 ) : IEquipmentService
 {
-    
 
+    public async Task<List<Equipment>> GetAll()
+    {
+        return await equipmentRepository.GetAllAsync();
+    }
 }
