@@ -12,7 +12,6 @@ namespace Domain.Shared.DTO;
 ///   <item><term>Api</term><description>Vue SPA, mobile app, Python script — JWT only, no cookie.</description></item>
 /// </list>
 /// </summary>
-[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum AuthClientType
 {
     Browser,
