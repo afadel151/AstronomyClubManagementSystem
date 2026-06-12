@@ -44,19 +44,6 @@ public partial class Equipment
     [StringLength(1000)]
     public string? Notes { get; set; }
 
-    // FITS
-    [StringLength(68)]
-    [Unicode(false)]
-    public string? FitsTelescop { get; set; }
-
-    [StringLength(68)]
-    [Unicode(false)]
-    public string? FitsInstrume { get; set; }
-
-    // specs
-    [Column(TypeName = "nvarchar(max)")]
-    public string? Specifications { get; set; }
-
     // hierarchy
     public int? ParentEquipmentId { get; set; }  
 
@@ -66,14 +53,8 @@ public partial class Equipment
     [InverseProperty("ParentEquipment")]
     public virtual ICollection<Equipment> ChildParts { get; set; } = [];
 
-
     // usage
     public int TotalUsageHours {get;set;}
-
-
-    // is accessory
-    public bool Accessory {get;set;} = false;
-
 
     // retirement
     public DateOnly? RetiredDate { get; set; }

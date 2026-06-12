@@ -16,6 +16,8 @@ public partial class EquipmentUpload
     [Required, StringLength(500), Unicode(false)]
     public string ObjectKey {get; set;} = "";
 
+    public bool IsMainImage {get;set;} = false;
+
     [StringLength(200)]
     public string? Caption { get; set; }
    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;

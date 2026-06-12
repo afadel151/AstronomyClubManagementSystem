@@ -12,7 +12,7 @@ namespace Data.Entities.Generated;
 public partial class EquipmentModel
 {
     [Key]
-    public int Id { get; set; } 
+    public int Id { get; set; }
 
     [Required]
     [StringLength(100)]
@@ -24,9 +24,19 @@ public partial class EquipmentModel
     public string Slug { get; set; } = null!;
 
     public int CategoryId { get; set; }
-    public int BrandId {get;set;}
+    public int BrandId { get; set; }
+    public bool Accessory { get; set; } = false;
+    [StringLength(68)]
+    [Unicode(false)]
+    public string? FitsTelescop { get; set; }
 
-   public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
+    [StringLength(68)]
+    [Unicode(false)]
+    public string? FitsInstrume { get; set; }
+
+    [Column(TypeName = "nvarchar(max)")]
+    public string? Specifications { get; set; }
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
 
     [StringLength(50)]
