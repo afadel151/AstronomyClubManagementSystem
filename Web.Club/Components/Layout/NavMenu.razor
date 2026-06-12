@@ -36,16 +36,16 @@
     <RadzenPanelMenu DisplayStyle="@(sidebarExpanded ? MenuItemDisplayStyle.IconAndText : MenuItemDisplayStyle.Icon)">
         <RadzenPanelMenuItem Text="Dashboard" Icon="home" Path="/dashboard" />
         <RadzenPanelMenuItem Text="Events" Icon="event_note">
-            <RadzenPanelMenuItem Text="All Events" Icon="calendar_view_month" Match="NavLinkMatch.All" />
-            <RadzenPanelMenuItem Text="New Event" Icon="calendar_add_on" />
+            <RadzenPanelMenuItem Text="All Events" Icon="calendar_view_month" Match="NavLinkMatch.All" Path="/events" />
+            <RadzenPanelMenuItem Text="New Event" Icon="calendar_add_on"Path="/events/insert" />
         </RadzenPanelMenuItem>
         <RadzenPanelMenuItem Text="Projects" Icon="folder">
-            <RadzenPanelMenuItem Text="All Projects" Icon="folder_open" Match="NavLinkMatch.All" />
+            <RadzenPanelMenuItem Text="All Projects" Icon="folder_open" Match="NavLinkMatch.All" Path="/projects"/>
             <RadzenPanelMenuItem Text="My Projects" Icon="bookmark" />
-            <RadzenPanelMenuItem Text="New Project" Icon="create_new_folder" />
+            <RadzenPanelMenuItem Text="New Project" Icon="create_new_folder" Path="/projects/insert" />
         </RadzenPanelMenuItem>
         <RadzenPanelMenuItem Text="Observations" Icon="table_eye">
-            <RadzenPanelMenuItem Text="Observation Sessions" Icon="schedule" Match="NavLinkMatch.All" />
+            <RadzenPanelMenuItem Text="Observation Sessions" Icon="schedule" Match="NavLinkMatch.All"  />
             <RadzenPanelMenuItem Text="My Sessions" Icon="view_timeline" />
             <RadzenPanelMenuItem Text="New Session" Icon="alarm_add" />
         </RadzenPanelMenuItem>

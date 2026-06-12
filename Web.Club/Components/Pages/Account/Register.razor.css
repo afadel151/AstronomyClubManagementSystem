@@ -1,7 +1,0 @@
-.account-form-grid {
-    flex-wrap: wrap;
-}
-
-.account-form-grid > * {
-    min-width: 14rem;
-}
