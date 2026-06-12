@@ -1,6 +1,8 @@
 namespace Data.Entities.Enums;
 
-public enum ObservationSessionStatusEnum
+
+using System.Text.Json.Serialization;
+[JsonConverter(typeof(JsonStringEnumConverter))]  public enum ObservationSessionStatusEnum
 {
     Planned,
     Ongoing,

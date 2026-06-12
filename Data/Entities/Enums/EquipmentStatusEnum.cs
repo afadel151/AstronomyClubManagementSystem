@@ -1,6 +1,8 @@
 namespace Data.Entities.Enums;
 
-public enum EquipmentStatusEnum
+
+using System.Text.Json.Serialization;
+[JsonConverter(typeof(JsonStringEnumConverter))]  public enum EquipmentStatusEnum
 {
     Operational,
     Maintenance,

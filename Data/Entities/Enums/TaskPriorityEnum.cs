@@ -1,6 +1,8 @@
 namespace Data.Entities.Enums;
 
-public enum TaskPriorityEnum
+
+using System.Text.Json.Serialization;
+[JsonConverter(typeof(JsonStringEnumConverter))]  public enum TaskPriorityEnum
 {
     Low,
     Medium,

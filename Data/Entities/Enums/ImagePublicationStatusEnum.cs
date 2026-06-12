@@ -1,6 +1,8 @@
 namespace Data.Entities.Enums;
 
-public enum ImagePublicationStatusEnum
+
+using System.Text.Json.Serialization;
+[JsonConverter(typeof(JsonStringEnumConverter))]  public enum ImagePublicationStatusEnum
 {
     Raw,
     Calibrating,

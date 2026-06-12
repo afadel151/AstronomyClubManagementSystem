@@ -1,6 +1,8 @@
 namespace Data.Entities.Enums;
 
-public enum TaskStatusEnum
+
+using System.Text.Json.Serialization;
+[JsonConverter(typeof(JsonStringEnumConverter))]  public enum TaskStatusEnum
 {
     Backlog,
     Todo,

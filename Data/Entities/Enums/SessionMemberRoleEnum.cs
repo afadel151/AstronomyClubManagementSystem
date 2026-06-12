@@ -1,6 +1,8 @@
 namespace Data.Entities.Enums;
 
-public enum SessionMemberRoleEnum
+
+using System.Text.Json.Serialization;
+[JsonConverter(typeof(JsonStringEnumConverter))]  public enum SessionMemberRoleEnum
 {
     LeadObserver,
     Observer,

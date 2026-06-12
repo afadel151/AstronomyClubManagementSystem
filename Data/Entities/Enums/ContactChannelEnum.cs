@@ -1,6 +1,9 @@
 namespace Data.Entities.Enums;
 
-public enum ContactChannelEnum
+
+using System.Text.Json.Serialization;
+[JsonConverter(typeof(JsonStringEnumConverter))]
+ public enum ContactChannelEnum
 {
     Telegram,
     Email,

@@ -1,6 +1,9 @@
 namespace Data.Entities.Enums;
 
-public enum EquipmentMaintenanceResultEnum
+
+using System.Text.Json.Serialization;
+[JsonConverter(typeof(JsonStringEnumConverter))]  
+public enum   EquipmentMaintenanceResultEnum
 {
     Completed,
     Partial,

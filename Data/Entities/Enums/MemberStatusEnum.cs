@@ -1,6 +1,8 @@
 namespace Data.Entities.Enums;
 
-public enum MemberStatusEnum
+
+using System.Text.Json.Serialization;
+[JsonConverter(typeof(JsonStringEnumConverter))]  public enum MemberStatusEnum
 {
     Active,
     Inactive,

@@ -1,6 +1,8 @@
 namespace Data.Entities.Enums;
 
-public enum ObservationSiteTypeEnum
+
+using System.Text.Json.Serialization;
+[JsonConverter(typeof(JsonStringEnumConverter))]  public enum ObservationSiteTypeEnum
 {
     PermanentObservatory,
     DarkSkySite,

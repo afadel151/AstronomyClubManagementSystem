@@ -1,6 +1,8 @@
 namespace Data.Entities.Enums;
 
-public enum ForecastStatusEnum
+
+using System.Text.Json.Serialization;
+[JsonConverter(typeof(JsonStringEnumConverter))]  public enum ForecastStatusEnum
 {
     Proposed,
     Approved,

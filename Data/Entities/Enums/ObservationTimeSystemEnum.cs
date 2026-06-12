@@ -1,6 +1,8 @@
 namespace Data.Entities.Enums;
 
-public enum ObservationTimeSystemEnum
+
+using System.Text.Json.Serialization;
+[JsonConverter(typeof(JsonStringEnumConverter))]  public enum ObservationTimeSystemEnum
 {
     UTC,
     TT,

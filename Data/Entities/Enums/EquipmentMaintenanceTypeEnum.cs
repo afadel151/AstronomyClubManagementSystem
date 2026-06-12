@@ -1,6 +1,8 @@
 namespace Data.Entities.Enums;
 
-public enum EquipmentMaintenanceTypeEnum
+
+using System.Text.Json.Serialization;
+[JsonConverter(typeof(JsonStringEnumConverter))]    public enum EquipmentMaintenanceTypeEnum
 {
     Collimation,
     Cleaning,

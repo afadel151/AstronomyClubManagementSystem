@@ -1,6 +1,8 @@
 namespace Data.Entities.Enums;
 
-public enum EquipmentOpticalDesignEnum
+
+using System.Text.Json.Serialization;
+[JsonConverter(typeof(JsonStringEnumConverter))]   public enum EquipmentOpticalDesignEnum
 {
     Newtonian,
     Sct,

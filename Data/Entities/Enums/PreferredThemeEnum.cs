@@ -1,6 +1,8 @@
 namespace Data.Entities.Enums;
 
-public enum PreferredThemeEnum
+
+using System.Text.Json.Serialization;
+[JsonConverter(typeof(JsonStringEnumConverter))]  public enum PreferredThemeEnum
 {
     Light,
     Dark,

@@ -1,6 +1,8 @@
 namespace Data.Entities.Enums;
 
-public enum UploadTypeEnum
+
+using System.Text.Json.Serialization;
+[JsonConverter(typeof(JsonStringEnumConverter))]  public enum UploadTypeEnum
 {
     Jpg,
     Png,

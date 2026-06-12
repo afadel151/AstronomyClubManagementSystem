@@ -1,6 +1,8 @@
 namespace Data.Entities.Enums;
 
-public enum MagnitudeSystemEnum
+
+using System.Text.Json.Serialization;
+[JsonConverter(typeof(JsonStringEnumConverter))]  public enum MagnitudeSystemEnum
 {
     Vega,
     AB,
