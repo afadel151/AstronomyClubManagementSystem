@@ -41,29 +41,27 @@
         </RadzenPanelMenuItem>
         <RadzenPanelMenuItem Text="Projects" Icon="folder">
             <RadzenPanelMenuItem Text="All Projects" Icon="folder_open" Match="NavLinkMatch.All" Path="/projects"/>
-            <RadzenPanelMenuItem Text="My Projects" Icon="bookmark" />
             <RadzenPanelMenuItem Text="New Project" Icon="create_new_folder" Path="/projects/insert" />
         </RadzenPanelMenuItem>
         <RadzenPanelMenuItem Text="Observations" Icon="table_eye">
-            <RadzenPanelMenuItem Text="Observation Sessions" Icon="schedule" Match="NavLinkMatch.All"  />
-            <RadzenPanelMenuItem Text="My Sessions" Icon="view_timeline" />
-            <RadzenPanelMenuItem Text="New Session" Icon="alarm_add" />
+            <RadzenPanelMenuItem Text="Observation Sessions" Icon="schedule" Match="NavLinkMatch.All" Path="/observation_sessions"  />
+            <RadzenPanelMenuItem Text="New Session" Icon="alarm_add" Path="/observation_sessions/insert"  />
         </RadzenPanelMenuItem>
-        <RadzenPanelMenuItem Text="Objectives" Icon="flag">
-            <RadzenPanelMenuItem Text="Our Objectives" Icon="calendar_view_week" Match="NavLinkMatch.All" />
-            <RadzenPanelMenuItem Text="New Objective" Icon="add_ad" />
+        <RadzenPanelMenuItem Text="Forecasts" Icon="flag">
+            <RadzenPanelMenuItem Text="All Forecasts" Icon="calendar_view_week" Match="NavLinkMatch.All" Path="/forecasts"  />
+            <RadzenPanelMenuItem Text="New Forecast" Icon="add_ad"  Path="/forecasts/insert"  />
         </RadzenPanelMenuItem>
         <RadzenPanelMenuItem Text="Targets" Icon="planet">
-            <RadzenPanelMenuItem Text="All Targets" Icon="assignment_globe" Match="NavLinkMatch.All" />
-            <RadzenPanelMenuItem Text="Catalogues" Icon="bookmark_stacks" />
+            <RadzenPanelMenuItem Text="All Targets" Icon="assignment_globe" Match="NavLinkMatch.All" Path="/targets" />
+            <RadzenPanelMenuItem Text="Catalogues" Icon="bookmark_stacks" Path="/catalogues" />
         </RadzenPanelMenuItem>
         <RadzenPanelMenuItem Text="Members" Icon="groups">
-            <RadzenPanelMenuItem Text="All Members" Icon="patient_list" Match="NavLinkMatch.All" />
+            <RadzenPanelMenuItem Text="All Members" Icon="patient_list" Match="NavLinkMatch.All" Path="/members"  />
             <RadzenPanelMenuItem Text="Club chat" Icon="chat" />
         </RadzenPanelMenuItem>
         <RadzenPanelMenuItem Text="Inventory" Icon="package_2">
-            <RadzenPanelMenuItem Text="Equipments" Icon="box" Match="NavLinkMatch.All" />
-            <RadzenPanelMenuItem Text="Accessories" Icon="docs_add_on" />
+            <RadzenPanelMenuItem Text="Equipments" Icon="box" Match="NavLinkMatch.All" Path="/equipments"  />
+            <RadzenPanelMenuItem Text="Accessories" Icon="docs_add_on" Path="/equipments/accessories" />
         </RadzenPanelMenuItem>
     </RadzenPanelMenu>
 </RadzenSidebar>
