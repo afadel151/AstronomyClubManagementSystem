@@ -17,6 +17,7 @@ public sealed record EquipmentModelDetailDto(
     string? FitsInstrume,
     int EquipmentsCount,
     DateTimeOffset CreatedAt,
-    List<CompatibleWithDto> Compatibles
+    List<CompatibleWithDto> Compatibles,
+    List<EquipmentListItemDto> Equipments
 );
 
