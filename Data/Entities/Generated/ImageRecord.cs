@@ -31,7 +31,6 @@ public partial class ImageRecord
     [StringLength(450)]
     public string? ProcessedBy { get; set; }
 
-    [StringLength(20)]
     public ImageTypeEnum ImageType { get; set; }
 
     public DateTimeOffset CaptureDateUtc { get; set; }
@@ -47,7 +46,7 @@ public partial class ImageRecord
 
     public int? FrameCount { get; set; }
 
-    [StringLength(20)]
+
     public ImagePublicationStatusEnum PublicationStatus { get; set; }
 
     public bool IsShowcase { get; set; }

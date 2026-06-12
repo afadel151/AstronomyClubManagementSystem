@@ -17,7 +17,6 @@ public partial class ProjectMember
     [Key]
     public string UserId { get; set; } = null!;
 
-    [StringLength(20)]
     public ProjectMemberRoleEnum Role { get; set; }
 
     public DateOnly JoinDate { get; set; }

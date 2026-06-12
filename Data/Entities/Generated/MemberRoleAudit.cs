@@ -19,8 +19,8 @@ public partial class MemberRoleAudit
 
     public string RoleId { get; set; } = null!;
 
-    [StringLength(10)]
-    [Unicode(false)]
+
+
     public MemberRoleAuditActionEnum Action { get; set; }
 
     public DateTimeOffset ActionDate { get; set; }

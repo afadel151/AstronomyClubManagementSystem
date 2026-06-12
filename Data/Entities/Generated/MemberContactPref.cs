@@ -15,8 +15,6 @@ public partial class MemberContactPref
 
     public string UserId { get; set; } = null!;
 
-    [StringLength(20)]
-    [Unicode(false)]
     public ContactChannelEnum Channel { get; set; }
 
     [StringLength(200)]

@@ -39,7 +39,7 @@ public partial class EquipmentModel
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
 
-    [StringLength(50)]
+
     public EquipmentOpticalDesignEnum? OpticalDesign { get; set; }
 
     [InverseProperty("EquipmentModel")]

@@ -34,10 +34,8 @@ public partial class Task
 
     public int TaskTypeId { get; set; }
 
-    [StringLength(20)]
     public TaskStatusEnum Status { get; set; }
 
-    [StringLength(10)]
     public TaskPriorityEnum Priority { get; set; }
 
     public DateOnly? DueDate { get; set; }

@@ -25,7 +25,6 @@ public partial class Equipment
     public int ModelId { get; set; }
     
     // status
-    [StringLength(20)]
     public EquipmentStatusEnum Status { get; set; }
 
 

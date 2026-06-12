@@ -28,13 +28,11 @@ public partial class Project
 
     public int ProjectTypeId { get; set; }
 
-    [StringLength(20)]
     public ProjectStatusEnum Status { get; set; }
 
-    [StringLength(10)]
     public ProjectPriorityEnum Priority { get; set; }
 
-    [StringLength(15)]
+
     public ProjectVisibilityEnum Visibility { get; set; }
 
     public DateOnly? StartDate { get; set; }

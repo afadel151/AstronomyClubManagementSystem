@@ -37,7 +37,7 @@ public partial class Event
 
     public DateTimeOffset? EventEndUtc { get; set; }
 
-    [StringLength(30)]
+
     public EventGlobalVisibilityEnum? VisibilityGlobal { get; set; }
 
     [Column(TypeName = "decimal(13, 9)")]

@@ -41,7 +41,7 @@ public partial class ObservationSession
     [StringLength(450)]
     public string LeadUserId { get; set; } = null!;
 
-    [StringLength(20)]
+
     public ObservationSessionStatusEnum Status { get; set; }
 
     public int SessionTypeId { get; set; }

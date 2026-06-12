@@ -51,8 +51,6 @@ public partial class Observation
     [Column(TypeName = "decimal(15, 7)")]
     public decimal? BjdTdb { get; set; }
 
-    [StringLength(10)]
-    [Unicode(false)]
     public ObservationTimeSystemEnum Timesys { get; set; }
 
     [Column(TypeName = "decimal(10, 3)")]
@@ -106,8 +104,6 @@ public partial class Observation
     [Unicode(false)]
     public string? MagnitudeFilter { get; set; }
 
-    [StringLength(10)]
-    [Unicode(false)]
     public MagnitudeSystemEnum? MagnitudeSystem { get; set; }
 
     public bool FainterThan { get; set; }

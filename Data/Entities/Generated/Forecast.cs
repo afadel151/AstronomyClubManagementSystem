@@ -27,7 +27,7 @@ public partial class Forecast
 
     public int CategoryId { get; set; }
 
-    [StringLength(20)]
+
     public ForecastStatusEnum Status { get; set; }
 
     public short PeriodYear { get; set; }

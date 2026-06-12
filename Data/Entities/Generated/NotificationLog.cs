@@ -15,8 +15,6 @@ public partial class NotificationLog
     [StringLength(450)]
     public string RecipientId { get; set; } = null!;
 
-    [StringLength(20)]
-    [Unicode(false)]
     public ContactChannelEnum Channel { get; set; }
 
     [StringLength(200)]
@@ -42,8 +40,6 @@ public partial class NotificationLog
 
     public string? PayloadJson { get; set; }
 
-    [StringLength(20)]
-    [Unicode(false)]
     public NotificationStatusEnum Status { get; set; }
 
     public DateTimeOffset? ScheduledFor { get; set; }

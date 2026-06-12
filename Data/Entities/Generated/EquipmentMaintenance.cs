@@ -19,7 +19,6 @@ public partial class EquipmentMaintenance
 
     public DateOnly MaintenanceDate { get; set; }
 
-    [StringLength(30)]
     public EquipmentMaintenanceTypeEnum MaintenanceType { get; set; }
 
     [StringLength(450)]
@@ -27,8 +26,6 @@ public partial class EquipmentMaintenance
 
     [StringLength(2000)]
     public string Description { get; set; } = null!;
-
-    [StringLength(20)]
     public EquipmentMaintenanceResultEnum Result { get; set; }
 
     public DateOnly? NextDueDate { get; set; }

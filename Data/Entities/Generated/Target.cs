@@ -97,8 +97,7 @@ public partial class Target
     [Unicode(false)]
     public string? MagnitudeFilter { get; set; }
 
-    [StringLength(10)]
-    [Unicode(false)]
+
     public MagnitudeSystemEnum? MagnitudeSystem { get; set; }
 
     [StringLength(3)]

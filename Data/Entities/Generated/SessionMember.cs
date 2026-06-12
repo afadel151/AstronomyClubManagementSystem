@@ -17,7 +17,7 @@ public partial class SessionMember
     [Key]
     public string UserId { get; set; } = null!;
 
-    [StringLength(30)]
+
     public SessionMemberRoleEnum SessionRole { get; set; }
 
     public DateTimeOffset? ArrivalTimeUtc { get; set; }
