@@ -141,15 +141,15 @@ public partial class AstroClubDbContext : IdentityDbContext<ApplicationUser, App
         });
         modelBuilder.Entity<EquipmentCompatibility>(entity =>
         {
-            entity.HasKey(e => new { e.EquipmentId, e.CompatibleWithId });
+            entity.HasKey(e => new { e.AccessoryId, e.CompatibleWithId });
 
             entity.HasOne(ec => ec.Accessory)
-                .WithMany()
-                .HasForeignKey(ec => ec.EquipmentId)
+                .WithMany(em => em.Compatibilities)
+                .HasForeignKey(ec => ec.AccessoryId)
                 .OnDelete(DeleteBehavior.NoAction);   
 
-            entity.HasOne(ec => ec.CompatibleEquipment)
-                .WithMany()
+            entity.HasOne(ec => ec.CompatibleWith)
+                .WithMany(em => em.CompatibleWith)
                 .HasForeignKey(ec => ec.CompatibleWithId)
                 .OnDelete(DeleteBehavior.NoAction);   
         });

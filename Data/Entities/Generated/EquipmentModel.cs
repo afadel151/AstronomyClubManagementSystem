@@ -52,4 +52,10 @@ public partial class EquipmentModel
     [ForeignKey("BrandId")]
     [InverseProperty("EquipmentModels")]
     public virtual EquipmentBrand EquipmentBrand { get; set; } = null!;
+
+    [InverseProperty("Accessory")]
+    public virtual ICollection<EquipmentCompatibility> Compatibilities { get; set; } = [];
+
+    [InverseProperty("CompatibleWith")]
+    public virtual ICollection<EquipmentCompatibility> CompatibleWith { get; set; } = [];
 }
