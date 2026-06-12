@@ -1,5 +1,6 @@
-namespace Domain.Shared.DTO.Equipment;
-public record EquipmentListItemDto(
+namespace Domain.Shared.DTO.Equipment.Accessory;
+
+public record AccessoryListItemDto(
     int Id,
     string Code,
     string? SerialNumber,
@@ -8,10 +9,7 @@ public record EquipmentListItemDto(
     string BrandName,
     string CategoryName,
     string Status,
-    int ChildPartsCount,
     string? Location,
     int TotalUsageHours,
     DateTimeOffset CreatedAt
 );
-
-
