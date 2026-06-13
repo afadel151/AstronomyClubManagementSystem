@@ -90,7 +90,7 @@ public static class BffEndpointRouteBuilderExtensions
             return Results.Redirect(SafeReturnUrl(returnUrl));
         });
 
-        
+
         group.MapPost("/refresh", async (
             [FromServices] IHttpClientFactory factory,
             HttpContext ctx) =>
