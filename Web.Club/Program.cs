@@ -13,6 +13,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 // ── Auth config ───────────────────────────────────────────────────────────────
+builder.Services.AddScoped<CircuitTokenHolder>();
 builder.Services.Configure<AuthApiOptions>(
     builder.Configuration.GetSection(AuthApiOptions.SectionName));
 builder.Services.Configure<JwtOptions>(
@@ -41,7 +42,6 @@ builder.Services.AddCascadingAuthenticationState();
 
 builder.Services.AddApplicationServices();
 builder.Services.AddTransient<BearerTokenHandler>();
-
 builder.Services.AddHttpClient("AuthApi", (sp, client) =>
 {
     var opts = sp.GetRequiredService<IOptions<AuthApiOptions>>().Value;
@@ -52,8 +52,7 @@ builder.Services.AddHttpClient("Api", (sp, client) =>
 {
     var opts = sp.GetRequiredService<IOptions<AuthApiOptions>>().Value;
     client.BaseAddress = new Uri(opts.BaseUrl);
-})
-    .AddHttpMessageHandler<BearerTokenHandler>();
+}).AddHttpMessageHandler<BearerTokenHandler>();
 
 // ── Other services ─────────────────────────────────────────────────────────────
 builder.Services.AddRadzenComponents();
