@@ -75,7 +75,7 @@ builder.Services.AddAuthentication(options =>
 {
     options.LoginPath         = "/account/login";
     options.AccessDeniedPath  = "/account/access-denied";
-    options.ExpireTimeSpan    = TimeSpan.FromDays(1);
+    options.ExpireTimeSpan    = TimeSpan.FromMinutes(2);
     options.SlidingExpiration = true;
     options.Cookie.HttpOnly   = true;
     options.Cookie.SameSite   = SameSiteMode.Strict;
