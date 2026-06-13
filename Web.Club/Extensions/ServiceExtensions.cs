@@ -24,6 +24,7 @@ public static class ServiceExtensions
         services.AddScoped<IObservationService,ObservationService>();
         services.AddScoped<IProjectService,ProjectService>();
         services.AddScoped<ITargetService,TargetService>();
+        services.AddScoped<IEquipmentService,EquipmentService>();
         return services;
     }
 }
