@@ -1,6 +1,150 @@
 @page "/equipments"
+@using Web.Club.Services
+@using Domain.Shared.DTO.Equipment
+@using Domain.Shared.DTO
+@using Data.Entities.Enums
+@inject IEquipmentService equipmentService
+@inject NavigationManager Nav
 
+<RadzenStack Gap="1rem">
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
+                 JustifyContent="JustifyContent.SpaceBetween" Gap="1rem">
 
-<div>
-    Equipments page
-</div>
+        <RadzenTextBox @bind-Value="SearchText" Placeholder="Search by name, code, serial…"
+                       Change="@(_ => grid.Reload())" Style="max-width:320px;" />
+
+        <RadzenButton Text="Add Equipment" Icon="add" ButtonStyle="ButtonStyle.Primary"
+                      Click="@(() => Nav.NavigateTo("/equipments/insert"))" />
+
+    </RadzenStack>
+
+    <RadzenDataGrid @ref="grid" TItem="EquipmentListItemDto" Data="equipments" Count="count" LoadData="LoadData"
+                    IsLoading="isLoading" AllowSorting="true" AllowPaging="true" PageSize="10"
+                    PagerHorizontalAlign="HorizontalAlign.Right" ShowPagingSummary="true" EmptyText="No equipment found."
+                    Style="width: 100%;">
+
+        <Columns>
+
+            <RadzenDataGridColumn TItem="EquipmentListItemDto" Title="Image" Width="100px" Sortable="false"
+                                  Filterable="false">
+                <Template Context="item">
+                    <div style="display:flex;justify-content:center;align-items:center;width:100%;">
+                        <img src="@(!string.IsNullOrEmpty(item.MainImagePresignedUrl)
+                                                                                                                                            ? item.MainImagePresignedUrl
+                                                                                                                                            : "/images/no-image.png")"
+                             alt="@item.ModelName" style="width:80px;height:80px;object-fit:cover;"
+                             onerror="this.onerror=null;this.src='/images/no-image.png';" />
+                    </div>
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="EquipmentListItemDto" Property="Code" Title="Code" Width="130px">
+                <Template Context="item">
+                    <div style="font-family:monospace;font-size:12px;">@item.Code</div>
+                    @if (!string.IsNullOrEmpty(item.SerialNumber))
+                    {
+                        <div style="font-size:11px;color:#999;">@item.SerialNumber</div>
+                    }
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="EquipmentListItemDto" Width="120px" Property="ModelName" Title="Equipment">
+                <Template Context="item">
+                    <div style="font-weight:500;">@item.ModelName</div>
+                    <div style="font-size:12px;color:#888;">@item.BrandName</div>
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="EquipmentListItemDto" Property="CategoryName" Title="Category" Width="60px" />
+
+            <RadzenDataGridColumn TItem="EquipmentListItemDto" Property="Status" Title="Status" Width="60px">
+                <Template Context="item">
+                    <span style="@GetStatusStyle(item.Status)">
+                        @GetStatusLabel(item.Status)
+                    </span>
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="EquipmentListItemDto" Property="Location" Title="Location" Width="60px">
+                <Template Context="item">
+                    @(item.Location ?? "—")
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="EquipmentListItemDto" Property="TotalUsageHours" Title="Usage Hours"
+                                  Width="80px" TextAlign="TextAlign.Left" />
+
+            <RadzenDataGridColumn TItem="EquipmentListItemDto" Property="ChildPartsCount" Title="Number of Parts"
+                                  Width="80px" TextAlign="TextAlign.Left" />
+
+            <RadzenDataGridColumn TItem="EquipmentListItemDto" Property="CreatedAt" Title="Added" Width="60px"
+                                  FormatString="{0:dd MMM yyyy}" />
+
+        </Columns>
+    </RadzenDataGrid>
+</RadzenStack>
+
+@code {
+    private RadzenDataGrid<EquipmentListItemDto> grid = default!;
+    private List<EquipmentListItemDto>? equipments;
+    private bool isLoading;
+    private int count;
+    private string SearchText = "";
+
+    private async Task LoadData(LoadDataArgs args)
+    {
+        isLoading = true;
+        try
+        {
+            int skip = args.Skip ?? 0;
+            int top = args.Top ?? 10;
+
+            var queryParams = new PagedQueryParams
+            {
+                PageNumber = (skip / top) + 1,
+                PageSize = top,
+                OrderBy = string.IsNullOrEmpty(args.OrderBy) ? "createdAt desc" : args.OrderBy,
+                Search = SearchText
+            };
+
+            var result = await equipmentService.GetEquipmentListAsync(queryParams);
+
+            equipments = result?.Items ?? [];
+            count = result?.TotalCount ?? 0;
+        }
+        catch (Exception ex)
+        {
+            equipments = [];
+            count = 0;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private static string GetStatusLabel(EquipmentStatusEnum status) => status switch
+    {
+        EquipmentStatusEnum.Operational => "Operational",
+        EquipmentStatusEnum.Maintenance => "Maintenance",
+        EquipmentStatusEnum.Loaned => "Loaned",
+        EquipmentStatusEnum.Lost => "Lost",
+        EquipmentStatusEnum.Retired => "Retired",
+        _ => status.ToString()
+    };
+
+    private static string GetStatusStyle(EquipmentStatusEnum status) => status switch
+    {
+        EquipmentStatusEnum.Operational =>
+            "background:#EAF3DE;color:#3B6D11;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500;",
+        EquipmentStatusEnum.Maintenance =>
+            "background:#E6F1FB;color:#185FA5;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500;",
+        EquipmentStatusEnum.Loaned =>
+            "background:#FAEEDA;color:#854F0B;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500;",
+        EquipmentStatusEnum.Lost =>
+            "background:#FCEBEB;color:#A32D2D;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500;",
+        EquipmentStatusEnum.Retired =>
+            "background:#F1EFE8;color:#5F5E5A;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500;",
+        _ => ""
+    };
+}
