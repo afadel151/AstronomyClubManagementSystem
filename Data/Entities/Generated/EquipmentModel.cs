@@ -29,6 +29,7 @@ public partial class EquipmentModel
     [StringLength(68)]
     [Unicode(false)]
     public string? FitsTelescop { get; set; }
+    public string? Url { get; set; }
 
     [StringLength(68)]
     [Unicode(false)]
