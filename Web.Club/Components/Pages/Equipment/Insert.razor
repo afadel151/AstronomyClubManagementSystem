@@ -1,1 +1,187 @@
 @page "/equipments/insert"
+@using Domain.Shared.DTO.Equipment
+@using Data.Entities.Enums
+@using Web.Club.Services
+@inject IEquipmentService EquipmentService
+@inject NavigationManager Nav
+@attribute [Authorize]
+
+<RadzenStack Gap="1.5rem" Style="max-width:640px;margin:2rem auto;padding:0 1rem;">
+
+    <div style="display:flex;align-items:center;gap:0.75rem;">
+        <RadzenButton Icon="arrow_back"
+                      ButtonStyle="ButtonStyle.Light"
+                      Size="ButtonSize.Small"
+                      Click="@(() => Nav.NavigateTo("/equipments"))" />
+        <h2 style="margin:0;font-size:1.2rem;font-weight:600;">Add Equipment</h2>
+    </div>
+
+    @if (!string.IsNullOrEmpty(_error))
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Danger"
+                     Shade="Shade.Lighter"
+                     AllowClose="false">
+            @_error
+        </RadzenAlert>
+    }
+
+    <RadzenCard>
+        <RadzenStack Gap="1rem">
+
+            <p style="margin:0;font-size:0.8rem;font-weight:600;
+                      text-transform:uppercase;letter-spacing:.05em;
+                      color:var(--rz-text-secondary-color);">
+                Identification
+            </p>
+
+            <RadzenRow Gap="1rem">
+                <RadzenColumn Size="12" SizeMD="6">
+                    <RadzenFormField Text="Code *" Style="width:100%">
+                        <RadzenTextBox @bind-Value="_model.Code"
+                                       Style="width:100%"
+                                       Placeholder="EQ-001" />
+                    </RadzenFormField>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="6">
+                    <RadzenFormField Text="Serial Number" Style="width:100%">
+                        <RadzenTextBox @bind-Value="_model.SerialNumber"
+                                       Style="width:100%"
+                                       Placeholder="Optional" />
+                    </RadzenFormField>
+                </RadzenColumn>
+            </RadzenRow>
+
+            <RadzenRow Gap="1rem">
+                <RadzenColumn Size="12" SizeMD="6">
+                    <RadzenFormField Text="Model Name *" Style="width:100%">
+                        <RadzenTextBox @bind-Value="_model.ModelName"
+                                       Style="width:100%" />
+                    </RadzenFormField>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="6">
+                    <RadzenFormField Text="Brand *" Style="width:100%">
+                        <RadzenTextBox @bind-Value="_model.BrandName"
+                                       Style="width:100%" />
+                    </RadzenFormField>
+                </RadzenColumn>
+            </RadzenRow>
+
+        </RadzenStack>
+    </RadzenCard>
+
+    <RadzenCard>
+        <RadzenStack Gap="1rem">
+
+            <p style="margin:0;font-size:0.8rem;font-weight:600;
+                      text-transform:uppercase;letter-spacing:.05em;
+                      color:var(--rz-text-secondary-color);">
+                Classification
+            </p>
+
+            <RadzenRow Gap="1rem">
+                <RadzenColumn Size="12" SizeMD="6">
+                    <RadzenFormField Text="Category *" Style="width:100%">
+                        {{!-- TODO: replace with RadzenDropDown bound to GET api/categories --}}
+                        <RadzenTextBox @bind-Value="_model.CategoryName"
+                                       Style="width:100%" />
+                    </RadzenFormField>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="6">
+                    <RadzenFormField Text="Status *" Style="width:100%">
+                        <RadzenDropDown @bind-Value="_model.Status"
+                                        Data="@_statuses"
+                                        TextProperty="Label"
+                                        ValueProperty="Value"
+                                        Style="width:100%" />
+                    </RadzenFormField>
+                </RadzenColumn>
+            </RadzenRow>
+
+            <RadzenFormField Text="Location" Style="width:100%">
+                <RadzenTextBox @bind-Value="_model.Location"
+                               Style="width:100%"
+                               Placeholder="Yard A, Workshop, Site 3…" />
+            </RadzenFormField>
+
+        </RadzenStack>
+    </RadzenCard>
+
+    <div style="display:flex;justify-content:flex-end;gap:0.75rem;">
+        <RadzenButton Text="Cancel"
+                      ButtonStyle="ButtonStyle.Light"
+                      Click="@(() => Nav.NavigateTo("/equipments"))" />
+        <RadzenButton Text="Save Equipment"
+                      ButtonStyle="ButtonStyle.Primary"
+                      Icon="save"
+                      IsBusy="_saving"
+                      BusyText="Saving…"
+                      Click="Submit" />
+    </div>
+
+</RadzenStack>
+
+@code {
+    private bool _saving;
+    private string? _error;
+    private CreateEquipmentModel _model = new();
+
+    private record StatusOption(string Label, EquipmentStatusEnum Value);
+    private readonly List<StatusOption> _statuses =
+    [
+        new("Operational", EquipmentStatusEnum.Operational),
+        new("Maintenance", EquipmentStatusEnum.Maintenance),
+        new("Loaned",      EquipmentStatusEnum.Loaned),
+        new("Lost",        EquipmentStatusEnum.Lost),
+        new("Retired",     EquipmentStatusEnum.Retired),
+    ];
+
+    private async Task Submit()
+    {
+        if (string.IsNullOrWhiteSpace(_model.Code)         ||
+            string.IsNullOrWhiteSpace(_model.ModelName)    ||
+            string.IsNullOrWhiteSpace(_model.BrandName)    ||
+            string.IsNullOrWhiteSpace(_model.CategoryName))
+        {
+            _error = "Code, Model Name, Brand and Category are required.";
+            return;
+        }
+
+        _saving = true;
+        _error  = null;
+
+        try
+        {
+            // TODO: replace with real call
+            // var success = await EquipmentService.CreateEquipmentAsync(_model);
+            // if (!success)
+            // {
+            //     _error = "Server rejected the request.";
+            //     return;
+            // }
+
+            Nav.NavigateTo("/equipments");
+        }
+        catch (Exception)
+        {
+            // TODO: inject ILogger<Insert> and log ex
+            _error = "Unexpected error. Try again or check logs.";
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    // TODO: replace with Domain.Shared.DTO.Equipment.CreateEquipmentDto
+    // Fields and nullability must exactly match your API [FromBody] contract
+    private sealed class CreateEquipmentModel
+    {
+        public string Code          { get; set; } = "";
+        public string? SerialNumber { get; set; }
+        public string ModelName     { get; set; } = "";
+        public string BrandName     { get; set; } = "";
+        public string CategoryName  { get; set; } = "";
+        public string? Location     { get; set; }
+        public EquipmentStatusEnum Status { get; set; } = EquipmentStatusEnum.Operational;
+    }
+}

@@ -136,16 +136,16 @@ public partial class AstroClubDbContext : IdentityDbContext<ApplicationUser, App
         });
         modelBuilder.Entity<EquipmentModelCompatibility>(entity =>
         {
-            entity.HasKey(e => new { e.AccessoryId, e.CompatibleWithId });
+            entity.HasKey(e => new { e.ModelId, e.CompatibleWithModelId });
 
-            entity.HasOne(ec => ec.Accessory)
+            entity.HasOne(ec => ec.Model)
                 .WithMany(em => em.Compatibilities)
-                .HasForeignKey(ec => ec.AccessoryId)
+                .HasForeignKey(ec => ec.ModelId)
                 .OnDelete(DeleteBehavior.NoAction);   
 
-            entity.HasOne(ec => ec.CompatibleWith)
+            entity.HasOne(ec => ec.CompatibleWithModel)
                 .WithMany(em => em.CompatibleWith)
-                .HasForeignKey(ec => ec.CompatibleWithId)
+                .HasForeignKey(ec => ec.CompatibleWithModelId)
                 .OnDelete(DeleteBehavior.NoAction);   
         });
         modelBuilder.Entity<Event>(entity =>

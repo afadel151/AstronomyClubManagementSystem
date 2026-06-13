@@ -4,16 +4,21 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Data.Entities.Generated;
 public class EquipmentModelCompatibility
 {
-    public int AccessoryId { get; set; }       
-    public int CompatibleWithId { get; set; }     
+    public int ModelId { get; set; }
+    public int CompatibleWithModelId { get; set; }
 
-    [StringLength(50)]
-    public string? CompatibilityNote { get; set; } 
+    [StringLength(300)]
+    public string? Note { get; set; }
+
+    // True = designed exclusively for this pairing
     public bool IsDedicated { get; set; } = false;
 
-    [ForeignKey("AccessoryId")]
-    public virtual EquipmentModel Accessory { get; set; } = null!;
+    // True = this part ships with / is required by the parent model
+    public bool IsIncludedByDefault { get; set; } = false;
 
-    [ForeignKey("CompatibleWithId")]
-    public virtual EquipmentModel CompatibleWith { get; set; } = null!;
+    [ForeignKey("ModelId")]
+    public virtual EquipmentModel Model { get; set; } = null!;
+
+    [ForeignKey("CompatibleWithModelId")]
+    public virtual EquipmentModel CompatibleWithModel { get; set; } = null!;
 }
