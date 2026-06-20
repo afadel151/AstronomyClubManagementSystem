@@ -1,9 +1,13 @@
-@page "/equipments/{Id}"
+@page "/equipments/{Id:int}"
+@inject NavigationManager Nav
 
-
+<div style="display:flex;align-items:center;gap:0.75rem;">
+    <RadzenButton Icon="arrow_back" ButtonStyle="ButtonStyle.Light" Size="ButtonSize.Small"
+                  Click="@(() => Nav.NavigateTo("/equipments"))" />
+</div>
 
 @code {
 
     [Parameter]
-    public int Id { get; set; } 
+    public int Id { get; set; }
 }

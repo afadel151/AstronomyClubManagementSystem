@@ -1,5 +1,5 @@
 @page "/equipments"
-@using Web.Club.Services
+@using Web.Club.Services.Equipments
 @using Domain.Shared.DTO.Equipment
 @using Domain.Shared.DTO
 @using Data.Entities.Enums
@@ -81,7 +81,18 @@
 
             <RadzenDataGridColumn TItem="EquipmentListItemDto" Property="CreatedAt" Title="Added" Width="60px"
                                   FormatString="{0:dd MMM yyyy}" />
-
+            <RadzenDataGridColumn TItem="EquipmentListItemDto"
+                                  Title="Actions" Width="60px"
+                                  Sortable="false" Filterable="false"
+                                  TextAlign="TextAlign.Center">
+                <Template Context="item">
+                    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem" JustifyContent="JustifyContent.Center">
+                        <RadzenButton Icon="visibility" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"
+                                      Text="View"
+                                      Click="@(() => Nav.NavigateTo($"/equipments/{item.Id}"))" />
+                    </RadzenStack>
+                </Template>
+            </RadzenDataGridColumn>
         </Columns>
     </RadzenDataGrid>
 </RadzenStack>
