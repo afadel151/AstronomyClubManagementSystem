@@ -10,10 +10,8 @@ public class EquipmentModelCompatibility
     [StringLength(300)]
     public string? Note { get; set; }
 
-    // True = designed exclusively for this pairing
     public bool IsDedicated { get; set; } = false;
 
-    // True = this part ships with / is required by the parent model
     public bool IsIncludedByDefault { get; set; } = false;
 
     [ForeignKey("ModelId")]

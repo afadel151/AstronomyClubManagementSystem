@@ -6,7 +6,7 @@ using Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
 
 
-namespace Application.Services;
+namespace Application.Services.Equipments;
 
 public interface IEquipmentService
 {
@@ -99,23 +99,20 @@ public sealed class EquipmentService(
             "CODE ASC" => query.OrderBy(x => x.Code),
             "CODE DESC" => query.OrderByDescending(x => x.Code),
 
-            "SERIAL_NUMBER ASC" => query.OrderBy(x => x.SerialNumber),
-            "SERIAL_NUMBER DESC" => query.OrderByDescending(x => x.SerialNumber),
+            "CREATEDAT ASC" => query.OrderBy(x => x.CreatedAt),
+            "CREATEDAT DESC" => query.OrderByDescending(x => x.CreatedAt),
 
-            "CREATED_AT ASC" => query.OrderBy(x => x.CreatedAt),
-            "CREATED_AT DESC" => query.OrderByDescending(x => x.CreatedAt),
+            "TOTALUSAGEHOURS ASC" => query.OrderBy(x => x.TotalUsageHours),
+            "TOTALUSAGEHOURS DESC" => query.OrderByDescending(x => x.TotalUsageHours),
 
-            "TOTAL_USAGE_HOURS ASC" => query.OrderBy(x => x.TotalUsageHours),
-            "TOTAL_USAGE_HOURS DESC" => query.OrderByDescending(x => x.TotalUsageHours),
+            "MODELNAME ASC" => query.OrderBy(x => x.EquipmentModel.Name),
+            "MODELNAME DESC" => query.OrderByDescending(x => x.EquipmentModel.Name),
 
-            "MODEL_NAME ASC" => query.OrderBy(x => x.EquipmentModel.Name),
-            "MODEL_NAME DESC" => query.OrderByDescending(x => x.EquipmentModel.Name),
+            "BRANDNAME ASC" => query.OrderBy(x => x.EquipmentModel.EquipmentBrand.Name),
+            "BRANDNAME DESC" => query.OrderByDescending(x => x.EquipmentModel.EquipmentBrand.Name),
 
-            "BRAND_NAME ASC" => query.OrderBy(x => x.EquipmentModel.EquipmentBrand.Name),
-            "BRAND_NAME DESC" => query.OrderByDescending(x => x.EquipmentModel.EquipmentBrand.Name),
-
-            "CATEGORY_NAME ASC" => query.OrderBy(x => x.EquipmentModel.EquipmentCategory.Name),
-            "CATEGORY_NAME DESC" => query.OrderByDescending(x => x.EquipmentModel.EquipmentCategory.Name),
+            "CATEGORYNAME ASC" => query.OrderBy(x => x.EquipmentModel.EquipmentCategory.Name),
+            "CATEGORYNAME DESC" => query.OrderByDescending(x => x.EquipmentModel.EquipmentCategory.Name),
 
             _ => query.OrderByDescending(x => x.CreatedAt)
         };
