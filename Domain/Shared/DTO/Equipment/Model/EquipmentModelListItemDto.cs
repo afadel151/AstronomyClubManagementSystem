@@ -6,6 +6,7 @@ public record EquipmentModelListItemDto(
     string Name,
     string BrandName,
     string CategoryName,
+    string? Url,
     bool Accessory,
     int EquipmentsCount,
     DateTimeOffset CreatedAt
