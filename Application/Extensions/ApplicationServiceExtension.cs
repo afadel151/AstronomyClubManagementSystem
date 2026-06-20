@@ -1,6 +1,7 @@
 using Application.Factories;
 using Application.Repositories;
 using Application.Services;
+using Application.Services.Equipments;
 using Data.Entities.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,6 +27,9 @@ public static class ServiceExtensions
         services.AddScoped<IEventService, EventService>();
         services.AddScoped<IMemberService, MemberService>();
         services.AddScoped<IEquipmentService, EquipmentService>();
+        services.AddScoped<IEquipmentBrandService, EquipmentBrandService>();
+
+        // IEquipmentBrandService
         // services.AddScoped<IObservationService, ObservationService>();
         services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, ApplicationUserClaimsPrincipalFactory>();
 
