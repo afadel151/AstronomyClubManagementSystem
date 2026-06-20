@@ -1,0 +1,211 @@
+@page "/equipment/brands"
+@using Web.Club.Services.Equipments
+@using Domain.Shared.DTO.Equipment.Brand
+@using Domain.Shared.DTO
+@inject IEquipmentBrandService brandService
+@inject NavigationManager Nav
+
+<PageTitle>Equipment Brands</PageTitle>
+
+<style>
+    .brand-logo {
+        width: 60px;
+        height: 60px;
+        object-fit: contain;
+        border-radius: 6px;
+    }
+
+    .badge-active {
+        background: #EAF3DE;
+        color: #3B6D11;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .badge-inactive {
+        background: #FCEBEB;
+        color: #A32D2D;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .country-flag {
+        font-size: 11px;
+        color: #888;
+    }
+
+    .model-count {
+        font-weight: 600;
+        color: #185FA5;
+    }
+</style>
+
+<RadzenStack Gap="1rem">
+
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
+                 JustifyContent="JustifyContent.SpaceBetween" Gap="1rem">
+
+        <RadzenTextBox @bind-Value="searchText"
+                       Placeholder="Search by name or country…"
+                       Change="@(_ => grid.Reload())"
+                       Style="max-width:320px;" />
+
+        <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem">
+
+        <EquipmentBrandInsertButton OnBrandInserted="grid.Reload" />
+        </RadzenStack>
+
+    </RadzenStack>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Danger" ShowIcon="true" Variant="Variant.Flat">
+            @errorMessage
+        </RadzenAlert>
+    }
+
+    <RadzenDataGrid @ref="grid"
+                    TItem="EquipmentBrandlListItemDto"
+                    Data="brands"
+                    Count="count"
+                    LoadData="LoadData"
+                    IsLoading="isLoading"
+                    AllowSorting="true"
+                    AllowPaging="true"
+                    PageSize="10"
+                    PagerHorizontalAlign="HorizontalAlign.Right"
+                    ShowPagingSummary="true"
+                    EmptyText="No brands found."
+                    Style="width:100%;">
+
+        <Columns>
+
+            <RadzenDataGridColumn TItem="EquipmentBrandlListItemDto"
+                                  Title="Logo" Width="90px"
+                                  Sortable="false" Filterable="false">
+                <Template Context="item">
+                    <div style="display:flex;justify-content:center;">
+                        <img src="@(!string.IsNullOrEmpty(item.LogoUrl) ? item.LogoUrl : "/images/no-logo.png")"
+                             alt="@item.Name"
+                             class="brand-logo"
+                             onerror="this.onerror=null;this.src='/images/no-logo.png';" />
+                    </div>
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="EquipmentBrandlListItemDto"
+                                  Property="Name" Title="Brand" Width="200px">
+                <Template Context="item">
+                    <div style="font-weight:500;">@item.Name</div>
+                    <div class="country-flag">@(item.CountryOfOrigin ?? "—")</div>
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="EquipmentBrandlListItemDto"
+                                  Property="Slug" Title="Slug" Width="160px">
+                <Template Context="item">
+                    <div style="font-family:monospace;font-size:12px;color:#666;">@item.Slug</div>
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="EquipmentBrandlListItemDto"
+                                  Property="ModelsCount" Title="Models"
+                                  Width="90px" TextAlign="TextAlign.Center">
+                <Template Context="item">
+                    <span class="model-count">@item.ModelsCount</span>
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="EquipmentBrandlListItemDto"
+                                  Property="Notes" Title="Notes" Width="220px">
+                <Template Context="item">
+                    @if (!string.IsNullOrEmpty(item.Notes))
+                    {
+                        <div style="font-size:12px;color:#555;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;"
+                             title="@item.Notes">
+                            @item.Notes
+                        </div>
+                    }
+                    else
+                    {
+                        <span style="color:#ccc;">—</span>
+                    }
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="EquipmentBrandlListItemDto"
+                                  Property="CreatedAt" Title="Added"
+                                  Width="110px" FormatString="{0:dd MMM yyyy}" />
+
+            <RadzenDataGridColumn TItem="EquipmentBrandlListItemDto"
+                                  Title="Actions" Width="110px"
+                                  Sortable="false" Filterable="false"
+                                  TextAlign="TextAlign.Center">
+                <Template Context="item">
+                    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem" JustifyContent="JustifyContent.Center">
+
+                        <RadzenButton Icon="visibility" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"
+                                      Text="View"
+                                      Click="@(() => Nav.NavigateTo($"/equipments/brands/{item.Id}"))" />
+                    </RadzenStack>
+                </Template>
+            </RadzenDataGridColumn>
+
+        </Columns>
+    </RadzenDataGrid>
+
+</RadzenStack>
+
+@code {
+    private RadzenDataGrid<EquipmentBrandlListItemDto> grid = default!;
+    private List<EquipmentBrandlListItemDto>? brands;
+    private bool isLoading;
+    private int count;
+    private string searchText = "";
+    private bool? activeFilter = true; // default: show active only
+    private string? errorMessage;
+
+    private async Task LoadData(LoadDataArgs args)
+    {
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            int skip = args.Skip ?? 0;
+            int top = args.Top ?? 10;
+
+            var queryParams = new PagedQueryParams
+            {
+                PageNumber = (skip / top) + 1,
+                PageSize = top,
+                OrderBy = string.IsNullOrEmpty(args.OrderBy) ? "CREATED_AT DESC" : args.OrderBy.ToUpper(),
+                Search = searchText,
+                // NOTE: You need to add IsActive to PagedQueryParams
+                // or create a BrandQueryParams that extends it.
+                // I'm not generating that assumption — wire it yourself.
+            };
+
+            var result = await brandService.GetEquipmentBrandListAsync(queryParams);
+
+            brands = result?.Items ?? [];
+            count = result?.TotalCount ?? 0;
+        }
+        catch (Exception ex)
+        {
+            // Replace with your app's notification/toast service
+            errorMessage = "Failed to load brands. Please try again.";
+            Console.Error.WriteLine($"[BrandList] LoadData failed: {ex.Message}");
+            brands = [];
+            count = 0;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

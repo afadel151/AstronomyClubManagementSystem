@@ -1,4 +1,4 @@
-using Application.Services;
+using Application.Services.Equipments;
 using Domain.Shared.DTO;
 using Domain.Shared.DTO.Equipment;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

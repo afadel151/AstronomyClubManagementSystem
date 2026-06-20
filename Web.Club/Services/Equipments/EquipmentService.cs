@@ -2,7 +2,7 @@ using Domain.Shared.DTO;
 using Domain.Shared.DTO.Equipment;
 using Web.Club.Providers;
 
-namespace Web.Club.Services;
+namespace Web.Club.Services.Equipments;
 
 public interface IEquipmentService
 {

@@ -1,0 +1,30 @@
+@using Domain.Shared.DTO.Equipment.Brand
+@using Web.Club.Services.Equipments
+
+<RadzenButton Text="Add Brand" Icon="add" ButtonStyle="ButtonStyle.Primary"
+              Click="OpenDialog" />
+
+
+@code {
+    [Parameter] public EventCallback OnBrandInserted { get; set; }
+
+    [Inject] private DialogService DialogService { get; set; } = default!;
+
+    private async Task OpenDialog()
+    {
+        var result = await DialogService.OpenAsync<EquipmentBrandInsertDialog>(
+            "Add New Brand",
+            options: new DialogOptions
+            {
+                Width = "520px",
+                CloseDialogOnOverlayClick = false,
+                ShowClose = true
+            }
+        );
+
+        if (result is true)
+        {
+            await OnBrandInserted.InvokeAsync();
+        }
+    }
+}

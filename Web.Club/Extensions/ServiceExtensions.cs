@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Web.Club.Providers;
 using Web.Club.Auth;
 using Web.Club.Services;
+using Web.Club.Services.Equipments;
 
 namespace Web.Club.Extensions;
 
@@ -11,6 +12,7 @@ public static class ServiceExtensions
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
         services.AddHttpContextAccessor();
+        services.AddScoped<IEquipmentService,EquipmentService>();
         services.AddScoped<BffAuthenticationStateProvider>();
         services.AddScoped<AuthenticationStateProvider>(sp =>
             sp.GetRequiredService<BffAuthenticationStateProvider>());
@@ -24,7 +26,8 @@ public static class ServiceExtensions
         services.AddScoped<IObservationService,ObservationService>();
         services.AddScoped<IProjectService,ProjectService>();
         services.AddScoped<ITargetService,TargetService>();
-        services.AddScoped<IEquipmentService,EquipmentService>();
+        services.AddScoped<IEquipmentBrandService,EquipmentBrandService>();
+        // IEquipmentBrandService
         return services;
     }
 }

@@ -1,0 +1,105 @@
+@page "/equipments/brands/{Id:int}"
+
+@using Domain.Shared.DTO.Equipment.Brand
+@using Web.Club.Services.Equipments
+@using Domain.Shared.DTO.Equipment.Model
+
+@inject IEquipmentBrandService BrandService
+
+<PageTitle>Brand Details</PageTitle>
+
+@if (isLoading)
+{
+    <RadzenProgressBar Mode="ProgressBarMode.Indeterminate" />
+}
+else if (errorMessage != null)
+{
+    <RadzenAlert AlertStyle="AlertStyle.Danger">
+        @errorMessage
+    </RadzenAlert>
+}
+else if (brand == null)
+{
+    <RadzenAlert AlertStyle="AlertStyle.Warning">
+        Brand not found.
+    </RadzenAlert>
+}
+else
+{
+    <RadzenStack Gap="1rem">
+
+        <h2>@brand.Name</h2>
+
+        <div>
+            <strong>Slug:</strong> @brand.Slug
+        </div>
+
+        <div>
+            <strong>Country:</strong> @brand.CountryOfOrigin
+        </div>
+
+        <div>
+            <strong>Models:</strong> @brand.ModelsCount
+        </div>
+
+        @if (!string.IsNullOrEmpty(brand.LogoUrl))
+        {
+            <img src="@brand.LogoUrl" style="max-width:150px;" />
+        }
+
+        @if (brand.Models?.Any() == true)
+        {
+            <RadzenDataGrid Data="@brand.Models" TItem="EquipmentModelListItemDto" AllowPaging="true">
+
+                <Columns>
+                    <RadzenDataGridColumn TItem="EquipmentModelListItemDto" Property="Name" Title="Model" />
+                    <RadzenDataGridColumn TItem="EquipmentModelListItemDto" Property="CategoryName" Title="Category" />
+                    <RadzenDataGridColumn TItem="EquipmentModelListItemDto" Property="EquipmentsCount" Title="Equipments" />
+                    <RadzenDataGridColumn TItem="EquipmentModelListItemDto" Property="CreatedAt" Title="Created" />
+                </Columns>
+
+            </RadzenDataGrid>
+        }
+
+    </RadzenStack>
+}
+
+@code {
+
+    [Parameter]
+    public int Id { get; set; }
+
+    private EquipmentBrandDetialsDto? brand;
+    private bool isLoading = true;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadBrand();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadBrand();
+    }
+
+    private async Task LoadBrand()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = null;
+
+            brand = await BrandService.GetEquipmentBrandDetialsAsync(Id);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Failed to load brand details.";
+            Console.Error.WriteLine(ex);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

@@ -1,0 +1,138 @@
+@using Domain.Shared.DTO.Equipment.Brand
+@using Domain.Shared.Schemas
+@using Web.Club.Services.Equipments
+@inject NavigationManager Nav
+@inject IEquipmentBrandService BrandService
+@inject HttpClient Http
+
+<RadzenStack Gap="1rem" Style="padding: 0.5rem 0;">
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Danger" ShowIcon="true" Variant="Variant.Flat" style="margin:0;">
+            @errorMessage
+        </RadzenAlert>
+    }
+
+    <RadzenTemplateForm TItem="CreateEquipmentBrandDto" Data="model" Submit="HandleSubmit">
+
+        <RadzenStack Gap="0.75rem">
+
+            <RadzenFormField Text="Brand Name" Variant="Variant.Outlined">
+                <RadzenTextBox @bind-Value="model.Name" Placeholder="e.g. Celestron" Change="GenerateSlug"
+                               MaxLength="100" />
+                <RadzenRequiredValidator Component="Name" Text="Name is required." />
+            </RadzenFormField>
+
+            <RadzenFormField Text="Slug" Variant="Variant.Outlined">
+                <ChildContent>
+                    <RadzenTextBox @bind-Value="model.Slug" Placeholder="e.g. celestron" MaxLength="120" />
+                </ChildContent>
+                <Helper>
+                    <RadzenText TextStyle="TextStyle.Caption" style="color:#888;">
+                        Auto-generated from name. Must be unique and URL-safe.
+                    </RadzenText>
+                </Helper>
+            </RadzenFormField>
+
+            <RadzenFormField Text="Country of Origin" Variant="Variant.Outlined">
+                <RadzenDropDown Data="@countries" TextProperty="Name" ValueProperty="Name"
+                                @bind-Value="model.CountryOfOrigin" Placeholder="Select a country" Style="width:100%;"
+                                AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+            </RadzenFormField>
+            <RadzenFormField Text="Logo URL" Variant="Variant.Outlined">
+                <ChildContent>
+                    <RadzenTextBox @bind-Value="model.LogoUrl" Placeholder="https://…" MaxLength="500" />
+                </ChildContent>
+                <Helper>
+                    <RadzenText TextStyle="TextStyle.Caption" style="color:#888;">
+                        Direct URL to logo image. File upload not supported here yet.
+                    </RadzenText>
+                </Helper>
+            </RadzenFormField>
+
+            <RadzenFormField Text="Notes" Variant="Variant.Outlined">
+                <RadzenTextArea @bind-Value="model.Notes" Placeholder="Optional notes about this brand…"
+                                MaxLength="1000" Rows="3" />
+            </RadzenFormField>
+
+            <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem"
+                         Style="padding-top:0.5rem;">
+                <RadzenButton Text="Cancel" ButtonStyle="ButtonStyle.Light" Click="Cancel" Disabled="isSaving" />
+                <RadzenButton Text="@(isSaving ? "Saving…" : "Save Brand")" ButtonStyle="ButtonStyle.Primary"
+                              ButtonType="ButtonType.Submit" IsBusy="isSaving" Disabled="isSaving" />
+            </RadzenStack>
+
+        </RadzenStack>
+
+    </RadzenTemplateForm>
+
+</RadzenStack>
+
+@code {
+    [Inject] private DialogService DialogService { get; set; } = default!;
+    private List<Country> countries = new();
+
+    private CreateEquipmentBrandDto model = new();
+    private bool isSaving;
+    private string? errorMessage;
+    protected override async Task OnInitializedAsync()
+    {
+        var url = $"{Nav.BaseUri}data/countries.json";
+        try
+        {
+                countries = await Http.GetFromJsonAsync<List<Country>>(url)
+                            ?? new();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Failed to load countries: {ex.Message}");
+        }
+    }
+
+    private void GenerateSlug(string name)
+    {
+        // Client-side slug — backend MUST validate uniqueness
+        // This is a best-effort display hint only
+        model.Slug = name
+            .Trim()
+            .ToLowerInvariant()
+            .Replace(" ", "-")
+            .Replace("_", "-");
+
+        // Strip anything that isn't a-z, 0-9, or hyphen
+        model.Slug = System.Text.RegularExpressions.Regex.Replace(model.Slug, @"[^a-z0-9\-]", "");
+    }
+
+    private async Task HandleSubmit()
+    {
+        isSaving = true;
+        errorMessage = null;
+
+        try
+        {
+            // SERVICE CALL COMMENTED OUT — wire when ready
+            // var created = await BrandService.CreateAsync(model);
+            // if (created is null)
+            // {
+            // errorMessage = "Failed to create brand. The slug may already be in use.";
+            // return;
+            // }
+
+            await Task.Delay(600); // remove when service call is wired
+
+            DialogService.Close(true); // signals success to parent
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "An unexpected error occurred. Please try again.";
+            Console.Error.WriteLine($"[BrandInsert] Submit failed: {ex.Message}");
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void Cancel() => DialogService.Close(false);
+}
