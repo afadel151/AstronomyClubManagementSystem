@@ -8,6 +8,7 @@ public interface IEquipmentBrandService
 {
     Task<PagedResult<EquipmentBrandlListItemDto>?> GetEquipmentBrandListAsync(PagedQueryParams queryParams);
     Task<EquipmentBrandDetialsDto?> GetEquipmentBrandDetialsAsync(int BrandId);
+    Task<EquipmentBrandlListItemDto?> CreateBrandAsync(CreateEquipmentBrandDto form);
 }
 
 public class EquipmentBrandService(ApiHttpClient api) : IEquipmentBrandService
@@ -33,4 +34,9 @@ public class EquipmentBrandService(ApiHttpClient api) : IEquipmentBrandService
         return await api.GetAsync<EquipmentBrandDetialsDto>(url);
     }
 
+    public async Task<EquipmentBrandlListItemDto?> CreateBrandAsync(CreateEquipmentBrandDto form)
+    {
+        var url = "api/equipments/brands";
+        return await api.PostAsync<EquipmentBrandlListItemDto>(url,form);
+    }
 }

@@ -77,6 +77,8 @@ public sealed class EquipmentBrandService(
         var brand = await equipmentBrandRepository.Query()
             .Include(b => b.EquipmentModels)
                 .ThenInclude(m => m.EquipmentCategory)
+            .Include(b => b.EquipmentModels)
+                .ThenInclude(m => m.Equipments)
             .FirstOrDefaultAsync(b => b.Id == brandId);
 
         if (brand == null)
@@ -105,6 +107,7 @@ public sealed class EquipmentBrandService(
     }
     public async Task<EquipmentBrandlListItemDto> CreateEquipmentBrandAsync(CreateEquipmentBrandDto dto)
     {
+        Console.WriteLine("########## " + dto);
         var slug = dto.Slug.Trim().ToLowerInvariant();
 
         var exists = await equipmentBrandRepository.Query()

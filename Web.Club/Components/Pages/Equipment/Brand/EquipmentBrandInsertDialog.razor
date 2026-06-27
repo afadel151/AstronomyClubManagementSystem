@@ -19,14 +19,14 @@
         <RadzenStack Gap="0.75rem">
 
             <RadzenFormField Text="Brand Name" Variant="Variant.Outlined">
-                <RadzenTextBox @bind-Value="model.Name" Placeholder="e.g. Celestron" Change="GenerateSlug"
+                <RadzenTextBox @bind-Value="model.Name" Name="Name" Placeholder="e.g. Celestron" Change="GenerateSlug"
                                MaxLength="100" />
                 <RadzenRequiredValidator Component="Name" Text="Name is required." />
             </RadzenFormField>
 
             <RadzenFormField Text="Slug" Variant="Variant.Outlined">
                 <ChildContent>
-                    <RadzenTextBox @bind-Value="model.Slug" Placeholder="e.g. celestron" MaxLength="120" />
+                    <RadzenTextBox @bind-Value="model.Slug" Name="Slug" Placeholder="e.g. celestron" MaxLength="120" />
                 </ChildContent>
                 <Helper>
                     <RadzenText TextStyle="TextStyle.Caption" style="color:#888;">
@@ -42,7 +42,7 @@
             </RadzenFormField>
             <RadzenFormField Text="Logo URL" Variant="Variant.Outlined">
                 <ChildContent>
-                    <RadzenTextBox @bind-Value="model.LogoUrl" Placeholder="https://…" MaxLength="500" />
+                    <RadzenTextBox @bind-Value="model.LogoUrl"  Name="logoUrl" Placeholder="https://…" MaxLength="500" />
                 </ChildContent>
                 <Helper>
                     <RadzenText TextStyle="TextStyle.Caption" style="color:#888;">
@@ -52,15 +52,16 @@
             </RadzenFormField>
 
             <RadzenFormField Text="Notes" Variant="Variant.Outlined">
-                <RadzenTextArea @bind-Value="model.Notes" Placeholder="Optional notes about this brand…"
+                <RadzenTextArea @bind-Value="model.Notes" Name="Notes" Placeholder="Optional notes about this brand…"
                                 MaxLength="1000" Rows="3" />
             </RadzenFormField>
 
             <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem"
                          Style="padding-top:0.5rem;">
                 <RadzenButton Text="Cancel" ButtonStyle="ButtonStyle.Light" Click="Cancel" Disabled="isSaving" />
-                <RadzenButton Text="@(isSaving ? "Saving…" : "Save Brand")" ButtonStyle="ButtonStyle.Primary"
-                              ButtonType="ButtonType.Submit" IsBusy="isSaving" Disabled="isSaving" />
+                <RadzenButton Text="@(isSaving ? "Saving…" : "Save Brand")" Click="HandleSubmit"
+                              ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" IsBusy="isSaving"
+                              Disabled="isSaving" />
             </RadzenStack>
 
         </RadzenStack>
@@ -81,8 +82,8 @@
         var url = $"{Nav.BaseUri}data/countries.json";
         try
         {
-                countries = await Http.GetFromJsonAsync<List<Country>>(url)
-                            ?? new();
+            countries = await Http.GetFromJsonAsync<List<Country>>(url)
+                        ?? new();
         }
         catch (Exception ex)
         {
@@ -111,17 +112,14 @@
 
         try
         {
-            // SERVICE CALL COMMENTED OUT — wire when ready
-            // var created = await BrandService.CreateAsync(model);
-            // if (created is null)
-            // {
-            // errorMessage = "Failed to create brand. The slug may already be in use.";
-            // return;
-            // }
+            EquipmentBrandlListItemDto? created = await BrandService.CreateBrandAsync(model);
 
-            await Task.Delay(600); // remove when service call is wired
-
-            DialogService.Close(true); // signals success to parent
+            if (created is null)
+            {
+                errorMessage = "Failed to create brand. The slug may already be in use.";
+                return;
+            }
+            DialogService.Close(true);
         }
         catch (Exception ex)
         {

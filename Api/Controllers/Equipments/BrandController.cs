@@ -22,12 +22,24 @@ public sealed class EquipmentBrandController(IEquipmentBrandService equipmentBra
     }
 
     [HttpGet("{BrandId}")]
-    public async Task<ActionResult<EquipmentBrandDetialsDto>> GetAll(int BrandId)
+    public async Task<ActionResult<EquipmentBrandDetialsDto>> GetBrand(int BrandId)
     {
         var brand = await equipmentBrandService.GetEquipmentBrandDetialsAsync(BrandId);
         if (brand == null)
         {
             return NotFound();
+        }
+        return Ok(brand);
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<EquipmentBrandlListItemDto>> CreateBrand(CreateEquipmentBrandDto dto)
+    {
+        Console.WriteLine("########## "+ dto);
+        var brand = await equipmentBrandService.CreateEquipmentBrandAsync(dto);
+        if (brand == null)
+        {
+            return Problem("Brand not created");
         }
         return Ok(brand);
     }
