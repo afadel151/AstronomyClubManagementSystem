@@ -1,0 +1,206 @@
+@page "/equipments/categories"
+@using Data.Entities.Enums
+@using Domain.Shared.DTO
+@using Domain.Shared.DTO.Equipment.Category
+@using Web.Club.Services.Equipments
+@inject IEquipmentCategoryService CategoryService
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject NavigationManager Nav
+
+<PageTitle>Equipment Categories</PageTitle>
+
+<RadzenStack Gap="1rem">
+    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
+                 JustifyContent="JustifyContent.SpaceBetween" Gap="1rem">
+        <RadzenStack Gap="0.25rem">
+            <RadzenText Text="Equipment Categories" TextStyle="TextStyle.H5" Style="margin:0;" />
+            <RadzenText Text="Manage equipment category definitions and specification types."
+                        TextStyle="TextStyle.Body2" Style="color:var(--rz-text-secondary-color);" />
+        </RadzenStack>
+
+        <RadzenButton Text="Add Category" Icon="add" ButtonStyle="ButtonStyle.Primary" Click="CreateCategory" />
+    </RadzenStack>
+
+    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.75rem" AlignItems="AlignItems.Center">
+        <RadzenTextBox @bind-Value="searchText"
+                       Placeholder="Search categories..."
+                       Change="@(_ => grid.Reload())"
+                       Style="width:min(100%, 22rem);" />
+    </RadzenStack>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Danger" ShowIcon="true" Variant="Variant.Flat">
+            @errorMessage
+        </RadzenAlert>
+    }
+
+    <RadzenDataGrid @ref="grid"
+                    TItem="EquipmentCategorylListItemDto"
+                    Data="categories"
+                    Count="count"
+                    LoadData="LoadData"
+                    IsLoading="isLoading"
+                    AllowSorting="true"
+                    AllowPaging="true"
+                    PageSize="10"
+                    PagerHorizontalAlign="HorizontalAlign.Right"
+                    ShowPagingSummary="true"
+                    EmptyText="No categories found."
+                    Style="width:100%;">
+        <Columns>
+            <RadzenDataGridColumn TItem="EquipmentCategorylListItemDto" Property="Name" Title="Category" Width="220px">
+                <Template Context="item">
+                    <RadzenStack Gap="0.15rem">
+                        <span style="font-weight:500;">@item.Name</span>
+                        @if (!string.IsNullOrWhiteSpace(item.Description))
+                        {
+                            <span style="font-size:0.78rem;color:var(--rz-text-secondary-color);
+                                white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:26rem;"
+                                  title="@item.Description">
+                                @item.Description
+                            </span>
+                        }
+                    </RadzenStack>
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem=EquipmentCategorylListItemDto Property="Accessory" Title="Type" Width="120px">
+                <Template Context="item">
+                    @if (item.Accessory)
+                    {
+                        <RadzenBadge Text="Accessory" BadgeStyle="BadgeStyle.Info" IsPill="true" />
+                    }
+                    else
+                    {
+                        <RadzenBadge Text="Main" BadgeStyle="BadgeStyle.Secondary" IsPill="true" />
+                    }
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="EquipmentCategorylListItemDto" Property="SpecsType" Title="Specs" Width="150px">
+                <Template Context="item">
+                    <span style="font-family:monospace;font-size:0.82rem;">@item.SpecsType</span>
+                </Template>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="EquipmentCategorylListItemDto" Property="ModelsCount" Title="Models"
+                                  Width="100px" TextAlign="TextAlign.Right" />
+
+            <RadzenDataGridColumn TItem="EquipmentCategorylListItemDto" Title="Actions" Width="80px"
+                                  Sortable="false" Filterable="false" TextAlign="TextAlign.Right">
+                <Template Context="item">
+                    <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem" JustifyContent="JustifyContent.End">
+                        <RadzenButton Icon="visibility" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Light"
+                                      Click="@(() => Nav.NavigateTo($"/equipments/categories/{item.Id}"))" />
+                        <RadzenButton Icon="edit" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Secondary"
+                                      Click="@(() => EditCategory(item.Id))" />
+                        <RadzenButton Icon="delete" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Danger"
+                                      Disabled="@(item.ModelsCount > 0)"
+                                      Click="@(() => DeleteCategory(item))" />
+                    </RadzenStack>
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+</RadzenStack>
+
+@code {
+    private RadzenDataGrid<EquipmentCategorylListItemDto> grid = default!;
+    private List<EquipmentCategorylListItemDto>? categories;
+    private bool isLoading;
+    private int count;
+    private string searchText = "";
+    private string? errorMessage;
+
+    private async Task LoadData(LoadDataArgs args)
+    {
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            var skip = args.Skip ?? 0;
+            var top = args.Top ?? 10;
+
+            var queryParams = new PagedQueryParams
+            {
+                PageNumber = (skip / top) + 1,
+                PageSize = top,
+                OrderBy = string.IsNullOrWhiteSpace(args.OrderBy) ? "NAME ASC" : args.OrderBy,
+                Search = searchText
+            };
+
+            var result = await CategoryService.GetEquipmentCategoryListAsync(queryParams);
+            categories = result?.Items ?? [];
+            count = result?.TotalCount ?? 0;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Failed to load categories.";
+            Console.Error.WriteLine($"[CategoryList] LoadData failed: {ex.Message}");
+            categories = [];
+            count = 0;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task CreateCategory()
+    {
+        var result = await DialogService.OpenAsync<EquipmentCategoryDialog>(
+            "Add Category",
+            options: new DialogOptions { Width = "560px", CloseDialogOnOverlayClick = false, ShowClose = true });
+
+        if (result is true)
+        {
+            await grid.Reload();
+            Notify("Category created.");
+        }
+    }
+
+    private async Task EditCategory(int categoryId)
+    {
+        var result = await DialogService.OpenAsync<EquipmentCategoryDialog>(
+            "Edit Category",
+            new Dictionary<string, object> { ["CategoryId"] = categoryId },
+            new DialogOptions { Width = "560px", CloseDialogOnOverlayClick = false, ShowClose = true });
+
+        if (result is true)
+        {
+            await grid.Reload();
+            Notify("Category updated.");
+        }
+    }
+
+    private async Task DeleteCategory(EquipmentCategorylListItemDto item)
+    {
+        var confirmed = await DialogService.Confirm(
+            $"Delete {item.Name}?",
+            "Delete Category",
+            new ConfirmOptions { OkButtonText = "Delete", CancelButtonText = "Cancel" });
+
+        if (confirmed != true)
+        {
+            return;
+        }
+
+        var deleted = await CategoryService.DeleteCategoryAsync(item.Id);
+        if (deleted)
+        {
+            await grid.Reload();
+            Notify("Category deleted.");
+            return;
+        }
+
+        NotificationService.Notify(NotificationSeverity.Error, "Delete failed", "Category could not be deleted.");
+    }
+
+    private void Notify(string message)
+    {
+        NotificationService.Notify(NotificationSeverity.Success, "Categories", message);
+    }
+}

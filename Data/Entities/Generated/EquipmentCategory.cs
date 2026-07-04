@@ -18,6 +18,7 @@ public partial class EquipmentCategory
     public string Name { get; set; } = null!;
 
     public bool Accessory { get; set; } = false;
+    
     [StringLength(500)]
     public string? Description { get; set; }
 

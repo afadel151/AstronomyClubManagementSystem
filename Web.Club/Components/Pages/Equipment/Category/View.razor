@@ -1,0 +1,169 @@
+@page "/equipments/categories/{Id:int}"
+@using Domain.Shared.DTO.Equipment.Category
+@using Domain.Shared.DTO.Equipment.Model
+@using Web.Club.Services.Equipments
+@inject IEquipmentCategoryService CategoryService
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject NavigationManager Nav
+
+<PageTitle>@(category?.Name ?? "Category") - Equipment</PageTitle>
+
+@if (isLoading)
+{
+    <RadzenProgressBar Mode="ProgressBarMode.Indeterminate" />
+}
+else if (!string.IsNullOrEmpty(errorMessage))
+{
+    <RadzenAlert AlertStyle="AlertStyle.Danger" Icon="exclamation-circle">
+        @errorMessage
+    </RadzenAlert>
+}
+else if (category is null)
+{
+    <RadzenAlert AlertStyle="AlertStyle.Warning" Icon="question-circle">
+        Category not found.
+    </RadzenAlert>
+}
+else
+{
+    <RadzenStack Gap="1.25rem">
+        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
+                     JustifyContent="JustifyContent.SpaceBetween" Gap="1rem">
+            <RadzenStack Gap="0.25rem">
+                <RadzenText Text="@category.Name" TextStyle="TextStyle.H5" Style="margin:0;" />
+                <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem" AlignItems="AlignItems.Center">
+                    <RadzenBadge Text="@(category.Accessory ? "Accessory" : "Main")"
+                                 BadgeStyle="@(category.Accessory ? BadgeStyle.Info : BadgeStyle.Secondary)"
+                                 IsPill="true" />
+                    <span style="font-family:monospace;font-size:0.82rem;color:var(--rz-text-secondary-color);">
+                        @category.SpecsType
+                    </span>
+                </RadzenStack>
+            </RadzenStack>
+
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.5rem">
+                <RadzenButton Text="Back" Icon="arrow_back" ButtonStyle="ButtonStyle.Light"
+                              Click="@(() => Nav.NavigateTo("/equipments/categories"))" />
+                <RadzenButton Text="Edit" Icon="edit" ButtonStyle="ButtonStyle.Primary" Click="EditCategory" />
+            </RadzenStack>
+        </RadzenStack>
+
+        @if (!string.IsNullOrWhiteSpace(category.Description))
+        {
+            <div style="border-left:2px solid var(--rz-info);border-radius:0 4px 4px 0;
+                padding:0.75rem 1rem;background:var(--rz-info-lighter);
+                font-size:0.875rem;line-height:1.6;">
+                @category.Description
+            </div>
+        }
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0.75rem;">
+            <div style="background:var(--rz-base-100);border-radius:4px;padding:0.875rem 1rem;">
+                <div style="font-size:0.72rem;color:var(--rz-text-secondary-color);margin-bottom:4px;">Models</div>
+                <div style="font-size:1.35rem;font-weight:500;">@category.ModelsCount</div>
+            </div>
+            <div style="background:var(--rz-base-100);border-radius:4px;padding:0.875rem 1rem;">
+                <div style="font-size:0.72rem;color:var(--rz-text-secondary-color);margin-bottom:4px;">Equipments</div>
+                <div style="font-size:1.35rem;font-weight:500;">@category.EquipmentsCount</div>
+            </div>
+        </div>
+
+        <RadzenStack Gap="0.5rem">
+            <RadzenText Text="Models" TextStyle="TextStyle.Subtitle2" Style="margin:0;" />
+
+            <RadzenDataGrid Data="@category.Models" TItem="EquipmentModelListItemDto"
+                            AllowPaging="true" PageSize="15"
+                            AllowSorting="true" AllowColumnResize="true"
+                            GridLines="DataGridGridLines.Horizontal"
+                            Density="Density.Compact"
+                            EmptyText="No models registered for this category yet.">
+                <Columns>
+                    <RadzenDataGridColumn TItem="EquipmentModelListItemDto" Property="Name" Title="Model" Width="220px">
+                        <Template Context="item">
+                            <span style="font-weight:500;">@item.Name</span>
+                        </Template>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="EquipmentModelListItemDto" Property="BrandName" Title="Brand" Width="160px" />
+                    <RadzenDataGridColumn TItem="EquipmentModelListItemDto" Property="EquipmentsCount" Title="Equip."
+                                          Width="90px" TextAlign="TextAlign.Right" />
+                    <RadzenDataGridColumn TItem="EquipmentModelListItemDto" Property="Url" Title="URL" Width="150px"
+                                          Sortable="false">
+                        <Template Context="item">
+                            @if (!string.IsNullOrWhiteSpace(item.Url))
+                            {
+                                <a href="@item.Url" target="_blank" rel="noopener noreferrer"
+                                   style="font-size:0.8rem;color:var(--rz-info);">
+                                    <RadzenIcon Icon="open_in_new"
+                                                Style="font-size:0.8rem;vertical-align:-2px;margin-right:3px;" />
+                                    Product page
+                                </a>
+                            }
+                            else
+                            {
+                                <span style="color:var(--rz-text-disabled-color);">-</span>
+                            }
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+            </RadzenDataGrid>
+        </RadzenStack>
+    </RadzenStack>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private EquipmentCategoryDetialsDto? category;
+    private bool isLoading = true;
+    private string? errorMessage;
+    private int loadedId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCategoryAsync();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Id != loadedId)
+        {
+            await LoadCategoryAsync();
+        }
+    }
+
+    private async Task LoadCategoryAsync()
+    {
+        isLoading = true;
+        errorMessage = null;
+        loadedId = Id;
+
+        try
+        {
+            category = await CategoryService.GetEquipmentCategoryDetialsAsync(Id);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Failed to load category details.";
+            Console.Error.WriteLine($"[CategoryView] Load failed: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task EditCategory()
+    {
+        var result = await DialogService.OpenAsync<EquipmentCategoryDialog>(
+            "Edit Category",
+            new Dictionary<string, object> { ["CategoryId"] = Id },
+            new DialogOptions { Width = "560px", CloseDialogOnOverlayClick = false, ShowClose = true });
+
+        if (result is true)
+        {
+            await LoadCategoryAsync();
+            NotificationService.Notify(NotificationSeverity.Success, "Categories", "Category updated.");
+        }
+    }
+}
