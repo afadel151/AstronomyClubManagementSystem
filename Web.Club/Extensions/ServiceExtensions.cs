@@ -27,7 +27,8 @@ public static class ServiceExtensions
         services.AddScoped<IProjectService,ProjectService>();
         services.AddScoped<ITargetService,TargetService>();
         services.AddScoped<IEquipmentBrandService,EquipmentBrandService>();
-        // IEquipmentBrandService
+        services.AddScoped<IEquipmentCategoryService,EquipmentCategoryService>();
+        services.AddScoped<IEquipmentModelService,EquipmentModelService>();
         return services;
     }
 }
