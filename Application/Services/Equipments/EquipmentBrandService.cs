@@ -77,12 +77,43 @@ public sealed class EquipmentBrandService(
         var brand = await equipmentBrandRepository.Query()
             .Include(b => b.EquipmentModels)
                 .ThenInclude(m => m.EquipmentCategory)
-            .Include(b => b.EquipmentModels)
-                .ThenInclude(m => m.Equipments)
+            .Select(b => new
+            {
+                b.Id,
+                b.Name,
+                b.Slug,
+                b.CountryOfOrigin,
+                b.LogoUrl,
+                b.Notes,
+                b.IsActive,
+                b.CreatedAt,
+                Models = b.EquipmentModels.Select(m => new
+                {
+                    m.Id,
+                    m.Name,
+                    BrandName = b.Name,
+                    CategoryName = m.EquipmentCategory.Name,
+                    m.Url,
+                    Accessory = m.EquipmentCategory.Accessory,
+                    EquipmentsCount = m.Equipments.Count(),   // COUNT(*) in SQL
+                    m.CreatedAt
+                }).ToList()
+            })
             .FirstOrDefaultAsync(b => b.Id == brandId);
 
         if (brand == null)
             return null;
+
+        var models = brand.Models.Select(m => new EquipmentModelListItemDto(
+            m.Id,
+            m.Name,
+            m.BrandName,
+            m.CategoryName,
+            m.Url,
+            m.Accessory,
+            m.EquipmentsCount,
+            m.CreatedAt
+        )).ToList();
 
         return new EquipmentBrandDetialsDto(
             brand.Id,
@@ -91,18 +122,12 @@ public sealed class EquipmentBrandService(
             brand.CountryOfOrigin,
             brand.LogoUrl,
             brand.Notes,
-            brand.EquipmentModels.Count,
-            [.. brand.EquipmentModels.Select(m => new EquipmentModelListItemDto(
-                m.Id,
-                m.Name,
-                m.EquipmentBrand.Name,
-                m.EquipmentCategory.Name,
-                m.Url,
-                m.EquipmentCategory.Accessory,
-                m.Equipments.Count,
-                m.CreatedAt
-            ))],
-            brand.CreatedAt
+            ModelsCount: models.Count,
+            AccessoryCount: models.Count(m => m.Accessory),
+            EquipmentsCount: models.Sum(m => m.EquipmentsCount),
+            IsActive: brand.IsActive,
+            Models: models,
+            CreatedAt: brand.CreatedAt
         );
     }
     public async Task<EquipmentBrandlListItemDto> CreateEquipmentBrandAsync(CreateEquipmentBrandDto dto)

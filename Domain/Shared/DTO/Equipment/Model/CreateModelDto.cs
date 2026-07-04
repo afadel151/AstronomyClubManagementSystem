@@ -12,3 +12,13 @@ public sealed record CreateModelDto(
     string? FitsTelescop,
     string? FitsInstrume
 );
+
+public sealed record UpdateModelDto(
+    string Name,
+    int CategoryId,
+    string Slug,
+    string? Url,
+    string? Specifications,
+    string? FitsTelescop,
+    string? FitsInstrume
+);

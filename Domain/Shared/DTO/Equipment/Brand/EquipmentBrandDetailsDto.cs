@@ -11,6 +11,9 @@ public record EquipmentBrandDetialsDto(
     string? LogoUrl,
     string? Notes,
     int ModelsCount,
+    int AccessoryCount,
+    int EquipmentsCount,
+    bool IsActive,
     List<EquipmentModelListItemDto> Models,
     DateTimeOffset CreatedAt
 );

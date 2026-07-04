@@ -28,8 +28,9 @@ public static class ServiceExtensions
         services.AddScoped<IMemberService, MemberService>();
         services.AddScoped<IEquipmentService, EquipmentService>();
         services.AddScoped<IEquipmentBrandService, EquipmentBrandService>();
+        services.AddScoped<IEquipmentCategoryService, EquipmentCategoryService>();
+        services.AddScoped<IEquipmentModelService, EquipmentModelService>();
 
-        // IEquipmentBrandService
         // services.AddScoped<IObservationService, ObservationService>();
         services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, ApplicationUserClaimsPrincipalFactory>();
 
