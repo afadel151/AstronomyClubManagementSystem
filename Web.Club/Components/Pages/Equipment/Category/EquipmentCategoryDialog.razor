@@ -1,0 +1,131 @@
+@using Data.Entities.Enums
+@using Domain.Shared.DTO.Equipment.Category
+@using Web.Club.Services.Equipments
+@inject IEquipmentCategoryService CategoryService
+@inject DialogService DialogService
+
+<RadzenStack Gap="1rem" Style="padding: 0.25rem 0;">
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Danger" ShowIcon="true" Variant="Variant.Flat" Style="margin:0;">
+            @errorMessage
+        </RadzenAlert>
+    }
+
+    <RadzenTemplateForm TItem="CategoryFormModel" Data="model" Submit="HandleSubmit">
+        <RadzenStack Gap="0.85rem">
+            <RadzenFormField Text="Name" Variant="Variant.Outlined">
+                <RadzenTextBox @bind-Value="model.Name" Name="Name" MaxLength="100" />
+                <RadzenRequiredValidator Component="Name" Text="Name is required." />
+            </RadzenFormField>
+
+            <RadzenFormField Text="Description" Variant="Variant.Outlined">
+                <RadzenTextArea @bind-Value="model.Description" Name="Description" MaxLength="500" Rows="3" />
+            </RadzenFormField>
+
+            <RadzenFormField Text="Specification Type" Variant="Variant.Outlined">
+                <RadzenDropDown Data="specTypes"
+                                @bind-Value="model.SpecsType"
+                                Name="SpecsType"
+                                Style="width:100%;" />
+            </RadzenFormField>
+
+            <RadzenCheckBox @bind-Value="model.Accessory" Name="Accessory" />
+            <RadzenLabel Text="Accessory category" Component="Accessory" Style="margin-left:0.35rem;" />
+
+            <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem"
+                         Style="padding-top:0.5rem;">
+                <RadzenButton Text="Cancel" ButtonStyle="ButtonStyle.Light" Click="Cancel" Disabled="isSaving" />
+                <RadzenButton Text="@(isSaving ? "Saving..." : "Save Category")"
+                              ButtonStyle="ButtonStyle.Primary"
+                              ButtonType="ButtonType.Submit"
+                              IsBusy="isSaving"
+                              Disabled="isSaving" />
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenTemplateForm>
+</RadzenStack>
+
+@code {
+    [Parameter] public int? CategoryId { get; set; }
+
+    private readonly SpecsTypeEnum[] specTypes = Enum.GetValues<SpecsTypeEnum>();
+    private CategoryFormModel model = new();
+    private bool isSaving;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (CategoryId is null)
+        {
+            return;
+        }
+
+        var category = await CategoryService.GetEquipmentCategoryDetialsAsync(CategoryId.Value);
+        if (category is null)
+        {
+            errorMessage = "Category not found.";
+            return;
+        }
+
+        model = new CategoryFormModel
+        {
+            Name = category.Name,
+            Description = category.Description,
+            Accessory = category.Accessory,
+            SpecsType = category.SpecsType
+        };
+    }
+
+    private async Task HandleSubmit()
+    {
+        isSaving = true;
+        errorMessage = null;
+
+        try
+        {
+            if (CategoryId is null)
+            {
+                var created = await CategoryService.CreateCategoryAsync(new CreateEquipmentCategoryDto
+                {
+                    Name = model.Name,
+                    Description = model.Description,
+                    Accessory = model.Accessory,
+                    SpecsType = model.SpecsType
+                });
+
+                DialogService.Close(created is not null);
+                return;
+            }
+
+            var updated = await CategoryService.UpdateCategoryAsync(CategoryId.Value, new UpdateEquipmentCategoryDto
+            {
+                Name = model.Name,
+                Description = model.Description,
+                Accessory = model.Accessory,
+                SpecsType = model.SpecsType
+            });
+
+            DialogService.Close(updated is not null);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Category could not be saved. Check for a duplicate name and try again.";
+            Console.Error.WriteLine($"[CategoryDialog] Save failed: {ex.Message}");
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void Cancel() => DialogService.Close(false);
+
+    private sealed class CategoryFormModel
+    {
+        public string Name { get; set; } = "";
+        public string? Description { get; set; }
+        public bool Accessory { get; set; }
+        public SpecsTypeEnum SpecsType { get; set; } = SpecsTypeEnum.None;
+    }
+}

@@ -7,7 +7,7 @@
 @inject NavigationManager Nav
 
 <PageTitle>Equipments</PageTitle>
-
+ <RadzenText TextStyle="TextStyle.H3">Equipments</RadzenText>
 <RadzenStack Gap="1rem">
     <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
                  JustifyContent="JustifyContent.SpaceBetween" Gap="1rem">
@@ -20,7 +20,7 @@
 
     </RadzenStack>
 
-    <RadzenDataGrid @ref="grid" TItem="EquipmentListItemDto" Data="equipments" Count="count" LoadData="LoadData"
+    <RadzenDataGrid @ref="grid" TItem=EquipmentListItemDto Data="equipments" Count="count" LoadData="LoadData"
                     IsLoading="isLoading" AllowSorting="true" AllowPaging="true" PageSize="10"
                     PagerHorizontalAlign="HorizontalAlign.Right" ShowPagingSummary="true" EmptyText="No equipment found."
                     Style="width: 100%;">

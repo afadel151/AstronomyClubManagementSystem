@@ -1,69 +1,224 @@
 @page "/equipments/brands/{Id:int}"
 
 @using Domain.Shared.DTO.Equipment.Brand
-@using Web.Club.Services.Equipments
 @using Domain.Shared.DTO.Equipment.Model
+@using Web.Club.Services.Equipments
 
 @inject IEquipmentBrandService BrandService
+@inject IEquipmentModelService ModelService
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject NavigationManager Nav
 
-<PageTitle>Brand Details</PageTitle>
+<PageTitle>@(brand?.Name ?? "Brand") — Equipment</PageTitle>
+@inject NavigationManager Nav
 
+<div style="display:flex;align-items:center;gap:0.75rem;margin-bottom: 10px;">
+    <RadzenButton Icon="arrow_back" Text="All brands" ButtonStyle="ButtonStyle.Light" Size="ButtonSize.Small"
+                  Click="@(() => Nav.NavigateTo("/equipment/brands"))" />
+</div>
 @if (isLoading)
 {
     <RadzenProgressBar Mode="ProgressBarMode.Indeterminate" />
 }
 else if (errorMessage != null)
 {
-    <RadzenAlert AlertStyle="AlertStyle.Danger">
+    <RadzenAlert AlertStyle="AlertStyle.Danger" Icon="exclamation-circle">
         @errorMessage
     </RadzenAlert>
 }
 else if (brand == null)
 {
-    <RadzenAlert AlertStyle="AlertStyle.Warning">
+    <RadzenAlert AlertStyle="AlertStyle.Warning" Icon="question-circle">
         Brand not found.
     </RadzenAlert>
 }
 else
 {
-    <RadzenStack Gap="1rem">
+    <RadzenStack Gap="1.5rem">
 
-        <h2>@brand.Name</h2>
+        <RadzenCard style="padding: 1.25rem 1.5rem;">
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="1.25rem" AlignItems="AlignItems.Start">
 
-        <div>
-            <strong>Slug:</strong> @brand.Slug
+                @if (!string.IsNullOrEmpty(brand.LogoUrl))
+                {
+                    <img src="@brand.LogoUrl" alt="@brand.Name logo"
+                         style="width:96px;height:96px;object-fit:contain;border-radius:5px;" />
+                }
+                else
+                {
+                    <div style="width:72px;height:72px;border-radius:8px;border:1px solid var(--rz-base-200);
+                        background:var(--rz-base-100);display:flex;align-items:center;
+                        justify-content:center;font-size:1.5rem;font-weight:500;color:var(--rz-base-500);">
+                        @(brand.Name.Length > 0 ? brand.Name[..Math.Min(2, brand.Name.Length)].ToUpper() : "?")
+                    </div>
+                }
+
+                <RadzenStack Gap="0.375rem" Style="flex:1">
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.75rem">
+                        <h2 style="margin:0;font-size:1.25rem;font-weight:500;">@brand.Name</h2>
+                        <RadzenBadge BadgeStyle="@(brand.IsActive ? BadgeStyle.Success : BadgeStyle.Danger)"
+                                     Text="@(brand.IsActive ? "Active" : "Inactive")" IsPill="true" />
+                    </RadzenStack>
+
+                    <span style="font-size:0.8rem;color:var(--rz-text-secondary-color);font-family:monospace;">
+                        @brand.Slug
+                    </span>
+
+                    @if (!string.IsNullOrEmpty(brand.CountryOfOrigin))
+                    {
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.35rem">
+                            <RadzenIcon Icon="place" Style="font-size:0.9rem;color:var(--rz-text-secondary-color);" />
+                            <span style="font-size:0.85rem;color:var(--rz-text-secondary-color);">
+                                @brand.CountryOfOrigin
+                            </span>
+                        </RadzenStack>
+                    }
+                </RadzenStack>
+            </RadzenStack>
+        </RadzenCard>
+
+        @* ── Stat cards ── *@
+        @* ── Stat cards ── *@
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0.75rem;">
+
+            <RadzenCard Variant="Variant.Outlined">
+                <RadzenText TextStyle="TextStyle.Caption" Style="display:block;margin-bottom:4px;">
+                    Models
+                </RadzenText>
+                <RadzenText TextStyle="TextStyle.H5" Style="margin:0;">
+                    @brand.ModelsCount
+                </RadzenText>
+            </RadzenCard>
+
+            <RadzenCard Variant="Variant.Outlined">
+                <RadzenText TextStyle="TextStyle.Caption" Style="display:block;margin-bottom:4px;">
+                    Equipments
+                </RadzenText>
+                <RadzenText TextStyle="TextStyle.H5" Style="margin:0;">
+                    @brand.EquipmentsCount
+                </RadzenText>
+            </RadzenCard>
+
+            <RadzenCard Variant="Variant.Outlined">
+                <RadzenText TextStyle="TextStyle.Caption" Style="display:block;margin-bottom:4px;">
+                    Accessories
+                </RadzenText>
+                <RadzenText TextStyle="TextStyle.H5" Style="margin:0;">
+                    @brand.AccessoryCount
+                </RadzenText>
+            </RadzenCard>
+
         </div>
 
-        <div>
-            <strong>Country:</strong> @brand.CountryOfOrigin
-        </div>
-
-        <div>
-            <strong>Models:</strong> @brand.ModelsCount
-        </div>
-
-        @if (!string.IsNullOrEmpty(brand.LogoUrl))
+        @if (!string.IsNullOrEmpty(brand.Notes))
         {
-            <img src="@brand.LogoUrl" style="max-width:150px;" />
+            <div style="border-left:2px solid var(--rz-info);border-radius:0 4px 4px 0;
+                padding:0.75rem 1rem;background:var(--rz-info-lighter);
+                font-size:0.875rem;color:var(--rz-text-color);line-height:1.6;">
+                @brand.Notes
+            </div>
         }
-
         @if (brand.Models?.Any() == true)
         {
-            <RadzenDataGrid Data="@brand.Models" TItem="EquipmentModelListItemDto" AllowPaging="true">
+            <RadzenStack Gap="0.5rem">
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
+                             JustifyContent="JustifyContent.SpaceBetween" Gap="1rem">
+                    <span style="font-size:0.75rem;font-weight:500;color:var(--rz-text-secondary-color);
+                        text-transform:uppercase;letter-spacing:0.05em;">
+                        Models
+                    </span>
+                    <RadzenButton Text="Add Model" Icon="add" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Primary"
+                                  Click="AddModel" />
+                </RadzenStack>
 
-                <Columns>
-                    <RadzenDataGridColumn TItem="EquipmentModelListItemDto" Property="Name" Title="Model" />
-                    <RadzenDataGridColumn TItem="EquipmentModelListItemDto" Property="CategoryName" Title="Category" />
-                    <RadzenDataGridColumn TItem="EquipmentModelListItemDto" Property="EquipmentsCount" Title="Equipments" />
-                    <RadzenDataGridColumn TItem="EquipmentModelListItemDto" Property="CreatedAt" Title="Created" />
-                    <RadzenDataGridColumn Title="Action">
-                        <Template Context="item">
-                            <RadzenButton Text="View" />
-                        </Template>
-                    </RadzenDataGridColumn>
-                </Columns>
+                <RadzenDataGrid Data="@brand.Models" TItem="EquipmentModelListItemDto" AllowPaging="true" PageSize="15"
+                                AllowSorting="true" AllowColumnResize="true" GridLines="DataGridGridLines.Horizontal"
+                                Density="Density.Compact">
+                    <Columns>
 
-            </RadzenDataGrid>
+                        <RadzenDataGridColumn TItem="EquipmentModelListItemDto" Property="Name" Title="Model" Width="220px">
+                            <Template Context="item">
+                                <span style="font-weight:500;">@item.Name</span>
+                            </Template>
+                        </RadzenDataGridColumn>
+
+                        <RadzenDataGridColumn TItem="EquipmentModelListItemDto" Property="CategoryName" Title="Category"
+                                              Width="160px" />
+
+                        <RadzenDataGridColumn TItem="EquipmentModelListItemDto" Property="Accessory" Title="Type" Width="110px"
+                                              Sortable="true">
+                            <Template Context="item">
+                                @if (item.Accessory)
+                                {
+                                    <RadzenBadge Text="Accessory" BadgeStyle="BadgeStyle.Info" IsPill="true"
+                                                 Style="font-size:0.7rem;" />
+                                }
+                                else
+                                {
+                                    <span style="font-size:0.8rem;color:var(--rz-text-secondary-color);">
+                                        Main
+                                    </span>
+                                }
+                            </Template>
+                        </RadzenDataGridColumn>
+
+                        <RadzenDataGridColumn TItem="EquipmentModelListItemDto" Property="EquipmentsCount" Title="Equip."
+                                              Width="80px" TextAlign="TextAlign.Right" />
+
+                        <RadzenDataGridColumn TItem="EquipmentModelListItemDto" Property="Url" Title="URL" Width="130px"
+                                              Sortable="false">
+                            <Template Context="item">
+                                @if (!string.IsNullOrEmpty(item.Url))
+                                {
+                                    <a href="@item.Url" target="_blank" rel="noopener noreferrer"
+                                       style="font-size:0.8rem;color:var(--rz-info);">
+                                        <RadzenIcon Icon="open_in_new"
+                                                    Style="font-size:0.8rem;vertical-align:-2px;margin-right:3px;" />
+                                        Product page
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span style="color:var(--rz-text-disabled-color);">—</span>
+                                }
+                            </Template>
+                        </RadzenDataGridColumn>
+
+                        <RadzenDataGridColumn TItem="EquipmentModelListItemDto" Property="CreatedAt" Title="Added"
+                                              Width="110px">
+                            <Template Context="item">
+                                <span style="font-size:0.78rem;color:var(--rz-text-secondary-color);">
+                                    @item.CreatedAt.ToString("MMM yyyy")
+                                </span>
+                            </Template>
+                        </RadzenDataGridColumn>
+
+                        <RadzenDataGridColumn TItem="EquipmentModelListItemDto" Title="" Width="150px" Sortable="false"
+                                              Filterable="false" TextAlign="TextAlign.Right">
+                            <Template Context="item">
+                                <RadzenStack Orientation="Orientation.Horizontal" Gap="0.25rem"
+                                             JustifyContent="JustifyContent.End">
+                                    <RadzenButton Icon="visibility" Size="ButtonSize.ExtraSmall" ButtonStyle="ButtonStyle.Light"
+                                                  Click="@(() => Nav.NavigateTo($"/equipments/models/{item.Id}"))" />
+                                    <RadzenButton Icon="edit" Size="ButtonSize.ExtraSmall" ButtonStyle="ButtonStyle.Secondary"
+                                                  Click="@(() => EditModel(item.Id))" />
+                                    <RadzenButton Icon="delete" Size="ButtonSize.ExtraSmall" ButtonStyle="ButtonStyle.Danger"
+                                                  Disabled="@(item.EquipmentsCount > 0)" Click="@(() => DeleteModel(item))" />
+                                </RadzenStack>
+                            </Template>
+                        </RadzenDataGridColumn>
+
+                    </Columns>
+                </RadzenDataGrid>
+            </RadzenStack>
+        }
+        else
+        {
+            <div style="text-align:center;padding:2rem;color:var(--rz-text-secondary-color);font-size:0.875rem;">
+                <div style="margin-bottom:0.75rem;">No models registered for this brand yet.</div>
+                <RadzenButton Text="Add Model" Icon="add" ButtonStyle="ButtonStyle.Primary" Click="AddModel" />
+            </div>
         }
 
     </RadzenStack>
@@ -78,23 +233,29 @@ else
     private bool isLoading = true;
     private string? errorMessage;
 
+    private int _loadedId;
+
     protected override async Task OnInitializedAsync()
     {
-        await LoadBrand();
+        await LoadBrandAsync();
     }
 
     protected override async Task OnParametersSetAsync()
     {
-        await LoadBrand();
+        if (Id != _loadedId)
+        {
+            await LoadBrandAsync();
+        }
     }
 
-    private async Task LoadBrand()
+    private async Task LoadBrandAsync()
     {
+        isLoading = true;
+        errorMessage = null;
+        _loadedId = Id;
+
         try
         {
-            isLoading = true;
-            errorMessage = null;
-
             brand = await BrandService.GetEquipmentBrandDetialsAsync(Id);
         }
         catch (Exception ex)
@@ -106,5 +267,70 @@ else
         {
             isLoading = false;
         }
+    }
+
+    private async Task AddModel()
+    {
+        var result = await DialogService.OpenAsync<Components.Shared.EquipmentModelDialog>(
+            "Add Model",
+            new Dictionary<string, object> { ["BrandId"] = Id },
+            new DialogOptions
+            {
+                Width = "640px",
+                CloseDialogOnOverlayClick = false,
+                ShowClose = true
+            });
+
+        if (result is true)
+        {
+            await LoadBrandAsync();
+            NotificationService.Notify(NotificationSeverity.Success, "Models", "Model created.");
+        }
+    }
+
+    private async Task EditModel(int modelId)
+    {
+        var result = await DialogService.OpenAsync<Components.Shared.EquipmentModelDialog>(
+            "Edit Model",
+            new Dictionary<string, object>
+            {
+                ["BrandId"] = Id,
+                ["ModelId"] = modelId
+            },
+            new DialogOptions
+            {
+                Width = "640px",
+                CloseDialogOnOverlayClick = false,
+                ShowClose = true
+            });
+
+        if (result is true)
+        {
+            await LoadBrandAsync();
+            NotificationService.Notify(NotificationSeverity.Success, "Models", "Model updated.");
+        }
+    }
+
+    private async Task DeleteModel(EquipmentModelListItemDto model)
+    {
+        var confirmed = await DialogService.Confirm(
+            $"Delete {model.Name}?",
+            "Delete Model",
+            new ConfirmOptions { OkButtonText = "Delete", CancelButtonText = "Cancel" });
+
+        if (confirmed != true)
+        {
+            return;
+        }
+
+        var deleted = await ModelService.DeleteModelAsync(model.Id);
+        if (deleted)
+        {
+            await LoadBrandAsync();
+            NotificationService.Notify(NotificationSeverity.Success, "Models", "Model deleted.");
+            return;
+        }
+
+        NotificationService.Notify(NotificationSeverity.Error, "Delete failed", "Model could not be deleted.");
     }
 }

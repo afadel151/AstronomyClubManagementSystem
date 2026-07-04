@@ -60,12 +60,11 @@
             <RadzenPanelMenuItem Text="Club chat" Icon="chat" />
         </RadzenPanelMenuItem>
         <RadzenPanelMenuItem Text="Inventory" Icon="package_2">
-            <RadzenPanelMenuItem Text="Equipments" Icon="box" Match="NavLinkMatch.All" Path="/equipments"  />
-            <RadzenPanelMenuItem Text="Accessories" Icon="docs_add_on" Path="/equipments/accessories" />
             <RadzenPanelMenuItem Text="Brands" Icon="copyright" Path="/equipment/brands" />
-            <RadzenPanelMenuItem Text="Models" Icon="tile_small"  />
-            <RadzenPanelMenuItem Text="Categories" Icon="category"  />
+            <RadzenPanelMenuItem Text="Categories" Icon="category" Path="/equipments/categories"  />
             <RadzenPanelMenuItem Text="Maintenance" Icon="build"  />
+            <RadzenPanelMenuItem Text="Equipments" Icon="box" Match="NavLinkMatch.All" Path="/equipments"  />
+            @* <RadzenPanelMenuItem Text="Accessories" Icon="docs_add_on" Path="/equipments/accessories" /> *@
             <RadzenPanelMenuItem Text="New equipment" Icon="rectangle_add" Path="/equipments/insert"  />
 
         </RadzenPanelMenuItem>
