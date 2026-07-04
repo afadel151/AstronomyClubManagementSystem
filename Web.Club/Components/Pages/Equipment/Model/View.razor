@@ -1,0 +1,339 @@
+@page "/equipments/models/{Id:int}"
+
+@using System.Text.Json
+@using Domain.Shared.DTO.Equipment
+@using Domain.Shared.DTO.Equipment.Model
+@using Domain.Shared.DTO.Equipment.Compatibility
+@using Web.Club.Services.Equipments
+
+
+@inject IEquipmentModelService ModelService
+@inject DialogService DialogService
+@inject NotificationService NotificationService
+@inject NavigationManager Nav
+
+<PageTitle>@(model?.Name ?? "Model") — Equipment</PageTitle>
+
+<div style="display:flex;align-items:center;gap:0.75rem;margin-bottom: 10px;">
+    <RadzenButton Icon="arrow_back" Text="Back to brand" ButtonStyle="ButtonStyle.Light" Size="ButtonSize.Small"
+                  Click="@(() => Nav.NavigateTo($"/equipments/brands/{model?.BrandId}"))" />
+</div>
+
+@if (isLoading)
+{
+    <RadzenProgressBar Mode="ProgressBarMode.Indeterminate" />
+}
+else if (errorMessage != null)
+{
+    <RadzenAlert AlertStyle="AlertStyle.Danger" Icon="exclamation-circle">
+        @errorMessage
+    </RadzenAlert>
+}
+else if (model == null)
+{
+    <RadzenAlert AlertStyle="AlertStyle.Warning" Icon="question-circle">
+        Model not found.
+    </RadzenAlert>
+}
+else
+{
+    <RadzenStack Gap="1.5rem">
+
+        <RadzenCard style="padding: 1.25rem 1.5rem;">
+            <RadzenStack Orientation="Orientation.Horizontal" Gap="1.25rem" AlignItems="AlignItems.Start"
+                         JustifyContent="JustifyContent.SpaceBetween">
+
+                <RadzenStack Gap="0.375rem" Style="flex:1">
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.75rem">
+                        <h2 style="margin:0;font-size:1.25rem;font-weight:500;">@model.Name</h2>
+                        <RadzenBadge BadgeStyle="@(model.Accessory ? BadgeStyle.Info : BadgeStyle.Secondary)"
+                                     Text="@(model.Accessory ? "Accessory" : "Main")" IsPill="true" />
+                    </RadzenStack>
+
+                    <span style="font-size:0.8rem;color:var(--rz-text-secondary-color);font-family:monospace;">
+                        @model.Slug
+                    </span>
+
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="1rem">
+                        <a href="@($"/equipments/brands/{model.BrandId}")" style="font-size:0.85rem;">
+                            @model.BrandName
+                        </a>
+                        <span style="color:var(--rz-text-secondary-color);">·</span>
+                        <span style="font-size:0.85rem;color:var(--rz-text-secondary-color);">
+                            @model.CategoryName
+                        </span>
+                    </RadzenStack>
+
+                    @if (!string.IsNullOrEmpty(model.Url))
+                    {
+                        <a href="@model.Url" target="_blank" rel="noopener noreferrer" style="font-size:0.8rem;color:var(--rz-info);">
+                            <RadzenIcon Icon="open_in_new" Style="font-size:0.8rem;vertical-align:-2px;margin-right:3px;" />
+                            Product page
+                        </a>
+                    }
+                </RadzenStack>
+
+                <RadzenButton Icon="edit" Text="Edit" ButtonStyle="ButtonStyle.Secondary" Size="ButtonSize.Small"
+                              Click="EditModel" />
+            </RadzenStack>
+        </RadzenCard>
+
+        @* ── Stat cards ── *@
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:0.75rem;">
+            <RadzenCard Variant="Variant.Outlined">
+                <RadzenText TextStyle="TextStyle.Caption" Style="display:block;margin-bottom:4px;">Equipments</RadzenText>
+                <RadzenText TextStyle="TextStyle.H5" Style="margin:0;">@model.EquipmentsCount</RadzenText>
+            </RadzenCard>
+            <RadzenCard Variant="Variant.Outlined">
+                <RadzenText TextStyle="TextStyle.Caption" Style="display:block;margin-bottom:4px;">Compatible With</RadzenText>
+                <RadzenText TextStyle="TextStyle.H5" Style="margin:0;">@model.Compatibles.Count</RadzenText>
+            </RadzenCard>
+            <RadzenCard Variant="Variant.Outlined">
+                <RadzenText TextStyle="TextStyle.Caption" Style="display:block;margin-bottom:4px;">Added</RadzenText>
+                <RadzenText TextStyle="TextStyle.H5" Style="margin:0;">@model.CreatedAt.ToString("MMM yyyy")</RadzenText>
+            </RadzenCard>
+        </div>
+
+        @if (!string.IsNullOrEmpty(model.FitsTelescop) || !string.IsNullOrEmpty(model.FitsInstrume))
+        {
+            <RadzenCard Variant="Variant.Outlined">
+                <RadzenText TextStyle="TextStyle.Subtitle2" Style="margin-bottom:0.5rem;">Fit</RadzenText>
+                <RadzenStack Gap="0.25rem">
+                    @if (!string.IsNullOrEmpty(model.FitsTelescop))
+                    {
+                        <span style="font-size:0.85rem;"><b>Telescope:</b> @model.FitsTelescop</span>
+                    }
+                    @if (!string.IsNullOrEmpty(model.FitsInstrume))
+                    {
+                        <span style="font-size:0.85rem;"><b>Instrument:</b> @model.FitsInstrume</span>
+                    }
+                </RadzenStack>
+            </RadzenCard>
+        }
+
+        @* ── Specs: generic fallback because SpecsType isn't on the DTO — see note above ── *@
+        @if (specFields != null && specFields.Count > 0)
+        {
+            <RadzenStack Gap="0.5rem">
+                <span style="font-size:0.75rem;font-weight:500;color:var(--rz-text-secondary-color);
+                    text-transform:uppercase;letter-spacing:0.05em;">
+                    Specifications
+                </span>
+                <RadzenCard Variant="Variant.Outlined">
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0.75rem;">
+                        @foreach (var kv in specFields)
+                        {
+                            <div>
+                                <div style="font-size:0.72rem;color:var(--rz-text-secondary-color);text-transform:uppercase;">
+                                    @kv.Key
+                                </div>
+                                <div style="font-size:0.9rem;">@kv.Value</div>
+                            </div>
+                        }
+                    </div>
+                </RadzenCard>
+            </RadzenStack>
+        }
+        else if (specParseError != null)
+        {
+            <RadzenAlert AlertStyle="AlertStyle.Warning" Icon="exclamation-circle">
+                Specifications could not be parsed: @specParseError
+            </RadzenAlert>
+        }
+
+        @* ── Compatibilities ── *@
+        <RadzenStack Gap="0.5rem">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
+                         JustifyContent="JustifyContent.SpaceBetween">
+                <span style="font-size:0.75rem;font-weight:500;color:var(--rz-text-secondary-color);
+                    text-transform:uppercase;letter-spacing:0.05em;">
+                    Compatible With
+                </span>
+                @* TODO: no dialog contract given for editing compatibilities — stubbed *@
+                <RadzenButton Text="Manage" Icon="link" Size="ButtonSize.Small" ButtonStyle="ButtonStyle.Light"
+                              Click="ManageCompatibilities" />
+            </RadzenStack>
+
+            @if (model.Compatibles.Count > 0)
+            {
+                <RadzenDataGrid Data="@model.Compatibles" TItem="CompatibleWithDto" AllowPaging="false"
+                                GridLines="DataGridGridLines.Horizontal" Density="Density.Compact">
+                    <Columns>
+                        <RadzenDataGridColumn TItem="CompatibleWithDto" Property="ModelName" Title="Model" />
+                        <RadzenDataGridColumn TItem="CompatibleWithDto" Property="CategoryName" Title="Category" />
+                    </Columns>
+                </RadzenDataGrid>
+            }
+            else
+            {
+                <div style="font-size:0.85rem;color:var(--rz-text-secondary-color);padding:0.5rem 0;">
+                    No compatibilities registered.
+                </div>
+            }
+        </RadzenStack>
+
+        @* ── Equipments (units) ── *@
+        <RadzenStack Gap="0.5rem">
+            <span style="font-size:0.75rem;font-weight:500;color:var(--rz-text-secondary-color);
+                text-transform:uppercase;letter-spacing:0.05em;">
+                Units
+            </span>
+
+            @if (model.Equipments.Count > 0)
+            {
+                <RadzenDataGrid Data="@model.Equipments" TItem="EquipmentListItemDto" AllowPaging="true" PageSize="15"
+                                AllowSorting="true" GridLines="DataGridGridLines.Horizontal" Density="Density.Compact">
+                    <Columns>
+                        <RadzenDataGridColumn TItem="EquipmentListItemDto" Property="Code" Title="Code" Width="140px" />
+                        <RadzenDataGridColumn TItem="EquipmentListItemDto" Property="SerialNumber" Title="Serial" Width="140px">
+                            <Template Context="item">
+                                @(item.SerialNumber ?? "—")
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="EquipmentListItemDto" Property="Status" Title="Status" Width="120px" />
+                        <RadzenDataGridColumn TItem="EquipmentListItemDto" Property="Location" Title="Location" Width="130px">
+                            <Template Context="item">
+                                @(item.Location ?? "—")
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="EquipmentListItemDto" Property="TotalUsageHours" Title="Usage (h)"
+                                              Width="100px" TextAlign="TextAlign.Right" />
+                        <RadzenDataGridColumn TItem="EquipmentListItemDto" Property="ChildPartsCount" Title="Parts"
+                                              Width="80px" TextAlign="TextAlign.Right" />
+                        <RadzenDataGridColumn TItem="EquipmentListItemDto" Property="CreatedAt" Title="Added" Width="110px">
+                            <Template Context="item">
+                                <span style="font-size:0.78rem;color:var(--rz-text-secondary-color);">
+                                    @item.CreatedAt.ToString("MMM yyyy")
+                                </span>
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="EquipmentListItemDto" Title="" Width="80px" Sortable="false"
+                                              Filterable="false" TextAlign="TextAlign.Right">
+                            <Template Context="item">
+                                <RadzenButton Icon="visibility" Size="ButtonSize.ExtraSmall" ButtonStyle="ButtonStyle.Light"
+                                              Click="@(() => Nav.NavigateTo($"/equipments/{item.Id}"))" />
+                            </Template>
+                        </RadzenDataGridColumn>
+                    </Columns>
+                </RadzenDataGrid>
+            }
+            else
+            {
+                <div style="font-size:0.85rem;color:var(--rz-text-secondary-color);padding:0.5rem 0;">
+                    No units registered for this model.
+                </div>
+            }
+        </RadzenStack>
+
+    </RadzenStack>
+}
+
+@code {
+
+    [Parameter]
+    public int Id { get; set; }
+
+    private EquipmentModelDetailDto? model;
+    private bool isLoading = true;
+    private string? errorMessage;
+    private Dictionary<string, object?>? specFields;
+    private string? specParseError;
+    
+    private int _loadedId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadModelAsync();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Id != _loadedId)
+        {
+            await LoadModelAsync();
+        }
+    }
+
+    private async Task LoadModelAsync()
+    {
+        isLoading = true;
+        errorMessage = null;
+        specFields = null;
+        specParseError = null;
+        _loadedId = Id;
+
+        try
+        {
+            model = await ModelService.GetEquipmentModelDetialsAsync(Id);
+            ParseSpecs();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Failed to load model details.";
+            Console.Error.WriteLine(ex);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    // Generic fallback: no SpecsType on the DTO to route to CameraSpecs/FilterSpecs/etc.
+    // Deserializes to a flat dictionary for display only — not for editing.
+    private void ParseSpecs()
+    {
+        if (string.IsNullOrWhiteSpace(model?.Specifications))
+        {
+            return;
+        }
+
+        try
+        {
+            var doc = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(model.Specifications);
+            if (doc == null)
+            {
+                return;
+            }
+
+            specFields = doc
+                .Where(kv => kv.Value.ValueKind != JsonValueKind.Null)
+                .ToDictionary(kv => kv.Key, kv => (object?)kv.Value.ToString());
+        }
+        catch (JsonException ex)
+        {
+            specParseError = ex.Message;
+        }
+    }
+
+    private async Task EditModel()
+    {
+        // TODO: no EquipmentModelDialog edit contract confirmed for this route —
+        // reusing the dialog from the Brand page pattern, same shape assumed.
+        var result = await DialogService.OpenAsync<Components.Shared.EquipmentModelDialog>(
+            "Edit Model",
+            new Dictionary<string, object?>
+            {
+                ["BrandId"] = model!.BrandId,
+                ["ModelId"] = model.Id
+            },
+            new DialogOptions
+            {
+                Width = "640px",
+                CloseDialogOnOverlayClick = false,
+                ShowClose = true
+            });
+
+        if (result is true)
+        {
+            await LoadModelAsync();
+            NotificationService.Notify(NotificationSeverity.Success, "Model", "Model updated.");
+        }
+    }
+
+    private Task ManageCompatibilities()
+    {
+        // TODO: no compatibility-management dialog given — stub until you specify the component/contract.
+        NotificationService.Notify(NotificationSeverity.Info, "Not implemented", "Compatibility management dialog not yet wired.");
+        return Task.CompletedTask;
+    }
+}

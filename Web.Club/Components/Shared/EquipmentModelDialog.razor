@@ -1,0 +1,689 @@
+@using System.Text.Json
+@using Data.Entities.Enums
+@using Data.Entities.Json
+@using Domain.Shared.DTO
+@using Domain.Shared.DTO.Equipment.Category
+@using Domain.Shared.DTO.Equipment.Model
+@using Web.Club.Services.Equipments
+@inject IEquipmentCategoryService CategoryService
+@inject IEquipmentModelService ModelService
+@inject DialogService DialogService
+
+<RadzenStack Gap="1rem" Style="padding: 0.25rem 0;">
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Danger" ShowIcon="true" Variant="Variant.Flat" Style="margin:0;">
+            @errorMessage
+        </RadzenAlert>
+    }
+
+    @if (isLoading)
+    {
+        <RadzenProgressBar Mode="ProgressBarMode.Indeterminate" />
+    }
+    else
+    {
+        <RadzenTemplateForm TItem="ModelFormModel" Data="model" Submit="HandleSubmit">
+            <RadzenStack Gap="0.85rem">
+                <RadzenFormField Text="Model Name" Variant="Variant.Outlined">
+                    <RadzenTextBox @bind-Value="model.Name" Name="Name" MaxLength="100" Change="GenerateSlug" />
+                    <RadzenRequiredValidator Component="Name" Text="Name is required." />
+                </RadzenFormField>
+
+                <RadzenFormField Text="Slug" Variant="Variant.Outlined">
+                    <RadzenTextBox @bind-Value="model.Slug" Name="Slug" MaxLength="120" />
+                    <RadzenRequiredValidator Component="Slug" Text="Slug is required." />
+                </RadzenFormField>
+
+                <RadzenFormField Text="Category" Variant="Variant.Outlined">
+                    <RadzenDropDown Data="categories" TextProperty="Name" ValueProperty="Id" @bind-Value="model.CategoryId"
+                                    Change="OnCategoryChanged" Name="CategoryId" Placeholder="Select category" Style="width:100%;"
+                                    AllowFiltering="true" FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive" />
+                    <RadzenRequiredValidator Component="CategoryId" Text="Category is required." />
+                </RadzenFormField>
+
+                <RadzenFormField Text="Product URL" Variant="Variant.Outlined">
+                    <RadzenTextBox @bind-Value="model.Url" Name="Url" Placeholder="https://..." />
+                </RadzenFormField>
+
+                @if (CurrentSpecsType != SpecsTypeEnum.None)
+                {
+                    <RadzenStack Gap="0.6rem">
+                        <RadzenText Text="@($"{CurrentSpecsType} Specifications")" TextStyle="TextStyle.Subtitle2"
+                                    Style="margin:0;" />
+
+                        @if (CurrentSpecsType == SpecsTypeEnum.Telescope)
+                        {
+                            <RadzenFormField Text="Optical Design" Variant="Variant.Outlined">
+                                <RadzenDropDown Data="opticalDesigns" @bind-Value="specs.OpticalDesign"
+                                                TValue="EquipmentOpticalDesignEnum?" Name="OpticalDesign" Placeholder="Select design"
+                                                Style="width:100%;" />
+                            </RadzenFormField>
+
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.75rem">
+                                <RadzenFormField Text="Aperture (mm)" Variant="Variant.Outlined" Style="flex:1;">
+                                    <RadzenNumeric TValue="int?" @bind-Value="specs.ApertureMm" Name="ApertureMm" Min="0" />
+                                </RadzenFormField>
+                                <RadzenFormField Text="Focal Length (mm)" Variant="Variant.Outlined" Style="flex:1;">
+                                    <RadzenNumeric TValue="int?" @bind-Value="specs.FocalLengthMm" Name="FocalLengthMm" Min="0" />
+                                </RadzenFormField>
+                            </RadzenStack>
+
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.75rem">
+                                <RadzenFormField Text="Focal Ratio (f/)" Variant="Variant.Outlined" Style="flex:1;">
+                                    <RadzenNumeric TValue="double?" @bind-Value="specs.FocalRatio" Name="FocalRatio" Min="0"
+                                                   Format="0.##" Step="0.1" />
+                                </RadzenFormField>
+                                <RadzenFormField Text="Weight (kg)" Variant="Variant.Outlined" Style="flex:1;">
+                                    <RadzenNumeric TValue="double?" @bind-Value="specs.WeightKg" Name="WeightKg" Min="0"
+                                                   Format="0.##" Step="0.1" />
+                                </RadzenFormField>
+                            </RadzenStack>
+
+                            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                                <RadzenCheckBox @bind-Value="specs.HasFieldFlattener" Name="HasFieldFlattener" TValue="bool?" />
+                                <RadzenLabel Text="Includes field flattener" Component="HasFieldFlattener" />
+                            </RadzenStack>
+                        }
+
+                        @if (CurrentSpecsType == SpecsTypeEnum.Mount)
+                        {
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.75rem">
+                                <RadzenFormField Text="Mount Type" Variant="Variant.Outlined" Style="flex:1;">
+                                    <RadzenDropDown Data="mountTypes" @bind-Value="specs.MountType" TValue="MountTypeEnum?"
+                                                    Name="MountType" Placeholder="Select type" Style="width:100%;" />
+                                </RadzenFormField>
+                                <RadzenFormField Text="Tracking Axis" Variant="Variant.Outlined" Style="flex:1;">
+                                    <RadzenDropDown Data="trackingAxes" @bind-Value="specs.TrackingAxis" TValue="TrackingAxisEnum?"
+                                                    Name="TrackingAxis" Placeholder="Select axis" Style="width:100%;" />
+                                </RadzenFormField>
+                            </RadzenStack>
+
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.75rem">
+                                <RadzenFormField Text="Drive Type" Variant="Variant.Outlined" Style="flex:1;">
+                                    <RadzenDropDown Data="driveTypes" @bind-Value="specs.DriveType" TValue="DriveTypeEnum?"
+                                                    Name="DriveType" Placeholder="Select drive" Style="width:100%;" />
+                                </RadzenFormField>
+                                <RadzenFormField Text="Max Payload (kg)" Variant="Variant.Outlined" Style="flex:1;">
+                                    <RadzenNumeric TValue="double?" @bind-Value="specs.MaxPayloadKg" Name="MaxPayloadKg" Min="0"
+                                                   Format="0.##" Step="0.5" />
+                                </RadzenFormField>
+                            </RadzenStack>
+
+                            <RadzenFormField Text="Weight (kg)" Variant="Variant.Outlined">
+                                <RadzenNumeric TValue="double?" @bind-Value="specs.WeightKg" Name="MountWeightKg" Min="0"
+                                               Format="0.##" Step="0.1" />
+                            </RadzenFormField>
+
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="1.5rem">
+                                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                                    <RadzenCheckBox @bind-Value="specs.HasPolarScope" Name="HasPolarScope" TValue="bool?" />
+                                    <RadzenLabel Text="Polar scope included" Component="HasPolarScope" />
+                                </RadzenStack>
+                                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                                    <RadzenCheckBox @bind-Value="specs.HasGuidePort" Name="HasGuidePort" TValue="bool?" />
+                                    <RadzenLabel Text="ST-4 guide port" Component="HasGuidePort" />
+                                </RadzenStack>
+                            </RadzenStack>
+                        }
+
+                        @if (CurrentSpecsType == SpecsTypeEnum.Camera)
+                        {
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.75rem">
+                                <RadzenFormField Text="Sensor Type" Variant="Variant.Outlined" Style="flex:1;">
+                                    <RadzenDropDown Data="sensorTypes" @bind-Value="specs.SensorType" TValue="SensorTypeEnum?"
+                                                    Name="SensorType" Placeholder="Select sensor" Style="width:100%;" />
+                                </RadzenFormField>
+                                <RadzenFormField Text="Sensor Format" Variant="Variant.Outlined" Style="flex:1;">
+                                    <RadzenDropDown Data="sensorFormats" @bind-Value="specs.SensorFormat" TValue="SensorFormatEnum?"
+                                                    Name="SensorFormat" Placeholder="Select format" Style="width:100%;" />
+                                </RadzenFormField>
+                            </RadzenStack>
+
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.75rem">
+                                <RadzenFormField Text="Resolution Width (px)" Variant="Variant.Outlined" Style="flex:1;">
+                                    <RadzenNumeric TValue="int?" @bind-Value="specs.ResolutionWidthPx" Name="ResolutionWidthPx"
+                                                   Min="0" />
+                                </RadzenFormField>
+                                <RadzenFormField Text="Resolution Height (px)" Variant="Variant.Outlined" Style="flex:1;">
+                                    <RadzenNumeric TValue="int?" @bind-Value="specs.ResolutionHeightPx" Name="ResolutionHeightPx"
+                                                   Min="0" />
+                                </RadzenFormField>
+                            </RadzenStack>
+
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.75rem">
+                                <RadzenFormField Text="Sensor Width (mm)" Variant="Variant.Outlined" Style="flex:1;">
+                                    <RadzenNumeric TValue="double?" @bind-Value="specs.SensorWidthMm" Name="SensorWidthMm" Min="0"
+                                                   Format="0.##" Step="0.1" />
+                                </RadzenFormField>
+                                <RadzenFormField Text="Sensor Height (mm)" Variant="Variant.Outlined" Style="flex:1;">
+                                    <RadzenNumeric TValue="double?" @bind-Value="specs.SensorHeightMm" Name="SensorHeightMm" Min="0"
+                                                   Format="0.##" Step="0.1" />
+                                </RadzenFormField>
+                            </RadzenStack>
+
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.75rem">
+                                <RadzenFormField Text="Pixel Size (μm)" Variant="Variant.Outlined" Style="flex:1;">
+                                    <RadzenNumeric TValue="double?" @bind-Value="specs.PixelSizeUm" Name="PixelSizeUm" Min="0"
+                                                   Format="0.##" Step="0.1" />
+                                </RadzenFormField>
+                                <RadzenFormField Text="Full Well Capacity (e⁻)" Variant="Variant.Outlined" Style="flex:1;">
+                                    <RadzenNumeric TValue="int?" @bind-Value="specs.FullWellCapacityE" Name="FullWellCapacityE"
+                                                   Min="0" />
+                                </RadzenFormField>
+                            </RadzenStack>
+
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.75rem">
+                                <RadzenFormField Text="Read Noise (e⁻)" Variant="Variant.Outlined" Style="flex:1;">
+                                    <RadzenNumeric TValue="double?" @bind-Value="specs.ReadNoiseE" Name="ReadNoiseE" Min="0"
+                                                   Format="0.##" Step="0.1" />
+                                </RadzenFormField>
+                                <RadzenStack Style="flex:1;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
+                                             Gap="0.5rem">
+                                    <RadzenCheckBox @bind-Value="specs.IsCooled" Name="IsCooled" TValue="bool?" />
+                                    <RadzenLabel Text="Cooled sensor" Component="IsCooled" />
+                                </RadzenStack>
+                            </RadzenStack>
+                        }
+
+                        @if (CurrentSpecsType == SpecsTypeEnum.Filter)
+                        {
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.75rem">
+                                <RadzenFormField Text="Filter Type" Variant="Variant.Outlined" Style="flex:1;">
+                                    <RadzenDropDown Data="filterTypes" @bind-Value="specs.FilterType" TValue="FilterTypeEnum?"
+                                                    Name="FilterType" Placeholder="Select type" Style="width:100%;" />
+                                </RadzenFormField>
+                                <RadzenFormField Text="Diameter (mm)" Variant="Variant.Outlined" Style="flex:1;">
+                                    <RadzenNumeric TValue="double?" @bind-Value="specs.DiameterMm" Name="DiameterMm" Min="0"
+                                                   Format="0.##" Step="0.5" />
+                                </RadzenFormField>
+                            </RadzenStack>
+
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.75rem">
+                                <RadzenFormField Text="Bandwidth (nm)" Variant="Variant.Outlined" Style="flex:1;">
+                                    <RadzenNumeric TValue="double?" @bind-Value="specs.BandwidthNm" Name="BandwidthNm" Min="0"
+                                                   Format="0.##" Step="0.5" />
+                                </RadzenFormField>
+                                <RadzenFormField Text="Central Wavelength (nm)" Variant="Variant.Outlined" Style="flex:1;">
+                                    <RadzenNumeric TValue="double?" @bind-Value="specs.CentralWavelengthNm"
+                                                   Name="CentralWavelengthNm" Min="0" Format="0.##" Step="0.5" />
+                                </RadzenFormField>
+                            </RadzenStack>
+
+                            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                                <RadzenCheckBox @bind-Value="specs.IsClipIn" Name="IsClipIn" TValue="bool" />
+                                <RadzenLabel Text="Clip-in filter" Component="IsClipIn" />
+                            </RadzenStack>
+
+                            @if (specs.IsClipIn)
+                            {
+                                <RadzenFormField Text="Clip-in Camera Mount" Variant="Variant.Outlined">
+                                    <RadzenTextBox @bind-Value="specs.ClipInCameraMount" Name="ClipInCameraMount"
+                                                   Placeholder="e.g. Canon EF, Nikon F" MaxLength="100" />
+                                </RadzenFormField>
+                            }
+                        }
+
+                        @if (CurrentSpecsType == SpecsTypeEnum.Guider)
+                        {
+                            <RadzenFormField Text="Guider Type" Variant="Variant.Outlined">
+                                <RadzenDropDown Data="guiderTypes" @bind-Value="specs.GuiderType" TValue="GuiderTypeEnum?"
+                                                Name="GuiderType" Placeholder="Select type" Style="width:100%;" />
+                            </RadzenFormField>
+
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.75rem">
+                                <RadzenFormField Text="Aperture (mm)" Variant="Variant.Outlined" Style="flex:1;">
+                                    <RadzenNumeric TValue="int?" @bind-Value="specs.ApertureMm" Name="GuiderApertureMm" Min="0" />
+                                </RadzenFormField>
+                                <RadzenFormField Text="Focal Length (mm)" Variant="Variant.Outlined" Style="flex:1;">
+                                    <RadzenNumeric TValue="int?" @bind-Value="specs.FocalLengthMm" Name="GuiderFocalLengthMm"
+                                                   Min="0" />
+                                </RadzenFormField>
+                            </RadzenStack>
+                        }
+
+                        @if (CurrentSpecsType == SpecsTypeEnum.Focuser)
+                        {
+                            <RadzenFormField Text="Focuser Type" Variant="Variant.Outlined">
+                                <RadzenDropDown Data="focuserTypes" @bind-Value="specs.FocuserType" TValue="FocuserTypeEnum?"
+                                                Name="FocuserType" Placeholder="Select type" Style="width:100%;" />
+                            </RadzenFormField>
+
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.75rem">
+                                <RadzenFormField Text="Barrel Diameter (inch)" Variant="Variant.Outlined" Style="flex:1;">
+                                    <RadzenNumeric TValue="double?" @bind-Value="specs.DiameterInch" Name="DiameterInch" Min="0"
+                                                   Format="0.##" Step="0.25" />
+                                </RadzenFormField>
+                                <RadzenFormField Text="Travel (mm)" Variant="Variant.Outlined" Style="flex:1;">
+                                    <RadzenNumeric TValue="double?" @bind-Value="specs.TravelMm" Name="TravelMm" Min="0"
+                                                   Format="0.##" Step="1" />
+                                </RadzenFormField>
+                            </RadzenStack>
+
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.75rem">
+                                <RadzenFormField Text="Max Load (kg)" Variant="Variant.Outlined" Style="flex:1;">
+                                    <RadzenNumeric TValue="double?" @bind-Value="specs.MaxLoadKg" Name="MaxLoadKg" Min="0"
+                                                   Format="0.##" Step="0.5" />
+                                </RadzenFormField>
+                                <RadzenStack Style="flex:1;" Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center"
+                                             Gap="0.5rem">
+                                    <RadzenCheckBox @bind-Value="specs.IsMotorized" Name="IsMotorized" TValue="bool?" />
+                                    <RadzenLabel Text="Motorized" Component="IsMotorized" />
+                                </RadzenStack>
+                            </RadzenStack>
+                        }
+
+                        @if (CurrentSpecsType == SpecsTypeEnum.ReducerFlattener)
+                        {
+                            <RadzenStack Orientation="Orientation.Horizontal" Gap="0.75rem">
+                                <RadzenFormField Text="Reduction Factor" Variant="Variant.Outlined" Style="flex:1;">
+                                    <RadzenNumeric TValue="double?" @bind-Value="specs.ReductionFactor" Name="ReductionFactor"
+                                                   Min="0" Max="1" Format="0.##" Step="0.01" />
+                                </RadzenFormField>
+                                <RadzenFormField Text="Image Circle (mm)" Variant="Variant.Outlined" Style="flex:1;">
+                                    <RadzenNumeric TValue="double?" @bind-Value="specs.ImageCircleMm" Name="ImageCircleMm" Min="0"
+                                                   Format="0.##" Step="1" />
+                                </RadzenFormField>
+                            </RadzenStack>
+
+                            <RadzenFormField Text="Thread Connection" Variant="Variant.Outlined">
+                                <RadzenTextBox @bind-Value="specs.ThreadConnection" Name="ThreadConnection"
+                                               Placeholder="e.g. M48, M54, T2" MaxLength="50" />
+                            </RadzenFormField>
+                        }
+
+                    </RadzenStack>
+                }
+
+                <RadzenStack Orientation="Orientation.Horizontal" Gap="0.75rem">
+                    <RadzenFormField Text="FITS TELESCOP" Variant="Variant.Outlined" Style="flex:1;">
+                        <RadzenTextBox @bind-Value="model.FitsTelescop" Name="FitsTelescop" MaxLength="68" />
+                    </RadzenFormField>
+
+                    <RadzenFormField Text="FITS INSTRUME" Variant="Variant.Outlined" Style="flex:1;">
+                        <RadzenTextBox @bind-Value="model.FitsInstrume" Name="FitsInstrume" MaxLength="68" />
+                    </RadzenFormField>
+                </RadzenStack>
+
+                <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.End" Gap="0.5rem"
+                             Style="padding-top:0.5rem;">
+                    <RadzenButton Text="Cancel" ButtonStyle="ButtonStyle.Light" Click="Cancel" Disabled="isSaving" />
+                    <RadzenButton Text="@(isSaving ? "Saving..." : "Save Model")" ButtonStyle="ButtonStyle.Primary"
+                                  ButtonType="ButtonType.Submit" IsBusy="isSaving" Disabled="isSaving" />
+                </RadzenStack>
+            </RadzenStack>
+        </RadzenTemplateForm>
+    }
+</RadzenStack>
+
+@code {
+    [Parameter] public int BrandId { get; set; }
+    [Parameter] public int? ModelId { get; set; }
+
+    private List<EquipmentCategorylListItemDto> categories = [];
+    private ModelFormModel model = new();
+    private SpecsFormModel specs = new();
+    private bool isLoading = true;
+    private bool isSaving;
+    private string? errorMessage;
+    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+
+    private readonly EquipmentOpticalDesignEnum[] opticalDesigns = Enum.GetValues<EquipmentOpticalDesignEnum>();
+    private readonly MountTypeEnum[] mountTypes = Enum.GetValues<MountTypeEnum>();
+    private readonly TrackingAxisEnum[] trackingAxes = Enum.GetValues<TrackingAxisEnum>();
+    private readonly DriveTypeEnum[] driveTypes = Enum.GetValues<DriveTypeEnum>();
+    private readonly SensorTypeEnum[] sensorTypes = Enum.GetValues<SensorTypeEnum>();
+    private readonly SensorFormatEnum[] sensorFormats = Enum.GetValues<SensorFormatEnum>();
+    private readonly FilterTypeEnum[] filterTypes = Enum.GetValues<FilterTypeEnum>();
+    private readonly GuiderTypeEnum[] guiderTypes = Enum.GetValues<GuiderTypeEnum>();
+    private readonly FocuserTypeEnum[] focuserTypes = Enum.GetValues<FocuserTypeEnum>();
+
+    private SpecsTypeEnum CurrentSpecsType =>
+        categories.FirstOrDefault(c => c.Id == model.CategoryId)?.SpecsType ?? SpecsTypeEnum.None;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var result = await CategoryService.GetEquipmentCategoryListAsync(new PagedQueryParams
+            {
+                PageNumber = 1,
+                PageSize = 100,
+                OrderBy = "NAME ASC"
+            });
+            categories = result?.Items ?? [];
+
+            if (ModelId is not null)
+            {
+                var existing = await ModelService.GetEquipmentModelDetialsAsync(ModelId.Value);
+                if (existing is null)
+                {
+                    errorMessage = "Model not found.";
+                    return;
+                }
+
+                model = new ModelFormModel
+                {
+                    Name = existing.Name,
+                    Slug = existing.Slug,
+                    CategoryId = existing.CategoryId,
+                    Url = existing.Url,
+                    FitsTelescop = existing.FitsTelescop,
+                    FitsInstrume = existing.FitsInstrume
+                };
+
+                specs = DeserializeSpecs(existing.Specifications, CurrentSpecsType);
+            }
+            else
+            {
+                model.CategoryId = categories.FirstOrDefault()?.Id ?? 0;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Failed to load model form.";
+            Console.Error.WriteLine($"[ModelDialog] Load failed: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void GenerateSlug(string name)
+    {
+        if (ModelId is not null)
+        {
+            return;
+        }
+
+        model.Slug = NormalizeSlug(name);
+    }
+
+    private void OnCategoryChanged(object? value)
+    {
+        var categoryId = value is int id ? id : model.CategoryId;
+        if (categoryId != model.CategoryId)
+        {
+            model.CategoryId = categoryId;
+        }
+
+        specs = new SpecsFormModel();
+    }
+
+    private async Task HandleSubmit()
+    {
+        isSaving = true;
+        errorMessage = null;
+
+        try
+        {
+            if (model.CategoryId <= 0)
+            {
+                errorMessage = "Select a category.";
+                return;
+            }
+
+            if (ModelId is null)
+            {
+                var created = await ModelService.CreateModelAsync(new CreateModelDto(
+                    model.Name,
+                    BrandId,
+                    model.CategoryId,
+                    string.IsNullOrWhiteSpace(model.Slug) ? NormalizeSlug(model.Name) : model.Slug,
+                    model.Url,
+                    SerializeSpecs(),
+                    model.FitsTelescop,
+                    model.FitsInstrume
+                ));
+
+                DialogService.Close(created is not null);
+                return;
+            }
+
+            var updated = await ModelService.UpdateModelAsync(ModelId.Value, new UpdateModelDto(
+                model.Name,
+                model.CategoryId,
+                string.IsNullOrWhiteSpace(model.Slug) ? NormalizeSlug(model.Name) : model.Slug,
+                model.Url,
+                SerializeSpecs(),
+                model.FitsTelescop,
+                model.FitsInstrume
+            ));
+
+            DialogService.Close(updated is not null);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Model could not be saved. Check for a duplicate slug and try again.";
+            Console.Error.WriteLine($"[ModelDialog] Save failed: {ex.Message}");
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void Cancel() => DialogService.Close(false);
+
+    private static string NormalizeSlug(string value)
+    {
+        var slug = value.Trim().ToLowerInvariant().Replace(" ", "-").Replace("_", "-");
+        return System.Text.RegularExpressions.Regex.Replace(slug, @"[^a-z0-9\-]", "");
+    }
+
+    private string? SerializeSpecs()
+    {
+        return CurrentSpecsType switch
+        {
+            SpecsTypeEnum.Telescope => JsonSerializer.Serialize(new TelescopeSpecs
+            {
+                OpticalDesign = specs.OpticalDesign,
+                ApertureMm = specs.ApertureMm,
+                FocalLengthMm = specs.FocalLengthMm,
+                FocalRatio = specs.FocalRatio,
+                WeightKg = specs.WeightKg,
+                HasFieldFlattener = specs.HasFieldFlattener
+            }, JsonOptions),
+            SpecsTypeEnum.Mount => JsonSerializer.Serialize(new MountSpecs
+            {
+                MountType = specs.MountType,
+                TrackingAxis = specs.TrackingAxis,
+                DriveType = specs.DriveType,
+                MaxPayloadKg = specs.MaxPayloadKg,
+                HasPolarScope = specs.HasPolarScope,
+                HasGuidePort = specs.HasGuidePort,
+                WeightKg = specs.WeightKg
+            }, JsonOptions),
+            SpecsTypeEnum.Camera => JsonSerializer.Serialize(new CameraSpecs
+            {
+                SensorType = specs.SensorType,
+                SensorFormat = specs.SensorFormat,
+                PixelSizeUm = specs.PixelSizeUm,
+                ResolutionWidthPx = specs.ResolutionWidthPx,
+                ResolutionHeightPx = specs.ResolutionHeightPx,
+                SensorWidthMm = specs.SensorWidthMm,
+                SensorHeightMm = specs.SensorHeightMm,
+                IsCooled = specs.IsCooled,
+                FullWellCapacityE = specs.FullWellCapacityE,
+                ReadNoiseE = specs.ReadNoiseE
+            }, JsonOptions),
+            SpecsTypeEnum.Filter => JsonSerializer.Serialize(new FilterSpecs
+            {
+                FilterType = specs.FilterType,
+                DiameterMm = specs.DiameterMm,
+                IsClipIn = specs.IsClipIn,
+                ClipInCameraMount = specs.ClipInCameraMount,
+                BandwidthNm = specs.BandwidthNm,
+                CentralWavelengthNm = specs.CentralWavelengthNm
+            }, JsonOptions),
+            SpecsTypeEnum.Guider => JsonSerializer.Serialize(new GuiderSpecs
+            {
+                GuiderType = specs.GuiderType,
+                FocalLengthMm = specs.FocalLengthMm,
+                ApertureMm = specs.ApertureMm
+            }, JsonOptions),
+            SpecsTypeEnum.Focuser => JsonSerializer.Serialize(new FocuserSpecs
+            {
+                FocuserType = specs.FocuserType,
+                TravelMm = specs.TravelMm,
+                DiameterInch = specs.DiameterInch,
+                MaxLoadKg = specs.MaxLoadKg,
+                IsMotorized = specs.IsMotorized
+            }, JsonOptions),
+            SpecsTypeEnum.ReducerFlattener => JsonSerializer.Serialize(new ReducerFlattenerSpecs
+            {
+                ReductionFactor = specs.ReductionFactor,
+                ImageCircleMm = specs.ImageCircleMm,
+                ThreadConnection = specs.ThreadConnection
+            }, JsonOptions),
+            _ => null
+        };
+    }
+
+    private static SpecsFormModel DeserializeSpecs(string? json, SpecsTypeEnum specsType)
+    {
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            return new SpecsFormModel();
+        }
+
+        try
+        {
+            return specsType switch
+            {
+                SpecsTypeEnum.Telescope => FromTelescope(JsonSerializer.Deserialize<TelescopeSpecs>(json, JsonOptions)),
+                SpecsTypeEnum.Mount => FromMount(JsonSerializer.Deserialize<MountSpecs>(json, JsonOptions)),
+                SpecsTypeEnum.Camera => FromCamera(JsonSerializer.Deserialize<CameraSpecs>(json, JsonOptions)),
+                SpecsTypeEnum.Filter => FromFilter(JsonSerializer.Deserialize<FilterSpecs>(json, JsonOptions)),
+                SpecsTypeEnum.Guider => FromGuider(JsonSerializer.Deserialize<GuiderSpecs>(json, JsonOptions)),
+                SpecsTypeEnum.Focuser => FromFocuser(JsonSerializer.Deserialize<FocuserSpecs>(json, JsonOptions)),
+                SpecsTypeEnum.ReducerFlattener => FromReducer(JsonSerializer.Deserialize<ReducerFlattenerSpecs>(json, JsonOptions)),
+                _ => new SpecsFormModel()
+            };
+        }
+        catch (JsonException)
+        {
+            return new SpecsFormModel();
+        }
+    }
+
+    private static SpecsFormModel FromTelescope(TelescopeSpecs? value) => new()
+    {
+        OpticalDesign = value?.OpticalDesign,
+        ApertureMm = value?.ApertureMm,
+        FocalLengthMm = value?.FocalLengthMm,
+        FocalRatio = value?.FocalRatio,
+        WeightKg = value?.WeightKg,
+        HasFieldFlattener = value?.HasFieldFlattener
+    };
+
+    private static SpecsFormModel FromMount(MountSpecs? value) => new()
+    {
+        MountType = value?.MountType,
+        TrackingAxis = value?.TrackingAxis,
+        DriveType = value?.DriveType,
+        MaxPayloadKg = value?.MaxPayloadKg,
+        HasPolarScope = value?.HasPolarScope,
+        HasGuidePort = value?.HasGuidePort,
+        WeightKg = value?.WeightKg
+    };
+
+    private static SpecsFormModel FromCamera(CameraSpecs? value) => new()
+    {
+        SensorType = value?.SensorType,
+        SensorFormat = value?.SensorFormat,
+        PixelSizeUm = value?.PixelSizeUm,
+        ResolutionWidthPx = value?.ResolutionWidthPx,
+        ResolutionHeightPx = value?.ResolutionHeightPx,
+        SensorWidthMm = value?.SensorWidthMm,
+        SensorHeightMm = value?.SensorHeightMm,
+        IsCooled = value?.IsCooled,
+        FullWellCapacityE = value?.FullWellCapacityE,
+        ReadNoiseE = value?.ReadNoiseE
+    };
+
+    private static SpecsFormModel FromFilter(FilterSpecs? value) => new()
+    {
+        FilterType = value?.FilterType,
+        DiameterMm = value?.DiameterMm,
+        IsClipIn = value?.IsClipIn ?? false,
+        ClipInCameraMount = value?.ClipInCameraMount,
+        BandwidthNm = value?.BandwidthNm,
+        CentralWavelengthNm = value?.CentralWavelengthNm
+    };
+
+    private static SpecsFormModel FromGuider(GuiderSpecs? value) => new()
+    {
+        GuiderType = value?.GuiderType,
+        FocalLengthMm = value?.FocalLengthMm,
+        ApertureMm = value?.ApertureMm
+    };
+
+    private static SpecsFormModel FromFocuser(FocuserSpecs? value) => new()
+    {
+        FocuserType = value?.FocuserType,
+        TravelMm = value?.TravelMm,
+        DiameterInch = value?.DiameterInch,
+        MaxLoadKg = value?.MaxLoadKg,
+        IsMotorized = value?.IsMotorized
+    };
+
+    private static SpecsFormModel FromReducer(ReducerFlattenerSpecs? value) => new()
+    {
+        ReductionFactor = value?.ReductionFactor,
+        ImageCircleMm = value?.ImageCircleMm,
+        ThreadConnection = value?.ThreadConnection
+    };
+
+    private sealed class ModelFormModel
+    {
+        public string Name { get; set; } = "";
+        public string Slug { get; set; } = "";
+        public int CategoryId { get; set; }
+        public string? Url { get; set; }
+        public string? FitsTelescop { get; set; }
+        public string? FitsInstrume { get; set; }
+    }
+
+    private sealed class SpecsFormModel
+    {
+        public EquipmentOpticalDesignEnum? OpticalDesign { get; set; }
+        public int? ApertureMm { get; set; }
+        public int? FocalLengthMm { get; set; }
+        public double? FocalRatio { get; set; }
+        public double? WeightKg { get; set; }
+        public bool? HasFieldFlattener { get; set; }
+        public MountTypeEnum? MountType { get; set; }
+        public TrackingAxisEnum? TrackingAxis { get; set; }
+        public DriveTypeEnum? DriveType { get; set; }
+        public double? MaxPayloadKg { get; set; }
+        public bool? HasPolarScope { get; set; }
+        public bool? HasGuidePort { get; set; }
+        public SensorTypeEnum? SensorType { get; set; }
+        public SensorFormatEnum? SensorFormat { get; set; }
+        public double? PixelSizeUm { get; set; }
+        public int? ResolutionWidthPx { get; set; }
+        public int? ResolutionHeightPx { get; set; }
+        public double? SensorWidthMm { get; set; }
+        public double? SensorHeightMm { get; set; }
+        public bool? IsCooled { get; set; }
+        public int? FullWellCapacityE { get; set; }
+        public double? ReadNoiseE { get; set; }
+        public FilterTypeEnum? FilterType { get; set; }
+        public double? DiameterMm { get; set; }
+        public bool IsClipIn { get; set; }
+        public string? ClipInCameraMount { get; set; }
+        public double? BandwidthNm { get; set; }
+        public double? CentralWavelengthNm { get; set; }
+        public GuiderTypeEnum? GuiderType { get; set; }
+        public FocuserTypeEnum? FocuserType { get; set; }
+        public double? TravelMm { get; set; }
+        public double? DiameterInch { get; set; }
+        public double? MaxLoadKg { get; set; }
+        public bool? IsMotorized { get; set; }
+        public double? ReductionFactor { get; set; }
+        public double? ImageCircleMm { get; set; }
+        public string? ThreadConnection { get; set; }
+    }
+}
