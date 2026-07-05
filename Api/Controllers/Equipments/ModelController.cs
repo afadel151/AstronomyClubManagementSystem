@@ -74,4 +74,10 @@ public sealed class ModelController(IEquipmentModelService equipmentModelService
             return Conflict(ex.Message);
         }
     }
+    [HttpGet("list")]
+    public async Task<ActionResult<List<EquipmentModelListItemDto>>> GetModelsList()
+    {
+        var models = await equipmentModelService.GetEquipmentModelListItemsAsync();
+        return Ok(models);
+    }
 }

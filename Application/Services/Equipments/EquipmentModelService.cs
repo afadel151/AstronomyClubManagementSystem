@@ -13,6 +13,7 @@ public interface IEquipmentModelService
     Task<EquipmentModelDetailDto?> GetEquipmentModelDetialsAsync(int modelId);
     Task<EquipmentModelListItemDto> CreateEquipmentModelAsync(CreateModelDto dto);
     Task<EquipmentModelListItemDto?> UpdateEquipmentModelAsync(int modelId, UpdateModelDto dto);
+    Task<List<EquipmentModelListItemDto>> GetEquipmentModelListItemsAsync();
     Task<bool> DeleteEquipmentModelAsync(int modelId);
 }
 
@@ -167,6 +168,27 @@ public sealed class EquipmentModelService(
                 m.CreatedAt
             ))
             .FirstOrDefaultAsync();
+    }
+    public async Task<List<EquipmentModelListItemDto>> GetEquipmentModelListItemsAsync()
+    {
+        // models
+        var models = await equipmentModelRepository.Query()
+                    .Include(m => m.EquipmentBrand)
+                    .Include(m => m.EquipmentCategory)
+                    .Select(m => new EquipmentModelListItemDto(
+                        m.Id,
+                        m.Name,
+                        m.EquipmentBrand.Name,
+                        m.EquipmentCategory.Name,
+                        m.Url,
+                        m.EquipmentCategory.Accessory,
+                        m.Equipments.Count,
+                        m.CreatedAt
+                    ))
+                    .ToListAsync();
+
+        return models;
+
     }
 
     private async System.Threading.Tasks.Task EnsureBrandExistsAsync(int brandId)
