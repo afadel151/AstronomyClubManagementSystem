@@ -177,10 +177,11 @@ builder.Services.AddInfrastructureServices();
 
 // Infra
 
-builder.Services.AddSingleton<IMongoClient>(_ =>
-    new MongoClient(builder.Configuration.GetConnectionString("MongoDB")));
-builder.Services.AddSingleton<MongoDbContext>(sp =>
-    new MongoDbContext(sp.GetRequiredService<IMongoClient>(), "AstroClubMongo"));
+// builder.Services.AddSingleton<IMongoClient>(_ =>
+//     new MongoClient(builder.Configuration.GetConnectionString("MongoDB")));
+
+// builder.Services.AddSingleton<MongoDbContext>(sp =>
+//     new MongoDbContext(sp.GetRequiredService<IMongoClient>(), "AstroClubMongo"));
 
 builder.Services.AddSingleton<IMinioClient>(_ =>
     new MinioClient()
@@ -193,13 +194,13 @@ builder.Services.AddSingleton<IMinioClient>(_ =>
 builder.Services.AddScoped<IStorageService, MinioStorageService>();
 
 // Configure Microservices options
-builder.Services.Configure<MicroserviceOptions>(
-    builder.Configuration.GetSection(MicroserviceOptions.SectionName));
+// builder.Services.Configure<MicroserviceOptions>(
+//     builder.Configuration.GetSection(MicroserviceOptions.SectionName));
 
 // Register Typed Resilient HttpClient for the Example Client
-builder.Services.AddMicroserviceClient<
-    IExampleServiceClient,
-    ExampleServiceClient>("Example");
+// builder.Services.AddMicroserviceClient<
+//     IExampleServiceClient,
+//     ExampleServiceClient>("Example");
 
 // API
 
@@ -209,11 +210,11 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
-{
-    var mongoCtx = scope.ServiceProvider.GetRequiredService<MongoDbContext>();
-    await MongoIndexInitializer.InitializeAsync(mongoCtx);
-}
+// using (var scope = app.Services.CreateScope())
+// {
+//     var mongoCtx = scope.ServiceProvider.GetRequiredService<MongoDbContext>();
+//     await MongoIndexInitializer.InitializeAsync(mongoCtx);
+// }
 
 if (app.Environment.IsDevelopment())
 {
