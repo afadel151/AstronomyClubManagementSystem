@@ -1,5 +1,6 @@
 using Domain.Shared.DTO;
 using Domain.Shared.DTO.Equipment;
+using Domain.Shared.DTO.Equipment.Model;
 using Web.Club.Providers;
 
 namespace Web.Club.Services.Equipments;
@@ -7,6 +8,8 @@ namespace Web.Club.Services.Equipments;
 public interface IEquipmentService
 {
     Task<PagedResult<EquipmentListItemDto>?> GetEquipmentListAsync(PagedQueryParams queryParams);
+    Task<List<EquipmentModelListItemDto>?> GetModelsList();
+    Task<EquipmentListItemDto?> CreateEquipmentAsync(CreateEquipmentDto dto);
 }
 
 public class EquipmentService(ApiHttpClient api) : IEquipmentService
@@ -26,4 +29,14 @@ public class EquipmentService(ApiHttpClient api) : IEquipmentService
         return await api.GetAsync<PagedResult<EquipmentListItemDto>>(url);
     }
 
+    public async Task<List<EquipmentModelListItemDto>?> GetModelsList()
+    {
+        var url = $"api/equipments/models/list";
+        return await api.GetAsync<List<EquipmentModelListItemDto>>(url);
+    }
+    public async Task<EquipmentListItemDto?> CreateEquipmentAsync(CreateEquipmentDto dto)
+    {
+        var url = "api/equipments";
+        return await api.PostAsync<EquipmentListItemDto>(url, dto);
+    }
 }

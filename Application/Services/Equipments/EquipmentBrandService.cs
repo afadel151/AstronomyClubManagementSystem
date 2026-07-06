@@ -161,7 +161,7 @@ public sealed class EquipmentBrandService(
                 entity.CountryOfOrigin,
                 entity.LogoUrl,
                 entity.Notes,
-                entity.EquipmentModels.Count,
+                0,
                 entity.CreatedAt
             );
     }

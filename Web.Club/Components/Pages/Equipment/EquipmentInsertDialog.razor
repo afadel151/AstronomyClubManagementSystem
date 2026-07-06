@@ -1,0 +1,227 @@
+@using Domain.Shared.DTO.Equipment
+@using Domain.Shared.DTO.Equipment.Model
+@using Data.Entities.Enums
+@using Web.Club.Services.Equipments
+@inject IEquipmentService EquipmentService
+@inject NavigationManager Nav
+@attribute [Authorize]
+
+<RadzenStack Gap="1rem" Style="padding: 0.5rem 0;">
+
+    @if (!string.IsNullOrEmpty(_error))
+    {
+        <RadzenAlert AlertStyle="AlertStyle.Danger" Shade="Shade.Lighter" AllowClose="false">@_error</RadzenAlert>
+    }
+
+    @if (_loadingModels)
+    {
+        <RadzenProgressBarCircular ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
+    }
+    else
+    {
+        <RadzenTemplateForm TItem="FormModel" Data="@_model" Submit="HandleSubmit">
+
+            <RadzenCard>
+                <RadzenStack Gap="1rem">
+                    <p style="margin:0;font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--rz-text-secondary-color);">
+                        Model
+                    </p>
+
+                    <RadzenFormField Text="Model *" Style="width:100%">
+                        <ChildContent>
+                            <RadzenDropDown @bind-Value="_model.ModelId"
+                                            Name="ModelId"
+                                            Data="@_models"
+                                            TextProperty="Name"
+                                            ValueProperty="Id"
+                                            AllowFiltering="true"
+                                            FilterCaseSensitivity="FilterCaseSensitivity.CaseInsensitive"
+                                            Placeholder="Select a model"
+                                            Change="@OnModelChanged"
+                                            Style="width:100%" />
+                        </ChildContent>
+                        <Helper>
+                            <RadzenRequiredValidator Component="ModelId" Text="Model is required." />
+                        </Helper>
+                    </RadzenFormField>
+
+                    @if (_selectedModel is not null)
+                    {
+                        <RadzenStack Orientation="Orientation.Horizontal" Gap="1rem">
+                            <RadzenBadge BadgeStyle="BadgeStyle.Light" Text="@($"Brand: {_selectedModel.BrandName}")" />
+                            <RadzenBadge BadgeStyle="BadgeStyle.Light" Text="@($"Category: {_selectedModel.CategoryName}")" />
+                            @if (_selectedModel.Accessory)
+                            {
+                                <RadzenBadge BadgeStyle="BadgeStyle.Info" Text="Accessory" />
+                            }
+                        </RadzenStack>
+                    }
+                </RadzenStack>
+            </RadzenCard>
+
+            <RadzenCard Style="margin-top:1rem;">
+                <RadzenStack Gap="1rem">
+                    <p style="margin:0;font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--rz-text-secondary-color);">
+                        Details
+                    </p>
+
+                    <RadzenRow Gap="1rem">
+                        <RadzenColumn Size="12" SizeMD="6">
+                            <RadzenFormField Text="Serial Number" Style="width:100%">
+                                <RadzenTextBox @bind-Value="_model.SerialNumber" Name="SerialNumber" Style="width:100%" Placeholder="Optional" MaxLength="200" />
+                            </RadzenFormField>
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="6">
+                            <RadzenFormField Text="Status *" Style="width:100%">
+                                <ChildContent>
+                                    <RadzenDropDown @bind-Value="_model.Status" Name="Status" Data="@_statuses" TextProperty="Label" ValueProperty="Value" Style="width:100%" />
+                                </ChildContent>
+                                <Helper>
+                                    <RadzenRequiredValidator Component="Status" Text="Status is required." />
+                                </Helper>
+                            </RadzenFormField>
+                        </RadzenColumn>
+                    </RadzenRow>
+
+                    <RadzenRow Gap="1rem">
+                        <RadzenColumn Size="12" SizeMD="6">
+                            <RadzenFormField Text="Purchase Date" Style="width:100%">
+                                <RadzenDatePicker @bind-Value="_purchaseDate" Name="PurchaseDate" Style="width:100%" ShowTime="false" />
+                            </RadzenFormField>
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="6">
+                            <RadzenFormField Text="Purchase Price (USD)" Style="width:100%">
+                                <RadzenNumeric TValue="decimal?" @bind-Value="_model.PurchasePriceUs" Name="PurchasePriceUs" Style="width:100%" Min="0" Format="c2" />
+                            </RadzenFormField>
+                        </RadzenColumn>
+                    </RadzenRow>
+
+                    <RadzenFormField Text="Location" Style="width:100%">
+                        <RadzenTextBox @bind-Value="_model.Location" Name="Location" Style="width:100%" Placeholder="Yard A, Workshop, Site 3…" MaxLength="200" />
+                    </RadzenFormField>
+
+                    <RadzenRow Gap="1rem">
+                        <RadzenColumn Size="12" SizeMD="6">
+                            <RadzenFormField Text="Fits Telescope" Style="width:100%">
+                                <RadzenTextBox @bind-Value="_model.FitsTelescop" Name="FitsTelescop" Style="width:100%" Placeholder="Optional" MaxLength="200" />
+                            </RadzenFormField>
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeMD="6">
+                            <RadzenFormField Text="Fits Instrument" Style="width:100%">
+                                <RadzenTextBox @bind-Value="_model.FitsInstrume" Name="FitsInstrume" Style="width:100%" Placeholder="Optional" MaxLength="200" />
+                            </RadzenFormField>
+                        </RadzenColumn>
+                    </RadzenRow>
+
+                    <RadzenFormField Text="Notes" Style="width:100%">
+                        <RadzenTextArea @bind-Value="_model.Notes" Name="Notes" Style="width:100%" Rows="3" MaxLength="1000" Placeholder="Optional notes…" />
+                    </RadzenFormField>
+                </RadzenStack>
+            </RadzenCard>
+
+            <div style="display:flex;justify-content:flex-end;gap:0.75rem;margin-top:1rem;">
+                <RadzenButton Text="Cancel" ButtonStyle="ButtonStyle.Light" Click="@(() => Nav.NavigateTo("/equipments"))" Disabled="_saving" />
+                <RadzenButton Text="Save Equipment" ButtonStyle="ButtonStyle.Primary" Icon="save"
+                              IsBusy="_saving" BusyText="Saving…" ButtonType="ButtonType.Submit" Disabled="_loadingModels || _saving" />
+            </div>
+
+        </RadzenTemplateForm>
+    }
+
+</RadzenStack>
+
+@code {
+    [Inject] private DialogService DialogService { get; set; } = default!;
+    private bool _saving;
+    private bool _loadingModels = true;
+    private string? _error;
+
+    private List<EquipmentModelListItemDto> _models = new();
+    private EquipmentModelListItemDto? _selectedModel;
+    private DateTime? _purchaseDate; // Radzen has no DateOnly picker; converted to DateOnly on submit
+
+    private record StatusOption(string Label, EquipmentStatusEnum Value);
+    private readonly List<StatusOption> _statuses =
+    [
+        new("Operational", EquipmentStatusEnum.Operational),
+        new("Maintenance", EquipmentStatusEnum.Maintenance),
+        new("Loaned",      EquipmentStatusEnum.Loaned),
+        new("Lost",        EquipmentStatusEnum.Lost),
+        new("Retired",     EquipmentStatusEnum.Retired),
+    ];
+
+    private FormModel _model = new();
+
+    private sealed class FormModel
+    {
+        public int? ModelId { get; set; } // nullable so RadzenRequiredValidator has a null to catch
+        public EquipmentStatusEnum Status { get; set; } = EquipmentStatusEnum.Operational;
+        public string? SerialNumber { get; set; }
+        public decimal? PurchasePriceUs { get; set; }
+        public string? Location { get; set; }
+        public string? Notes { get; set; }
+        public string? FitsTelescop { get; set; }
+        public string? FitsInstrume { get; set; }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _models = await EquipmentService.GetModelsList() ?? new();
+        }
+        catch (Exception ex)
+        {
+            _error = "Failed to load equipment models. Reload the page.";
+            Console.Error.WriteLine($"[EquipmentInsert] GetModelsList failed: {ex.Message}");
+        }
+        finally
+        {
+            _loadingModels = false;
+        }
+    }
+
+    private void OnModelChanged(object value)
+    {
+        _selectedModel = _models.FirstOrDefault(m => m.Id == _model.ModelId);
+    }
+
+    // Only invoked by RadzenTemplateForm after all validators pass — no manual null-check needed here anymore.
+    private async Task HandleSubmit()
+    {
+        _error = null;
+
+        var dto = new CreateEquipmentDto(
+            ModelId: _model.ModelId!.Value, // safe: RadzenRequiredValidator blocked submit if null
+            Status: _model.Status,
+            SerialNumber: string.IsNullOrWhiteSpace(_model.SerialNumber) ? null : _model.SerialNumber,
+            PurchaseDate: _purchaseDate is null ? null : DateOnly.FromDateTime(_purchaseDate.Value),
+            PurchasePriceUs: _model.PurchasePriceUs,
+            Location: string.IsNullOrWhiteSpace(_model.Location) ? null : _model.Location,
+            Notes: string.IsNullOrWhiteSpace(_model.Notes) ? null : _model.Notes,
+            FitsTelescop: string.IsNullOrWhiteSpace(_model.FitsTelescop) ? null : _model.FitsTelescop,
+            FitsInstrume: string.IsNullOrWhiteSpace(_model.FitsInstrume) ? null : _model.FitsInstrume
+        );
+
+        _saving = true;
+        try
+        {
+            var created = await EquipmentService.CreateEquipmentAsync(dto);
+            if (created is null)
+            {
+                _error = "Server rejected the request.";
+            }
+            DialogService.Close(true);
+
+        }
+        catch (Exception ex)
+        {
+            _error = "Unexpected error. Try again or check logs.";
+            Console.Error.WriteLine($"[EquipmentInsert] Submit failed: {ex.Message}");
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+}

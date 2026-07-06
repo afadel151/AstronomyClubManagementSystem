@@ -2,6 +2,7 @@ using Application.Repositories;
 using Data.Entities.Generated;
 using Domain.Shared.DTO;
 using Domain.Shared.DTO.Equipment;
+using Domain.Shared.DTO.Equipment.Model;
 using Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,13 +12,14 @@ namespace Application.Services.Equipments;
 public interface IEquipmentService
 {
     Task<PagedResult<EquipmentListItemDto>> GetAll(PagedQueryParams queryParams);
+    Task<EquipmentListItemDto> CrateEquipmentAsync(CreateEquipmentDto dto);
 }
 
 public sealed class EquipmentService(
     IBaseRepository<Equipment> equipmentRepository,
-    IStorageService storageService
+    IStorageService storageService,
 // IBaseRepository<EquipmentBrand> equipmentBrandRepository,
-// IBaseRepository<EquipmentModel> equipmentModelRepository,
+    IBaseRepository<EquipmentModel> equipmentModelRepository
 // IBaseRepository<EquipmentCategory> equipmentCaregoryRepository,
 // IBaseRepository<EquipmentUpload> equipmentUploadRepository,
 // IBaseRepository<EquipmentMaintenance> equipmentMaintenanceRepository,
@@ -88,6 +90,74 @@ public sealed class EquipmentService(
             queryParams.PageNumber,
             queryParams.PageSize
         );
+    }
+
+
+    public async Task<EquipmentListItemDto> CrateEquipmentAsync(CreateEquipmentDto dto)
+    {
+        await EnsureModelExistsAsync(dto.ModelId);
+
+        var entity = new Equipment
+        {
+            Code = await GenerateEquipmentCodeAsync(),
+            SerialNumber = dto.SerialNumber,
+            ModelId = dto.ModelId,
+            Status = dto.Status,
+            PurchaseDate = dto.PurchaseDate,
+            PurchasePriceUs = dto.PurchasePriceUs,
+            Location = dto.Location,
+            Notes = dto.Notes,
+            TotalUsageHours = 0
+        };
+
+        await equipmentRepository.AddAsync(entity);
+        var created = await equipmentRepository.Query()
+                        .Include(e => e.EquipmentModel)
+                            .ThenInclude(m => m.EquipmentBrand)
+                        .Include(e => e.EquipmentModel)
+                            .ThenInclude(m => m.EquipmentCategory)
+                        .Where(e => e.Id == entity.Id)
+                        .FirstOrDefaultAsync() ?? throw new InvalidOperationException("Equipment was inserted but could not be re-read.");
+        return new EquipmentListItemDto(
+            created.Id,
+            created.Code,
+            created.SerialNumber,
+            "",
+            "",
+            created.EquipmentModel.Name,
+            created.EquipmentModel.EquipmentBrand.Name,
+            created.EquipmentModel.EquipmentCategory.Name,
+            created.Status,
+            0,
+            created.Location,
+            created.TotalUsageHours,
+            created.CreatedAt
+        );
+
+
+    }
+
+    private async Task<string> GenerateEquipmentCodeAsync()
+    {
+        var prefix = $"ASTRO-{DateTime.UtcNow:yyyyMM}-";
+        string code;
+
+        do
+        {
+            code = prefix + Guid.NewGuid().ToString("N")[..4].ToUpperInvariant();
+        }
+        while (await equipmentRepository.AnyAsync(u => u.Code == code));
+
+        return code;
+    }
+    private async System.Threading.Tasks.Task EnsureModelExistsAsync(int ModelId)
+    {
+        var exists = await equipmentModelRepository.Query(asNoTracking: true)
+            .AnyAsync(b => b.Id == ModelId);
+        if (!exists)
+        {
+            throw new InvalidOperationException("Brand not found.");
+        }
     }
 
     private static IQueryable<Equipment> ApplyOrdering(

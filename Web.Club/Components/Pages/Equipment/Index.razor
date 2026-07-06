@@ -15,8 +15,7 @@
         <RadzenTextBox @bind-Value="SearchText" Placeholder="Search by name, code, serial…"
                        Change="@(_ => grid.Reload())" Style="max-width:320px;" />
 
-        <RadzenButton Text="Add Equipment" Icon="add" ButtonStyle="ButtonStyle.Primary"
-                      Click="@(() => Nav.NavigateTo("/equipments/insert"))" />
+        <EquipmentInsertButton OnBrandInserted="grid.Reload" />
 
     </RadzenStack>
 

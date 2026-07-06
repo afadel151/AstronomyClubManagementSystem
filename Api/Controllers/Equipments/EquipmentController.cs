@@ -18,4 +18,15 @@ public sealed class EquipmentController(IEquipmentService equipmentService) : Co
         var equipments = await equipmentService.GetAll(queryParams);
         return Ok(equipments);
     }
+
+    [HttpPost]
+    public async Task<ActionResult> CreateEquipment(CreateEquipmentDto dto)
+    {
+        var equipment = await equipmentService.CrateEquipmentAsync(dto);
+        if (equipment == null)
+        {
+            return Problem("Equipment not created");
+        }
+        return Ok(equipment);
+    }
 }
